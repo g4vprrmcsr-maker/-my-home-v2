@@ -1250,17 +1250,22 @@ async function runStream(aiMsg, messages) {
       aiMsg.think = (aiMsg.think || "") + thinkChunk;
     });
     if (usage) aiMsg.tokens = usage;
-
-    /* content里带");
+    const TKO = String.fromCharCode(60) + "think" + String.fromCharCode(62);
+    const TKC = String.fromCharCode(60) + "/think" + String.fromCharCode(62);
+    let full = aiMsg.versions[aiMsg.vi];
+    const tOpen = full.indexOf(TKO);
+    if (tOpen >= 0) {
+      const tClose = full.indexOf(TKC);
       if (tClose > tOpen) {
         aiMsg.think = (aiMsg.think || "") + full.slice(tOpen + 7, tClose).trim();
         aiMsg.versions[aiMsg.vi] = (full.slice(0, tOpen) + full.slice(tClose + 8)).trim();
       }
     }
-
     if (!aiMsg.versions[aiMsg.vi]) {
       aiMsg.versions[aiMsg.vi] = "(空回复)";
     }
+
+  
     if (state.settings.splitSend) {
       splitAiMessage(aiMsg);
     }
