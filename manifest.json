@@ -1,11 +1,13 @@
 {
   "name": "我们的家",
   "short_name": "家",
+  "description": "我们的家",
   "display": "standalone",
+  "orientation": "portrait",
   "start_url": "./index.html",
   "scope": "./",
-  "background_color": "#FFF9F2",
-  "theme_color": "#FFF9F2",
+  "background_color": "#111111",
+  "theme_color": "#111111",
   "icons": [
     {
       "src": "icon.png",
