@@ -1,5 +1,5 @@
 /* ==========================================
-   my home app.js v103
+   my home app.js v104
    第一部分:数据 / 仓库 / 工具 / 外观引擎
    ========================================== */
 
@@ -27,7 +27,6 @@ function defaultSettings() {
     currentProviderId: provId,
     temperature: 1,
     contextCount: 20,
-    /* 新:流式/非流式,有些中转流式漏水,非流稳 */
     streamMode: "stream",
     fontSize: 14,
     skin: "day",
@@ -41,7 +40,6 @@ function defaultSettings() {
     avatarShape: "circle",
     avatarSize: 30,
     bubbleAlign: "side",
-    /* 新:消息间距 + 小字与气泡距离,自己捏 */
     msgGap: 16,
     metaGap: 5,
     /* 显示 */
@@ -101,7 +99,6 @@ function defaultSettings() {
     daysTheme: "cream",
     daysGlassMode: "frost",
     daysGlassAlpha: 55,
-    /* 8号:这组颜色v103起只染大数字,别的字不碰 */
     daysInkHue: -1, daysInkSat: 30, daysInkLight: 40,
     iconRound: "squircle",
     iconHue: -1, iconSat: 40, iconLight: 92, iconAlpha: 75,
@@ -109,6 +106,8 @@ function defaultSettings() {
     /* Dock */
     dockStyle: "frost",
     dockAlpha: 60,
+    /* 3号新:Dock高度位置,0贴地40悬高,你自己捏 */
+    dockDrop: 8,
     /* 情侣空间 */
     coupleAuto: false
   };
@@ -122,7 +121,6 @@ function defaultHome() {
     qa: [],
     feed: [],
     decoBlocks: [],
-    /* v103:两个2x2大组件的自定义文字 + 两个空占位标的名字 */
     widgetLText: "",
     widgetRText: "",
     slotNameA: "备忘录",
@@ -165,6 +163,10 @@ function fillDefaults() {
   if (state.settings.darkMode && state.settings.skin === "day") {
     state.settings.skin = "night";
   }
+  /* 1号:等腰上下两款退役,老存档自动迁移到拉角尾 */
+  if (state.settings.bubbleShape === "iso-down" || state.settings.bubbleShape === "iso-up") {
+    state.settings.bubbleShape = "pull";
+  }
   if (!state.home) state.home = defaultHome();
   const h = defaultHome();
   for (const k in h) {
@@ -173,7 +175,6 @@ function fillDefaults() {
   state.roles.forEach(r => {
     if (!r.memories) r.memories = [];
     if (!r.memPending) r.memPending = [];
-    /* 9号:星芒火化,老数据里有的一并清掉 */
     if (r.starAvatar) delete r.starAvatar;
   });
 }
@@ -344,7 +345,7 @@ function loveDays() {
   return Math.floor((a - b) / 86400000) + 1;
 }
 
-/* ---------- 默认头像:星芒已火化,只留素净底 ---------- */
+/* ---------- 默认头像 ---------- */
 const AI_FALLBACK = "data:image/svg+xml;utf8," + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72"><rect width="72" height="72" rx="36" fill="#E8E2D5"/><circle cx="36" cy="36" r="10" fill="#C9BFA9"/></svg>'
 );
@@ -444,7 +445,7 @@ const MENU_TEXT = {
   en: { theme: "Theme", role: "Roles", memory: "Memory", days: "Company", session: "Chats", settings: "Settings" }
 };
 
-/* ---------- 气泡形状表:v103新增三款 ---------- */
+/* ---------- 气泡形状表:1号,等腰退役,拉角尾上岗 ---------- */
 const BUBBLE_SHAPES = {
   "round-lg": { name: "大圆角" },
   "rect": { name: "方角" },
@@ -454,8 +455,7 @@ const BUBBLE_SHAPES = {
   "corner": { name: "圆角矩形（尖角下）" },
   "corner-up": { name: "圆角矩形（尖角上）" },
   "sharp": { name: "尖角矩形（零圆角）" },
-  "iso-down": { name: "等腰三角（朝下）" },
-  "iso-up": { name: "等腰三角（朝上）" }
+  "pull": { name: "拉角尾（角落拽出的尖）" }
 };
 
 /* ---------- 快捷色块 ---------- */
@@ -502,7 +502,6 @@ function injectDynStyle() {
   L.push(".bs-wechat-ai::after{content:'';position:absolute;left:-4px;top:14px;width:0;height:0;border-style:solid;border-width:3px 5px 3px 0;border-color:transparent var(--tail-c) transparent transparent;}");
   L.push(".bs-rect-user::after{content:'';position:absolute;right:-5px;top:13px;width:0;height:0;border-style:solid;border-width:4px 0 4px 6px;border-color:transparent transparent transparent var(--tail-c);}");
   L.push(".bs-rect-ai::after{content:'';position:absolute;left:-5px;top:13px;width:0;height:0;border-style:solid;border-width:4px 6px 4px 0;border-color:transparent var(--tail-c) transparent transparent;}");
-  /* 尖角矩形款:零圆角,侧边硬朗三角 */
   L.push(".bs-sharp-user::after{content:'';position:absolute;right:-6px;top:12px;width:0;height:0;border-style:solid;border-width:5px 0 5px 7px;border-color:transparent transparent transparent var(--tail-c);}");
   L.push(".bs-sharp-ai::after{content:'';position:absolute;left:-6px;top:12px;width:0;height:0;border-style:solid;border-width:5px 7px 5px 0;border-color:transparent var(--tail-c) transparent transparent;}");
   el2.textContent = L.join(NL);
@@ -543,16 +542,12 @@ async function dressBubble(bubble, isUser) {
     bubble.style.borderRadius = radius;
   }
 
-  /* 带尾巴的形状:侧尾3款+尖角矩形+等腰上下 */
+  /* 带尾巴的形状:侧尾4款 + 拉角尾 */
   const sideTail = ["tail", "wechat", "rect", "sharp"].indexOf(st.bubbleShape) >= 0;
-  const isoTail = st.bubbleShape === "iso-down" || st.bubbleShape === "iso-up";
-  const tailed = sideTail || isoTail;
+  const pullTail = st.bubbleShape === "pull";
+  const tailed = sideTail || pullTail;
   const hsl = bubbleColorOf(isUser);
   const g = (st.bubbleGlow || 0) / 100;
-
-  /* 等腰款给尾巴留出身位 */
-  if (st.bubbleShape === "iso-down") bubble.style.marginBottom = "8px";
-  if (st.bubbleShape === "iso-up") bubble.style.marginTop = "8px";
 
   const bgKey = isUser? "bubble_user" : "bubble_ai";
   const bgBlob = await getImg(bgKey);
@@ -565,13 +560,21 @@ async function dressBubble(bubble, isUser) {
     return;
   }
 
+  function addTailClass(bg) {
+    bubble.style.setProperty("--tail-c", bg);
+    if (sideTail) {
+      bubble.classList.add("bs-" + st.bubbleShape + "-" + (isUser? "user" : "ai"));
+    } else {
+      bubble.classList.add(isUser? "bs-pull-user" : "bs-pull-ai");
+    }
+  }
+
   if (hsl) {
     const hue = isUser? st.userHue : st.aiHue;
     const s = isUser? st.userSat : st.aiSat;
     const l = isUser? st.userLight : st.aiLight;
     let bg = hsl.bg;
     if (tailed) {
-      /* 尾巴是拼色的,必须不透明才接得上 */
       bg = "hsl(" + hue + "," + s + "%," + l + "%)";
     }
     bubble.style.background = bg;
@@ -583,15 +586,7 @@ async function dressBubble(bubble, isUser) {
     } else {
       bubble.style.boxShadow = "0 1px 6px rgba(0,0,0,0.05)";
     }
-
-    if (tailed) {
-      bubble.style.setProperty("--tail-c", bg);
-      if (sideTail) {
-        bubble.classList.add("bs-" + st.bubbleShape + "-" + (isUser? "user" : "ai"));
-      } else {
-        bubble.classList.add(st.bubbleShape === "iso-down"? "bs-iso-down" : "bs-iso-up");
-      }
-    }
+    if (tailed) addTailClass(bg);
   } else {
     if (st.bubbleTexture === "water") {
       bubble.style.background = "linear-gradient(155deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.14) 100%)";
@@ -603,14 +598,8 @@ async function dressBubble(bubble, isUser) {
     if (g > 0) {
       bubble.style.boxShadow += ", 0 2px " + Math.round(4 + 5 * g) + "px rgba(160,140,130," + (0.12 * g).toFixed(2) + ")";
     }
-    /* 玻璃底也能长尾巴:用半透明白接色 */
     if (tailed) {
-      bubble.style.setProperty("--tail-c", st.skin === "night"? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.55)");
-      if (sideTail) {
-        bubble.classList.add("bs-" + st.bubbleShape + "-" + (isUser? "user" : "ai"));
-      } else {
-        bubble.classList.add(st.bubbleShape === "iso-down"? "bs-iso-down" : "bs-iso-up");
-      }
+      addTailClass(st.skin === "night"? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.55)");
     }
   }
 }
@@ -644,14 +633,12 @@ function dressMeta(row, isUser) {
     e.style.fontWeight = String(st.metaWeight);
     e.style.fontSize = st.metaSize + "px";
     e.style.color = gray;
-    /* 13号:小字与气泡的距离,自己捏 */
     e.style.marginTop = st.metaGap + "px";
   });
   row.querySelectorAll(".msg-avatar").forEach(av => {
     av.style.borderRadius = st.avatarShape === "square"? "6px" : "50%";
     if (!st.showAvatar) av.style.display = "none";
   });
-  /* 13号:消息之间的间距 */
   row.style.marginBottom = st.msgGap + "px";
 
   if (st.bubbleAlign === "below") {
@@ -686,7 +673,7 @@ function applyTheme() {
   document.documentElement.style.setProperty("--title-fs", st.titleFs + "px");
   document.documentElement.style.setProperty("--title-fw", String(st.titleFw));
 
-  /* 1号斩草除根:液态按钮不走CSS选择器了,JS直接上妆 */
+  /* 液态按钮:JS直接上妆 */
   const glassBtns = [$("#menu-btn"), $("#new-session-btn")];
   glassBtns.forEach(b => {
     if (!b) return;
@@ -725,6 +712,26 @@ function applyTheme() {
   } else {
     ib.style.background = "";
     ib.style.boxShadow = "";
+  }
+
+  /* 2号斩草除根:液态下所有整页面板刷实底漆,不透光
+     玻璃质感只留给小件,面板下面压着什么都透不出来了 */
+  let liq = document.getElementById("liquid-fix-style");
+  if (!liq) {
+    liq = document.createElement("style");
+    liq.id = "liquid-fix-style";
+    document.head.appendChild(liq);
+  }
+  if (st.skin === "liquid") {
+    const solid = "#f2f3f6";
+    liq.textContent = [
+      ".panel:not(#days-panel){background:" + solid + "!important;",
+      "backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}",
+      ".overlay-page{background:" + solid + "!important;",
+      "backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}"
+    ].join("");
+  } else {
+    liq.textContent = "";
   }
 
   const sb = $("#sidebar");
@@ -793,6 +800,9 @@ function applyLayout() {
   const ia = $("#input-area");
   const lift = Math.max(0, 34 - st.inputLift);
   ia.style.paddingBottom = "calc(" + lift + "px + env(safe-area-inset-bottom) * 0.4)";
+
+  /* 3号:Dock高度位置变量,拉条实时写入 */
+  document.documentElement.style.setProperty("--dock-drop", st.dockDrop + "px");
 }
 
 /* ---------- 文字手感 ---------- */
@@ -880,7 +890,6 @@ async function buildMsgRow(m, gi, aiSrc, userSrc) {
 
   const body = document.createElement("div");
   body.className = "msg-body " + (isUser? "msg-body-user" : "msg-body-ai");
-  /* 5号:无气泡时AI消息几乎铺满,右边留一口气 */
   if (st.aiBare &&!isUser) {
     body.classList.add("bare-full");
   }
@@ -1135,7 +1144,7 @@ function msgMenu(m, x, y) {
   showActions(items, x, y);
 }
 
-/* ---------- 弹窗:4号,手写记忆用多行大框 ---------- */
+/* ---------- 弹窗 ---------- */
 function inputDialog(title, initial, onOk, multiline) {
   const mask = document.createElement("div");
   mask.className = "dialog-mask";
@@ -1303,7 +1312,7 @@ async function streamChat(messages, onDelta, onThink) {
   return usage;
 }
 
-/* ---------- 非流式请求:整包落地,中转漏水救星 ---------- */
+/* ---------- 非流式请求 ---------- */
 async function plainChat(messages, onDelta, onThink) {
   const p = curProvider();
   if (!p.baseURL ||!p.apiKey) throw new Error("请先在设置里配置供应商地址和Key");
@@ -1425,7 +1434,6 @@ async function runStream(aiMsg, messages, isRegen) {
     });
     if (usage) aiMsg.tokens = usage;
 
-    /* 剥think标签:安全写法 */
     const TKO = String.fromCharCode(60) + "think" + String.fromCharCode(62);
     const TKC = String.fromCharCode(60) + "/think" + String.fromCharCode(62);
     let full = aiMsg.versions[aiMsg.vi];
@@ -1767,7 +1775,7 @@ function mkUpload(parent, label, key, after, delLabel) {
 let bgScope = "chat";
 
 function buildSettingsExtras() {
-  /* 参数:非流式开关在这里 */
+  /* 参数:流式/非流式 */
   const pb = $("#param-body");
   pb.innerHTML = "";
   pb.appendChild(el("label", "form-label", "输出方式（部分中转流式易空回，可切非流式）"));
@@ -1942,7 +1950,7 @@ function newRole() {
   });
 }
 
-/* ---------- 角色编辑器:星芒火化后的清爽版 ---------- */
+/* ---------- 角色编辑器 ---------- */
 function openCharEditor(r) {
   const old = document.getElementById("char-editor");
   if (old) old.remove();
@@ -2179,7 +2187,7 @@ function mkFontSelect(parent, label, key, after) {
   parent.appendChild(row);
 }
 
-/* ---------- 颜色区工厂:7号,预览条瘦一半,色块已全圆 ---------- */
+/* ---------- 颜色区工厂 ---------- */
 function mkColorArea(parent, label, hueKey, satKey, lightKey, alphaKey, onChange) {
   const fire = onChange || (() => renderMessages());
   parent.appendChild(el("label", "form-label", label));
@@ -2196,7 +2204,7 @@ function mkColorArea(parent, label, hueKey, satKey, lightKey, alphaKey, onChange
     if (st[hueKey] < 0) {
       previewInk.style.background = "linear-gradient(135deg, rgba(255,255,255,0.9), rgba(200,200,200,0.35))";
     } else {
-      previewInk.style.background = hslaOf(st[hueKey], st[satKey], st[lightKey], st[alphaKey]);
+      previewInk.style.background = hslaOf(st[hueKey], st[satKey], st[lightKey], st[alphaKey] === undefined? 100 : st[alphaKey]);
     }
   }
 
@@ -2222,7 +2230,7 @@ function mkColorArea(parent, label, hueKey, satKey, lightKey, alphaKey, onChange
       state.settings[hueKey] = c.h;
       state.settings[satKey] = c.s;
       state.settings[lightKey] = c.l;
-      state.settings[alphaKey] = c.a;
+      if (state.settings[alphaKey]!== undefined) state.settings[alphaKey] = c.a;
       saveState();
       fire();
       refreshDots();
@@ -2290,7 +2298,9 @@ function mkColorArea(parent, label, hueKey, satKey, lightKey, alphaKey, onChange
     slBox.appendChild(hueRow);
     mkSliderX(slBox, "鲜艳度", 0, 100, 1, satKey, "%");
     mkSliderX(slBox, "深浅", 0, 100, 1, lightKey, "%");
-    mkSliderX(slBox, "不透明度", 15, 100, 1, alphaKey, "%");
+    if (state.settings[alphaKey]!== undefined) {
+      mkSliderX(slBox, "不透明度", 15, 100, 1, alphaKey, "%");
+    }
   }
 
   function mkSliderX(parent2, label2, min, max, step, key, unit) {
@@ -2322,7 +2332,7 @@ function mkColorArea(parent, label, hueKey, satKey, lightKey, alphaKey, onChange
   refreshPreview();
 }
 /* ==========================================
-   第四部分:主题面板 / 相识页v103新布局 / Dock
+   第四部分:主题面板 / 相识页v104 / Dock
    ========================================== */
 
 /* ---------- 气泡宽度注入 ---------- */
@@ -2375,7 +2385,6 @@ function buildThemePanel() {
     (v) => { state.settings.avatarShape = v; saveState(); renderMessages(); }
   );
   mkSlider(sec, "头像大小", 20, 52, 1, "avatarSize", "px", () => { applyTheme(); renderMessages(); });
-  /* 13号:两根新拉条,消息间距+小字距离 */
   mkSlider(sec, "消息之间的间距", 4, 40, 1, "msgGap", "px", () => renderMessages());
   mkSlider(sec, "小字与气泡的距离", 0, 20, 1, "metaGap", "px", () => renderMessages());
   mkSlider(sec, "输入框下移", 0, 34, 1, "inputLift", "", applyLayout);
@@ -2589,7 +2598,11 @@ const DAYS_THEMES = {
   }
 };
 
-/* ---------- 8号:调色只染大数字,别的字全用主题色 ---------- */
+/* 当前主题的墨色:5号,房间按钮统一吃这个 */
+function daysT() {
+  return DAYS_THEMES[state.settings.daysTheme] || DAYS_THEMES.cream;
+}
+
 function daysNumColor(T) {
   const st = state.settings;
   if (st.daysInkHue < 0) return T.inkMain;
@@ -2656,7 +2669,7 @@ async function buildIconFace(app, T) {
   return face;
 }
 
-/* ---------- 15号:文字占位标(备忘录/相册),点了只能改名 ---------- */
+/* ---------- 文字占位标 ---------- */
 async function buildSlotApp(which, T, ink) {
   const key = "slot_" + which;
   const nameKey = which === "A"? "slotNameA" : "slotNameB";
@@ -2673,7 +2686,6 @@ async function buildSlotApp(which, T, ink) {
     img.src = urlCache[key];
     face.appendChild(img);
   }
-  /* 没传图=干净的空底座,不画任何图形 */
 
   const lab = el("div", "app-icon-label", state.home[nameKey]);
   lab.style.color = ink;
@@ -2710,7 +2722,7 @@ async function buildSlotApp(which, T, ink) {
   return node;
 }
 
-/* ---------- 15号:2x2大组件,可传图+自定义文字 ---------- */
+/* ---------- 2x2大组件:3号,胶囊摘了,素字浮图上,保留换行 ---------- */
 async function buildWidget(which, cardBg, cardBlur, ink) {
   const key = "widget_" + which;
   const textKey = which === "L"? "widgetLText" : "widgetRText";
@@ -2733,10 +2745,11 @@ async function buildWidget(which, cardBg, cardBlur, ink) {
   const txt = state.home[textKey];
   if (txt) {
     const lab = el("div", "widget-label", txt);
-    lab.style.background = "rgba(255,255,255,0.55)";
-    lab.style.backdropFilter = "blur(8px)";
-    lab.style.webkitBackdropFilter = "blur(8px)";
-    lab.style.color = ink;
+    /* 素字直接浮图上,细阴影保证任何图上都读得清 */
+    lab.style.background = "none";
+    lab.style.color = blob? "#ffffff" : ink;
+    if (blob) lab.style.textShadow = "0 1px 4px rgba(0,0,0,0.45)";
+    lab.style.marginBottom = "10px";
     w.appendChild(lab);
   }
 
@@ -2757,11 +2770,11 @@ async function buildWidget(which, cardBg, cardBlur, ink) {
   w.onclick = (e) => {
     showActions([
       { label: blob? "换图" : "传图", fn: () => file.click() },
-      { label: "写文字", fn: () => inputDialog("组件上的文字（留空则不显示）", state.home[textKey], v => {
-          state.home[textKey] = v.trim().slice(0, 14);
+      { label: "写文字", fn: () => inputDialog("组件上的文字（可换行排版，留空则不显示）", state.home[textKey], v => {
+          state.home[textKey] = v.replace(/\s+$/, "").slice(0, 100);
           saveState();
           buildDaysPanel();
-        }) },
+        }, true) },
       { label: "移除图", danger: true, fn: async () => {
           await delImg(key);
           if (urlCache[key]) { URL.revokeObjectURL(urlCache[key]); delete urlCache[key]; }
@@ -2831,17 +2844,19 @@ async function buildDockSlot(i) {
   return slot;
 }
 
-/* ---------- 相识页大厅v103 ---------- */
+/* ---------- 相识页大厅v104:通顶通底 ---------- */
 async function buildDaysPanel() {
   const panel = $("#days-panel");
   panel.innerHTML = "";
   const st = state.settings;
-  const T = DAYS_THEMES[st.daysTheme] || DAYS_THEMES.cream;
+  const T = daysT();
   const isLiquid = st.daysTheme === "liquid";
 
   panel.style.background = T.pageBg;
   panel.style.backgroundSize = "cover";
   panel.style.backgroundPosition = "center";
+  /* 3号:面板自己不留任何内边距,壁纸通顶通底 */
+  panel.style.padding = "0";
 
   let cardBg = "rgba(255,255,255,0.45)";
   let cardBlur = "";
@@ -2861,8 +2876,9 @@ async function buildDaysPanel() {
     }
   }
 
+  /* 3号:标题栏无底漆无边线,悬浮在壁纸上 */
   const header = el("div", "panel-header");
-  header.style.background = "transparent";
+  header.style.cssText = "background:transparent;border-bottom:none;box-shadow:none;padding-top:calc(10px + env(safe-area-inset-top));";
   const back = el("button", "topbar-btn", "‹");
   back.style.color = T.inkMain;
   back.onclick = () => closePanel("#days-panel");
@@ -2870,8 +2886,9 @@ async function buildDaysPanel() {
   const pt = el("div", "panel-title", "我们的小家");
   pt.style.color = T.inkMain;
   header.appendChild(pt);
+  /* 3号:日期加大一号 */
   const datePill = el("div", "", todayPretty());
-  datePill.style.cssText = "margin-left:auto;font-size:10px;letter-spacing:0.5px;color:" + T.inkSub + ";";
+  datePill.style.cssText = "margin-left:auto;font-size:12px;letter-spacing:0.5px;color:" + T.inkSub + ";";
   header.appendChild(datePill);
   panel.appendChild(header);
 
@@ -2879,7 +2896,7 @@ async function buildDaysPanel() {
   scroll.style.cssText = "flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;";
   panel.appendChild(scroll);
 
-  /* 顶部横跨大组件:8号,只有数字吃自定义色 */
+  /* 顶部横跨大组件 */
   const hero = el("div", "home-hero-card");
   hero.style.background = cardBg;
   if (cardBlur) {
@@ -2938,12 +2955,11 @@ async function buildDaysPanel() {
   };
   scroll.appendChild(hero);
 
-  /* 贴着大组件的那句小字 */
   const cap = el("div", "home-caption", "这里是我们攒起来的日子");
   cap.style.color = T.inkSub;
   scroll.appendChild(cap);
 
-  /* 第二区:左2x2组件 + 右四格(备忘录/相册/信封/小克日记) */
+  /* 第二区 */
   const row2 = el("div", "home-grid-row");
   row2.appendChild(await buildWidget("L", cardBg, cardBlur, T.inkMain));
   const quad1 = el("div", "icon-quad");
@@ -2954,7 +2970,7 @@ async function buildDaysPanel() {
   row2.appendChild(quad1);
   scroll.appendChild(row2);
 
-  /* 第三区:左四格(心情/美化/秘密/情侣空间) + 右2x2组件 */
+  /* 第三区 */
   const row3 = el("div", "home-grid-row");
   const quad2 = el("div", "icon-quad");
   quad2.appendChild(await buildGridApp("mood", T, T.inkMain));
@@ -2965,7 +2981,7 @@ async function buildDaysPanel() {
   row3.appendChild(await buildWidget("R", cardBg, cardBlur, T.inkMain));
   scroll.appendChild(row3);
 
-  /* 装饰组件:长条铺底那些,照旧 */
+  /* 装饰组件 */
   if (state.home.decoBlocks.length) {
     const deco = el("div", "deco-blocks");
     deco.style.padding = "0 18px 10px";
@@ -2995,8 +3011,10 @@ async function buildDaysPanel() {
     scroll.appendChild(deco);
   }
 
-  /* Dock:2号,已在CSS里下移加宽,坑位62px和app图标同尺寸 */
+  /* Dock:3号,高度位置吃--dock-drop变量,拉条实时调
+     不再给安全区单独刷色,底部横带消失,Dock悬浮在壁纸上 */
   const dock = el("div", "days-dock");
+  dock.style.marginBottom = "var(--dock-drop, 8px)";
   const da = (st.dockAlpha || 60) / 100;
   if (st.dockStyle === "clear") {
     dock.style.background = "rgba(255,255,255," + (da * 0.25).toFixed(2) + ")";
@@ -3113,10 +3131,31 @@ function homeMaterial() {
   return lines.join(NL + NL);
 }
 
-/* ---------- 6号:折叠状态(不存档,刷新自动展开) ---------- */
+/* ---------- 5号:主题墨色按钮工厂
+   房间里所有主按钮统一吃当前主题的墨色,不再死黑
+   墨夜这种深底主题墨色是浅的,字自动换深色 ---------- */
+function inkOf() {
+  const T = daysT();
+  /* 判断墨色深浅:取十六进制第一位粗略判断亮度 */
+  const hex = T.inkMain.replace("#", "");
+  const rV = parseInt(hex.slice(0, 2), 16);
+  const gV = parseInt(hex.slice(2, 4), 16);
+  const bV = parseInt(hex.slice(4, 6), 16);
+  const light = (rV * 0.299 + gV * 0.587 + bV * 0.114) > 150;
+  return { bg: T.inkMain, ink: light? "#2a2a2a" : "#ffffff" };
+}
+
+function inkBtn(label, widthCss) {
+  const c = inkOf();
+  const b = el("button", "btn", label);
+  b.style.cssText = (widthCss || "display:block;width:70%;margin:0 auto 14px;") +
+    "background:" + c.bg + ";color:" + c.ink + ";border:none;";
+  return b;
+}
+
+/* ---------- 折叠状态 ---------- */
 const roomFold = { mood: false, letter: false, diary: false, qa: false, feed: false };
 
-/* 计数小字 + 折叠键,一对搭档 */
 function mkCountFold(body, countText, foldKey, onToggle) {
   const cnt = el("div", "room-count", countText);
   body.appendChild(cnt);
@@ -3139,18 +3178,19 @@ const ROOM_TITLES = { mood: "心情", letter: "信封", diary: "小克日记", q
 async function openHomeRoom(k) {
   const panel = $("#days-panel");
   panel.innerHTML = "";
-  const T = DAYS_THEMES[state.settings.daysTheme] || DAYS_THEMES.cream;
+  const T = daysT();
   const isLiquid = state.settings.daysTheme === "liquid";
 
   panel.style.background = T.pageBg;
   panel.style.backgroundSize = "cover";
   panel.style.backgroundPosition = "center";
+  panel.style.padding = "0";
   if (isLiquid && urlCache.days_wp) {
     panel.style.backgroundImage = "url(" + urlCache.days_wp + ")";
   }
 
   const header = el("div", "panel-header");
-  header.style.background = "transparent";
+  header.style.cssText = "background:transparent;border-bottom:none;box-shadow:none;padding-top:calc(10px + env(safe-area-inset-top));";
   const back = el("button", "topbar-btn", "‹");
   back.style.color = T.inkMain;
   back.onclick = () => buildDaysPanel();
@@ -3161,7 +3201,7 @@ async function openHomeRoom(k) {
   panel.appendChild(header);
 
   const body = el("div", "");
-  body.style.cssText = "flex:1;overflow-y:auto;padding:14px 18px 60px;-webkit-overflow-scrolling:touch;";
+  body.style.cssText = "flex:1;overflow-y:auto;padding:14px 18px calc(40px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch;";
   panel.appendChild(body);
 
   if (k === "mood") renderMoodRoom(body);
@@ -3177,9 +3217,10 @@ function renderMoodRoom(body) {
   const today = todayKey();
   const done = state.home.moods.find(m => m.day === today);
   const reload = () => renderMoodRoom(clearBody(body));
+  const T = daysT();
 
   const tip = el("div", "", done? "今天已打卡，可以重选" : "宝宝今天的心情怎么样？");
-  tip.style.cssText = "font-size:14px;font-weight:600;margin-bottom:12px;";
+  tip.style.cssText = "font-size:14px;font-weight:600;margin-bottom:12px;color:" + T.inkMain + ";";
   body.appendChild(tip);
 
   const row = el("div", "");
@@ -3188,7 +3229,7 @@ function renderMoodRoom(body) {
     const b = el("button", "");
     b.textContent = mf.face;
     const on = done && done.mood === mf.k;
-    b.style.cssText = "font-size:26px;padding:8px 10px;border-radius:12px;border:2px solid " + (on? "#D97757" : "transparent") + ";background:rgba(255,255,255,0.5);";
+    b.style.cssText = "font-size:26px;padding:8px 10px;border-radius:12px;border:2px solid " + (on? T.accent : "transparent") + ";background:rgba(255,255,255,0.5);";
     b.onclick = () => {
       inputDialog("想说点什么吗（可留空）", done? done.note : "", async v => {
         state.home.moods = state.home.moods.filter(m => m.day!== today);
@@ -3265,8 +3306,9 @@ function renderLetterRoom(body) {
   const fresh = state.home.lastLetterDay === today;
   const reload = () => renderLetterRoom(clearBody(body));
 
-  const btn = el("button", "btn", fresh? "今天的信已送达" : "收今天的信 ✉️");
-  btn.style.cssText = "display:block;width:70%;margin:0 auto 8px;" + (fresh? "opacity:0.5;" : "");
+  /* 5号:墨色按钮上岗 */
+  const btn = inkBtn(fresh? "今天的信已送达" : "收今天的信 ✉️", "display:block;width:70%;margin:0 auto 8px;");
+  if (fresh) btn.style.opacity = "0.5";
   btn.onclick = async () => {
     if (fresh) { toast("今天已经写过啦，明天再来"); return; }
     btn.textContent = "他正在写...";
@@ -3338,8 +3380,8 @@ function renderDiaryRoom(body) {
   const fresh = state.home.lastDiaryDay === today;
   const reload = () => renderDiaryRoom(clearBody(body));
 
-  const btn = el("button", "btn", fresh? "今天他已经写过了" : "偷看他今天的日记 📓");
-  btn.style.cssText = "display:block;width:70%;margin:0 auto 14px;" + (fresh? "opacity:0.5;" : "");
+  const btn = inkBtn(fresh? "今天他已经写过了" : "偷看他今天的日记 📓");
+  if (fresh) btn.style.opacity = "0.5";
   btn.onclick = async () => {
     if (fresh) { toast("一天一篇，明天再偷看"); return; }
     btn.textContent = "他正躲着写...";
@@ -3408,10 +3450,10 @@ function renderQaRoom(body) {
   const today = todayKey();
   const cur = state.home.qa.find(q => q.day === today);
   const reload = () => renderQaRoom(clearBody(body));
+  const T = daysT();
 
   if (!cur) {
-    const btn = el("button", "btn", "摇一个今日秘密 🫙");
-    btn.style.cssText = "display:block;width:70%;margin:0 auto 14px;";
+    const btn = inkBtn("摇一个今日秘密 🫙");
     btn.onclick = () => {
       const used = state.home.qa.map(q => q.q);
       const pool = QA_BANK.filter(q => used.indexOf(q) < 0);
@@ -3428,24 +3470,23 @@ function renderQaRoom(body) {
     qt.style.cssText = "font-size:11px;color:#aaa;margin-bottom:6px;";
     qCard.appendChild(qt);
     const qq = el("div", "", cur.q);
-    qq.style.cssText = "font-size:15px;font-weight:600;line-height:1.6;";
+    qq.style.cssText = "font-size:15px;font-weight:600;line-height:1.6;color:" + T.inkMain + ";";
     qCard.appendChild(qq);
     body.appendChild(qCard);
 
-    const mineBtn = el("button", "btn", cur.mine? "改我的答案 ✏️" : "写我的答案 ✏️");
-    mineBtn.style.cssText = "display:block;width:70%;margin:0 auto 8px;";
+    const mineBtn = inkBtn(cur.mine? "改我的答案 ✏️" : "写我的答案 ✏️", "display:block;width:70%;margin:0 auto 8px;");
     mineBtn.onclick = () => {
       inputDialog("你的答案", cur.mine, v => {
         cur.mine = v.trim();
         saveState();
         reload();
-      }, false);
+      }, true);
     };
     body.appendChild(mineBtn);
 
-    const hisBtn = el("button", "btn", cur.his? "他答过了" : "看他的答案 👀");
     const locked =!cur.mine;
-    hisBtn.style.cssText = "display:block;width:70%;margin:0 auto 14px;" + ((locked || cur.his)? "opacity:0.5;" : "");
+    const hisBtn = inkBtn(cur.his? "他答过了" : "看他的答案 👀");
+    if (locked || cur.his) hisBtn.style.opacity = "0.5";
     hisBtn.onclick = async () => {
       if (locked) { toast("先写你的，不许偷看"); return; }
       if (cur.his) { toast("他答过啦，往下看"); return; }
@@ -3542,9 +3583,8 @@ function renderBeautifyRoom(body) {
     }, "移除壁纸");
   }
 
-  /* 8号:只染大数字 */
   body.appendChild(el("label", "form-label", "天数数字颜色（只染那个大数字，选玻璃点=跟随主题）"));
-  mkColorArea(body, "数字颜色", "daysInkHue", "daysInkSat", "daysInkLight", "daysInkAlphaDummy", () => {});
+  mkColorArea(body, "数字颜色", "daysInkHue", "daysInkSat", "daysInkLight", "daysInkAlphaX", () => {});
 
   body.appendChild(el("label", "form-label", "天数数字"));
   mkFontSelect(body, "数字字体", "daysFont", null);
@@ -3567,6 +3607,8 @@ function renderBeautifyRoom(body) {
     (v) => { st.dockStyle = v; saveState(); }
   );
   mkSlider(body, "Dock透明度", 10, 100, 1, "dockAlpha", "%", null);
+  /* 3号:Dock高度位置拉条,0贴地40悬高,实时生效 */
+  mkSlider(body, "Dock高度位置（0最贴底）", 0, 40, 1, "dockDrop", "px", applyLayout);
   mkUpload(body, "上传Dock背景图", "dock_bg", () => {
     if (urlCache.dock_bg) { URL.revokeObjectURL(urlCache.dock_bg); delete urlCache.dock_bg; }
   }, "移除Dock背景图");
@@ -3574,7 +3616,7 @@ function renderBeautifyRoom(body) {
   dockTip.style.cssText = "font-size:11px;color:#aaa;margin:-4px 0 14px;";
   body.appendChild(dockTip);
 
-  /* 3号:图标上传区域选择制,选谁传谁,不再一排重复按钮 */
+  /* 图标上传区域选择制 */
   body.appendChild(el("label", "form-label", "自定义app图标（先选一个，再传图）"));
   mkSeg(body,
     HOME_APPS.map(a => ({ v: a.k, name: a.label })),
@@ -3673,6 +3715,7 @@ async function aiReplyComment(post, myComment) {
 function renderCoupleRoom(body) {
   const reload = () => renderCoupleRoom(clearBody(body));
   const r = curRole();
+  const c = inkOf();
 
   const compose = el("div", "feed-card");
   compose.style.background = "rgba(255,255,255,0.55)";
@@ -3697,7 +3740,8 @@ function renderCoupleRoom(body) {
     e.target.value = "";
   };
   imgBtn.onclick = () => imgFile.click();
-  const postBtn = el("button", "btn gray", "发布");
+  const postBtn = el("button", "btn", "发布");
+  postBtn.style.cssText = "background:" + c.bg + ";color:" + c.ink + ";border:none;";
   postBtn.onclick = async () => {
     const t = ta.value.trim();
     if (!t &&!composeImg) { toast("写点什么吧"); return; }
@@ -3769,8 +3813,8 @@ function renderCoupleRoom(body) {
     }
     if (post.comments && post.comments.length) {
       const cbox = el("div", "feed-comments");
-      post.comments.forEach(c => {
-        cbox.appendChild(el("div", "feed-comment", (c.who === "me"? r.userName : r.aiName) + "：" + c.text));
+      post.comments.forEach(cm2 => {
+        cbox.appendChild(el("div", "feed-comment", (cm2.who === "me"? r.userName : r.aiName) + "：" + cm2.text));
       });
       card.appendChild(cbox);
     }
@@ -3884,7 +3928,6 @@ function renderMemBook(body, ch) {
   };
   sumCard.appendChild(sumBtn);
 
-  /* 4号:手写记忆改成多行大框,不再挤一行 */
   const add = el("button", "btn", "手写一条记忆");
   add.style.cssText = btnCss + "margin-bottom:14px;";
   add.onclick = () => {
@@ -4072,7 +4115,7 @@ function toggleMiniMenu() {
   }, 60);
 }
 
-/* ---------- 12号:备份提醒回退原版,只有那句话和表情,无按钮无特效 ---------- */
+/* ---------- 备份提醒:原版,只有那句话和表情 ---------- */
 function checkBackupRemind() {
   if (Date.now() - state.home.lastBackup < 7 * 24 * 3600 * 1000) return;
   setTimeout(() => {
