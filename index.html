@@ -2,26 +2,18 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="我们的家">
-  <meta name="theme-color" content="#111111">
-
-  <link rel="manifest" href="manifest.json?v=107">
   <link rel="apple-touch-icon" href="icon.png">
+  <meta name="theme-color" content="#FFF9F2">
 
   <title>my home</title>
-
-  <link rel="stylesheet" href="style.css?v=107">
+  <link rel="stylesheet" href="style.css?v=108">
 </head>
-
 <body>
   <div id="app">
 
@@ -30,38 +22,24 @@
 
     <div id="sidebar">
       <div id="sidebar-bg"></div>
-
       <div class="sidebar-inner">
         <div class="sidebar-header">
           <div class="sidebar-title">my home</div>
         </div>
-
         <div class="menu-list">
           <div class="menu-item" id="menu-theme"></div>
           <div class="menu-item" id="menu-role"></div>
           <div class="menu-item" id="menu-memory"></div>
           <div class="menu-item" id="menu-days"></div>
         </div>
-
         <div class="session-label" id="session-label"></div>
         <div class="session-list" id="session-list"></div>
-
         <div class="sidebar-footer">
           <div id="sidebar-role">
-            <img
-              id="current-role-avatar"
-              alt="当前角色头像"
-            >
+            <img id="current-role-avatar">
             <div id="current-role-name"></div>
           </div>
-
-          <button
-            class="topbar-btn"
-            id="settings-btn"
-            type="button"
-          >
-            ⚙︎
-          </button>
+          <button class="topbar-btn" id="settings-btn">⚙︎</button>
         </div>
       </div>
     </div>
@@ -69,95 +47,31 @@
     <div id="main">
       <div id="topbar">
         <div id="topbar-left">
-          <button
-            class="topbar-btn"
-            id="menu-btn"
-            type="button"
-          >
-            ☰
-          </button>
-
+          <button class="topbar-btn" id="menu-btn">☰</button>
           <div id="topbar-title"></div>
         </div>
-
-        <button
-          class="topbar-btn"
-          id="new-session-btn"
-          type="button"
-        >
-          ＋
-        </button>
+        <button class="topbar-btn" id="new-session-btn">＋</button>
       </div>
 
       <div id="chat-area"></div>
 
       <div id="export-txt-bar">
-        <button
-          class="btn"
-          id="export-txt-confirm"
-          type="button"
-        >
-          导出选中
-        </button>
-
-        <button
-          class="btn secondary"
-          id="export-txt-cancel"
-          type="button"
-        >
-          取消
-        </button>
+        <button class="btn" id="export-txt-confirm">导出选中</button>
+        <button class="btn secondary" id="export-txt-cancel">取消</button>
       </div>
 
       <div id="input-area">
         <div id="attach-preview"></div>
-
         <div id="input-box">
           <div id="input-box-bg"></div>
-
-          <textarea
-            id="input-text"
-            rows="1"
-            placeholder="说点什么..."
-          ></textarea>
-
+          <textarea id="input-text" rows="1" placeholder="说点什么..."></textarea>
           <div class="input-toolbar">
-            <button
-              id="attach-btn"
-              type="button"
-            >
-              ＋
-            </button>
-
-            <input
-              type="file"
-              id="attach-input"
-              accept="image/*"
-              style="display:none"
-            >
-
-            <button
-              id="model-btn"
-              type="button"
-            >
-              选择模型
-            </button>
-
-            <button
-              id="mini-menu-btn"
-              type="button"
-            >
-              ⋯
-            </button>
-
+            <button id="attach-btn">＋</button>
+            <input type="file" id="attach-input" accept="image/*" style="display:none">
+            <button id="model-btn">选择模型</button>
+            <button id="mini-menu-btn">⋯</button>
             <div class="toolbar-spacer"></div>
-
-            <button
-              id="send-btn"
-              type="button"
-            >
-              ↑
-            </button>
+            <button id="send-btn">↑</button>
           </div>
         </div>
       </div>
@@ -166,129 +80,52 @@
     <div id="model-popup"></div>
   </div>
 
-  <!-- 主题面板：内容由JS搭建 -->
   <div class="panel" id="theme-panel">
     <div class="panel-header">
-      <button
-        class="topbar-btn"
-        id="theme-back"
-        type="button"
-      >
-        ‹
-      </button>
-
+      <button class="topbar-btn" id="theme-back">‹</button>
       <div class="panel-title" id="theme-title">主题</div>
     </div>
-
     <div id="theme-body"></div>
   </div>
 
-  <!-- 角色面板 -->
   <div class="panel" id="role-panel">
     <div class="panel-header">
-      <button
-        class="topbar-btn"
-        id="role-back"
-        type="button"
-      >
-        ‹
-      </button>
-
+      <button class="topbar-btn" id="role-back">‹</button>
       <div class="panel-title" id="role-title">角色</div>
     </div>
-
     <div class="settings-section">
-      <div class="section-title">
-        人设、会话、记忆完全隔离 · 点⋯编辑
-      </div>
-
+      <div class="section-title">人设、会话、记忆完全隔离 · 点⋯编辑</div>
       <div id="role-page-list"></div>
-
-      <button
-        class="btn secondary"
-        id="new-role-btn"
-        type="button"
-      >
-        ＋ 新建角色
-      </button>
+      <button class="btn secondary" id="new-role-btn">＋ 新建角色</button>
     </div>
   </div>
 
-  <!-- 相识面板：内容由JS搭建 -->
   <div class="panel" id="days-panel"></div>
 
-  <!-- 设置面板 -->
   <div class="panel" id="settings-panel">
     <div class="panel-header">
-      <button
-        class="topbar-btn"
-        id="settings-back"
-        type="button"
-      >
-        ‹
-      </button>
-
+      <button class="topbar-btn" id="settings-back">‹</button>
       <div class="panel-title" id="settings-title">设置</div>
     </div>
 
     <div class="settings-section">
       <div class="section-title">API设置</div>
-
       <div id="provider-list"></div>
-
-      <button
-        class="btn secondary"
-        id="new-provider-btn"
-        type="button"
-      >
-        ＋ 新增供应商
-      </button>
-
+      <button class="btn secondary" id="new-provider-btn">＋ 新增供应商</button>
       <div class="form-row" style="margin-top:14px">
-        <label class="form-label" for="set-baseurl">
-          接口地址 baseURL（以 /v1 结尾）
-        </label>
-
-        <input
-          class="form-input"
-          type="text"
-          id="set-baseurl"
-          placeholder="https://xxx.com/v1"
-        >
+        <label class="form-label">接口地址 baseURL（以 /v1 结尾）</label>
+        <input class="form-input" type="text" id="set-baseurl" placeholder="https://xxx.com/v1">
       </div>
-
       <div class="form-row">
-        <label class="form-label" for="set-apikey">
-          API Key（只存在本机）
-        </label>
-
-        <input
-          class="form-input"
-          type="password"
-          id="set-apikey"
-          placeholder="sk-..."
-        >
+        <label class="form-label">API Key（只存在本机）</label>
+        <input class="form-input" type="password" id="set-apikey" placeholder="sk-...">
       </div>
-
       <div class="btn-group">
-        <button
-          class="btn secondary"
-          id="fetch-models-btn"
-          type="button"
-        >
-          拉取模型列表
-        </button>
+        <button class="btn secondary" id="fetch-models-btn">拉取模型列表</button>
       </div>
-
       <div class="form-row" style="margin-top:12px">
-        <label class="form-label" for="set-model">
-          当前模型
-        </label>
-
-        <select
-          class="form-select"
-          id="set-model"
-        ></select>
+        <label class="form-label">当前模型</label>
+        <select class="form-select" id="set-model"></select>
       </div>
     </div>
 
@@ -303,114 +140,59 @@
     </div>
 
     <div class="settings-section">
-      <div class="section-title">
-        分段发送（AI回复拆成多条连发）
-      </div>
+      <div class="section-title">分段发送（AI回复拆成多条连发）</div>
       <div id="split-body"></div>
     </div>
 
     <div class="settings-section">
-      <div class="section-title">
-        背景（聊天 / 输入栏 / 侧边栏 / 记忆手册）
-      </div>
+      <div class="section-title">背景（聊天 / 输入栏 / 侧边栏 / 记忆手册）</div>
       <div id="bg-body"></div>
     </div>
 
     <div class="settings-section">
       <div class="section-title">数据</div>
-
       <div class="btn-group">
-        <button
-          class="btn secondary"
-          id="export-json-btn"
-          type="button"
-        >
-          导出JSON备份
-        </button>
-
-        <label
-          class="btn secondary"
-          style="display:inline-block"
-        >
-          导入JSON
-
-          <input
-            type="file"
-            id="import-json-input"
-            accept=".json"
-            style="display:none"
-          >
+        <button class="btn secondary" id="export-json-btn">导出JSON备份</button>
+        <label class="btn secondary" style="display:inline-block">
+          导入JSON<input type="file" id="import-json-input" accept=".json" style="display:none">
         </label>
-
-        <button
-          class="btn secondary"
-          id="export-txt-btn"
-          type="button"
-        >
-          勾选导出TXT
-        </button>
+        <button class="btn secondary" id="export-txt-btn">勾选导出TXT</button>
       </div>
     </div>
 
     <div style="padding:16px 16px 40px">
-      <button
-        class="btn"
-        id="save-settings-btn"
-        type="button"
-        style="width:100%"
-      >
-        保存设置
-      </button>
+      <button class="btn" id="save-settings-btn" style="width:100%">保存设置</button>
     </div>
   </div>
 
   <div id="toast"></div>
 
   <script>
-    /* 超强小喇叭：编制内报警器，同一个错只喊一次 */
-    (function () {
-      var seen = {};
-
-      window.onerror = function (msg, src, line) {
-        var k = msg + "@" + line;
-
-        if (seen[k]) return false;
-
-        seen[k] = 1;
-        alert("病灶：" + msg + " 第" + line + "行");
-
-        return false;
-      };
-
-      window.addEventListener("unhandledrejection", function (e) {
-        var r = e.reason;
-        var m = r && r.message
-          ? r.message
-          : String(r);
-
-        if (seen[m]) return;
-
-        seen[m] = 1;
-        alert("暗伤：" + m.slice(0, 200));
-      });
-
-      window.addEventListener(
-        "error",
-        function (e) {
-          if (
-            e.target &&
-            e.target.tagName === "SCRIPT" &&
-            !seen.js
-          ) {
-            seen.js = 1;
-            alert("app.js没加载到");
-          }
-        },
-        true
-      );
-    })();
+  (function () {
+    var seen = {};
+    window.onerror = function (msg, src, line) {
+      var k = msg + "@" + line;
+      if (seen[k]) return false;
+      seen[k] = 1;
+      alert("病灶：" + msg + " 第" + line + "行");
+      return false;
+    };
+    window.addEventListener("unhandledrejection", function (e) {
+      var r = e.reason;
+      var m = r && r.message? r.message : String(r);
+      if (seen[m]) return;
+      seen[m] = 1;
+      alert("暗伤：" + m.slice(0, 200));
+    });
+    window.addEventListener("error", function (e) {
+      if (e.target && e.target.tagName === "SCRIPT" && !seen.js) {
+        seen.js = 1;
+        alert("app.js没加载到");
+      }
+    }, true);
+  })();
   </script>
 
-  <script src="app.js?v=107"></script>
+  <script src="app.js?v=108"></script>
 </body>
 </html>
