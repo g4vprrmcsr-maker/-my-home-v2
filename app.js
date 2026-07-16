@@ -106,8 +106,12 @@ function defaultSettings() {
     /* Dock */
     dockStyle: "frost",
     dockAlpha: 60,
-    /* 3号新:Dock高度位置,0贴地40悬高,你自己捏 */
     dockDrop: 8,
+    /* v105:界面字号/昵称字号/相识页日期字号 */
+    uiFs: 14,
+    nameSize: 11,
+    daysDateSize: 12,
+
     /* 情侣空间 */
     coupleAuto: false
   };
@@ -887,12 +891,15 @@ async function buildMsgRow(m, gi, aiSrc, userSrc) {
   avatar.src = isUser? userSrc : aiSrc;
   const hideAv = st.splitAvatarOnce && gi.inGroup &&!gi.isFirst;
   if (hideAv) avatar.classList.add("ghost");
-
   const body = document.createElement("div");
   body.className = "msg-body " + (isUser? "msg-body-user" : "msg-body-ai");
   if (st.aiBare &&!isUser) {
     body.classList.add("bare-full");
+    body.style.maxWidth = "96%";
+  } else {
+    body.style.maxWidth = state.settings.bubbleMaxW + "%";
   }
+
 
   let timeOk = st.showTime;
   if (st.splitTimeLast && gi.inGroup &&!gi.isLast) timeOk = false;
