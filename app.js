@@ -111,6 +111,8 @@ function defaultSettings() {
     uiFs: 14,
     nameSize: 11,
     daysDateSize: 12,
+    widgetFs: 14,
+    appLabelFs: 11,
 
     /* 情侣空间 */
     coupleAuto: false
@@ -266,19 +268,30 @@ function getImg(key) {
       rq.onsuccess = () => resolve(rq.result || null);
       rq.onerror = () => resolve(null);
     }
-    if (DB) { read(); return; }
+    if (DB) {
+      read();
+      return;
+    }
     let n = 0;
     const t = setInterval(() => {
       n++;
-      if (DB) { clearInterval(t); read(); }
-      else if (n > 80) { clearInterval(t); resolve(null); }
+      if (DB) {
+        clearInterval(t);
+        read();
+      } else if (n > 80) {
+        clearInterval(t);
+        resolve(null);
+      }
     }, 100);
   });
 }
 
 function delImg(key) {
   return new Promise((resolve) => {
-    if (!DB) { resolve(); return; }
+    if (!DB) {
+      resolve();
+      return;
+    }
     const tx = DB.transaction("imgs", "readwrite");
     tx.objectStore("imgs").delete(key);
     tx.oncomplete = resolve;
@@ -287,12 +300,14 @@ function delImg(key) {
 }
 
 /* ---------- 小工具 ---------- */
-function $(sel) { return document.querySelector(sel); }
+function $(sel) {
+  return document.querySelector(sel);
+}
 
 function el(tag, cls, text) {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
-  if (text!== undefined) e.textContent = text;
+  if (text !== undefined) e.textContent = text;
   return e;
 }
 
@@ -325,7 +340,9 @@ function fmtTime(ts) {
   const f = state.settings.timeFmt;
   const hm = p(d.getHours()) + ":" + p(d.getMinutes());
   if (f === "hm") return hm;
-  if (f === "ymd") return d.getFullYear() + "." + p(d.getMonth() + 1) + "." + p(d.getDate()) + " " + hm;
+  if (f === "ymd") {
+    return d.getFullYear() + "." + p(d.getMonth() + 1) + "." + p(d.getDate()) + " " + hm;
+  }
   return p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + hm;
 }
 
@@ -353,6 +370,7 @@ function loveDays() {
 const AI_FALLBACK = "data:image/svg+xml;utf8," + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72"><rect width="72" height="72" rx="36" fill="#E8E2D5"/><circle cx="36" cy="36" r="10" fill="#C9BFA9"/></svg>'
 );
+
 const USER_FALLBACK = "data:image/svg+xml;utf8," + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="72" height="72"><rect width="72" height="72" rx="36" fill="#8aa2c8"/><circle cx="36" cy="28" r="12" fill="#fff"/><ellipse cx="36" cy="58" rx="20" ry="14" fill="#fff"/></svg>'
 );
@@ -367,7 +385,7 @@ async function avatarSrc(kind) {
     urlCache[key] = URL.createObjectURL(blob);
     return urlCache[key];
   }
-  return kind === "ai"? AI_FALLBACK : USER_FALLBACK;
+  return kind === "ai" ? AI_FALLBACK : USER_FALLBACK;
 }
 
 function clearUrlCache() {
@@ -388,12 +406,14 @@ async function applyBg() {
     bgEl.style.backgroundImage = "";
     bgEl.classList.remove("has-bg");
   }
+
   const sbg = $("#sidebar-bg");
   const sblob = await getImg("bg_sidebar");
-  sbg.style.backgroundImage = sblob? "url(" + URL.createObjectURL(sblob) + ")" : "";
+  sbg.style.backgroundImage = sblob ? "url(" + URL.createObjectURL(sblob) + ")" : "";
+
   const ibg = $("#input-box-bg");
   const iblob = await getImg("bg_input");
-  ibg.style.backgroundImage = iblob? "url(" + URL.createObjectURL(iblob) + ")" : "";
+  ibg.style.backgroundImage = iblob ? "url(" + URL.createObjectURL(iblob) + ")" : "";
 }
 
 /* ---------- 图片压缩 ---------- */
@@ -404,7 +424,8 @@ function compressImage(file, maxSide, quality) {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
-      let w = img.width, h = img.height;
+      let w = img.width;
+      let h = img.height;
       if (Math.max(w, h) > maxSide) {
         const k = maxSide / Math.max(w, h);
         w = Math.round(w * k);
@@ -417,7 +438,10 @@ function compressImage(file, maxSide, quality) {
       URL.revokeObjectURL(url);
       resolve(canvas.toDataURL("image/jpeg", quality));
     };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("图片读取失败")); };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("图片读取失败"));
+    };
     img.src = url;
   });
 }
@@ -437,16 +461,40 @@ const FONT_LIST = {
   snell: "'Snell Roundhand','Kaiti SC',cursive",
   marker: "'Marker Felt','Kaiti SC',sans-serif"
 };
+
 const FONT_NAMES = {
-  system: "系统", round: "圆体", song: "宋体", kai: "楷体", hei: "黑体", mono: "等宽",
-  kaiti: "楷体（手写感）", songti2: "宋体（书卷感）", georgia2: "Georgia（数字优雅）",
-  palatino: "Palatino（衬线）", snell: "Snell（英文花体）", marker: "Marker（手账感）"
+  system: "系统",
+  round: "圆体",
+  song: "宋体",
+  kai: "楷体",
+  hei: "黑体",
+  mono: "等宽",
+  kaiti: "楷体（手写感）",
+  songti2: "宋体（书卷感）",
+  georgia2: "Georgia（数字优雅）",
+  palatino: "Palatino（衬线）",
+  snell: "Snell（英文花体）",
+  marker: "Marker（手账感）"
 };
 
 /* ---------- 菜单双语表 ---------- */
 const MENU_TEXT = {
-  zh: { theme: "主题", role: "角色", memory: "记忆", days: "相识", session: "会话", settings: "设置" },
-  en: { theme: "Theme", role: "Roles", memory: "Memory", days: "Company", session: "Chats", settings: "Settings" }
+  zh: {
+    theme: "主题",
+    role: "角色",
+    memory: "记忆",
+    days: "相识",
+    session: "会话",
+    settings: "设置"
+  },
+  en: {
+    theme: "Theme",
+    role: "Roles",
+    memory: "Memory",
+    days: "Company",
+    session: "Chats",
+    settings: "Settings"
+  }
 };
 
 /* ---------- 气泡形状表:1号,等腰退役,拉角尾上岗 ---------- */
@@ -480,11 +528,11 @@ function hslaOf(h, s, l, a) {
 
 function bubbleColorOf(isUser) {
   const st = state.settings;
-  const hue = isUser? st.userHue : st.aiHue;
+  const hue = isUser ? st.userHue : st.aiHue;
   if (hue < 0) return null;
-  const s = isUser? st.userSat : st.aiSat;
-  const l = isUser? st.userLight : st.aiLight;
-  const a = (isUser? st.userAlpha : st.aiAlpha) / 100;
+  const s = isUser ? st.userSat : st.aiSat;
+  const l = isUser ? st.userLight : st.aiLight;
+  const a = (isUser ? st.userAlpha : st.aiAlpha) / 100;
   return {
     bg: "hsla(" + hue + "," + s + "%," + l + "%," + a + ")",
     dark: l < 45
@@ -514,10 +562,10 @@ function injectDynStyle() {
 /* ---------- 气泡上妆 ---------- */
 async function dressBubble(bubble, isUser) {
   const st = state.settings;
-  bubble.className = "msg-bubble " + (isUser? "bub-user" : "bub-ai");
+  bubble.className = "msg-bubble " + (isUser ? "bub-user" : "bub-ai");
   bubble.style.cssText = "";
 
-  if (st.aiBare &&!isUser) {
+  if (st.aiBare && !isUser) {
     bubble.style.padding = "0 2px";
     return;
   }
@@ -536,10 +584,12 @@ async function dressBubble(bubble, isUser) {
     const small = Math.max(3, Math.round(r * 0.25));
     const up = st.bubbleShape === "corner-up";
     if (isUser) {
-      bubble.style.borderRadius = up? r + "px " + small + "px " + r + "px " + r + "px"
+      bubble.style.borderRadius = up
+        ? r + "px " + small + "px " + r + "px " + r + "px"
         : r + "px " + r + "px " + small + "px " + r + "px";
     } else {
-      bubble.style.borderRadius = up? small + "px " + r + "px " + r + "px " + r + "px"
+      bubble.style.borderRadius = up
+        ? small + "px " + r + "px " + r + "px " + r + "px"
         : r + "px " + r + "px " + r + "px " + small + "px";
     }
   } else {
@@ -553,13 +603,13 @@ async function dressBubble(bubble, isUser) {
   const hsl = bubbleColorOf(isUser);
   const g = (st.bubbleGlow || 0) / 100;
 
-  const bgKey = isUser? "bubble_user" : "bubble_ai";
+  const bgKey = isUser ? "bubble_user" : "bubble_ai";
   const bgBlob = await getImg(bgKey);
   if (bgBlob) {
     if (!urlCache[bgKey]) urlCache[bgKey] = URL.createObjectURL(bgBlob);
     bubble.style.backgroundImage = "url(" + urlCache[bgKey] + ")";
     bubble.style.backgroundSize = "cover";
-    bubble.style.color = st.skin === "night"? "#f2f2f2" : "#1a1a1a";
+    bubble.style.color = st.skin === "night" ? "#f2f2f2" : "#1a1a1a";
     bubble.style.boxShadow = "0 1px 6px rgba(0,0,0,0.08)";
     return;
   }
@@ -567,22 +617,22 @@ async function dressBubble(bubble, isUser) {
   function addTailClass(bg) {
     bubble.style.setProperty("--tail-c", bg);
     if (sideTail) {
-      bubble.classList.add("bs-" + st.bubbleShape + "-" + (isUser? "user" : "ai"));
+      bubble.classList.add("bs-" + st.bubbleShape + "-" + (isUser ? "user" : "ai"));
     } else {
-      bubble.classList.add(isUser? "bs-pull-user" : "bs-pull-ai");
+      bubble.classList.add(isUser ? "bs-pull-user" : "bs-pull-ai");
     }
   }
 
   if (hsl) {
-    const hue = isUser? st.userHue : st.aiHue;
-    const s = isUser? st.userSat : st.aiSat;
-    const l = isUser? st.userLight : st.aiLight;
+    const hue = isUser ? st.userHue : st.aiHue;
+    const s = isUser ? st.userSat : st.aiSat;
+    const l = isUser ? st.userLight : st.aiLight;
     let bg = hsl.bg;
     if (tailed) {
       bg = "hsl(" + hue + "," + s + "%," + l + "%)";
     }
     bubble.style.background = bg;
-    bubble.style.color = hsl.dark? "#f2f2f2" : "#1a1a1a";
+    bubble.style.color = hsl.dark ? "#f2f2f2" : "#1a1a1a";
 
     if (g > 0) {
       const glow = "hsla(" + hue + "," + Math.max(s, 25) + "%," + Math.max(l - 28, 10) + "%," + (0.22 * g).toFixed(2) + ")";
@@ -596,14 +646,14 @@ async function dressBubble(bubble, isUser) {
       bubble.style.background = "linear-gradient(155deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.14) 100%)";
       bubble.style.boxShadow = "inset 0 1px 1px rgba(255,255,255,0.5), 0 2px 10px rgba(0,0,0,0.04)";
     } else {
-      bubble.style.background = st.skin === "night"? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.3)";
+      bubble.style.background = st.skin === "night" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.3)";
       bubble.style.boxShadow = "0 1px 8px rgba(0,0,0,0.04)";
     }
     if (g > 0) {
       bubble.style.boxShadow += ", 0 2px " + Math.round(4 + 5 * g) + "px rgba(160,140,130," + (0.12 * g).toFixed(2) + ")";
     }
     if (tailed) {
-      addTailClass(st.skin === "night"? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.55)");
+      addTailClass(st.skin === "night" ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.55)");
     }
   }
 }
@@ -614,25 +664,26 @@ function dressMeta(row, isUser) {
   const metaF = FONT_LIST[st.metaFont];
   const nameF = FONT_LIST[st.nameFont];
   const night = st.skin === "night";
-  const g = night? Math.min(255, st.metaShade + 60) : st.metaShade;
+  const g = night ? Math.min(255, st.metaShade + 60) : st.metaShade;
   const gray = "rgb(" + g + "," + g + "," + g + ")";
-  const ng = night? Math.min(255, g + 20) : Math.max(60, g - 40);
+  const ng = night ? Math.min(255, g + 20) : Math.max(60, g - 40);
   const nameGray = "rgb(" + ng + "," + ng + "," + ng + ")";
 
   row.querySelectorAll(".msg-name").forEach(e => {
     e.style.fontFamily = nameF;
     e.style.fontWeight = String(st.nameWeight);
-        e.style.fontSize = (st.nameSize || 11) + "px";
-
+    e.style.fontSize = (st.nameSize || 11) + "px";
     e.style.color = nameGray;
-    e.style.display = st.showName? "" : "none";
+    e.style.display = st.showName ? "" : "none";
   });
+
   row.querySelectorAll(".msg-time").forEach(e => {
     e.style.fontFamily = metaF;
     e.style.fontWeight = String(st.metaWeight);
     e.style.fontSize = st.metaSize + "px";
     e.style.color = gray;
   });
+
   row.querySelectorAll(".msg-footer").forEach(e => {
     e.style.fontFamily = metaF;
     e.style.fontWeight = String(st.metaWeight);
@@ -640,10 +691,12 @@ function dressMeta(row, isUser) {
     e.style.color = gray;
     e.style.marginTop = st.metaGap + "px";
   });
+
   row.querySelectorAll(".msg-avatar").forEach(av => {
-    av.style.borderRadius = st.avatarShape === "square"? "6px" : "50%";
+    av.style.borderRadius = st.avatarShape === "square" ? "6px" : "50%";
     if (!st.showAvatar) av.style.display = "none";
   });
+
   row.style.marginBottom = st.msgGap + "px";
 
   if (st.bubbleAlign === "below") {
@@ -671,7 +724,7 @@ function applyTheme() {
   if (st.skin === "night") document.body.classList.add("dark");
   if (st.skin === "official") document.body.classList.add("skin-official");
   if (st.skin === "liquid") document.body.classList.add("skin-liquid");
-  st.darkMode = (st.skin === "night");
+  st.darkMode = st.skin === "night";
 
   document.documentElement.style.setProperty("--msg-fs", st.fontSize + "px");
   document.documentElement.style.setProperty("--avatar-size", st.avatarSize + "px");
@@ -694,6 +747,7 @@ function applyTheme() {
       b.style.boxShadow = "";
     }
   });
+
   const tt = $("#topbar-title");
   if (st.skin === "liquid") {
     tt.style.background = "rgba(255,255,255,0.35)";
@@ -710,6 +764,7 @@ function applyTheme() {
     tt.style.padding = "";
     tt.style.boxShadow = "";
   }
+
   const ib = $("#input-box");
   if (st.skin === "liquid") {
     ib.style.background = "rgba(255,255,255,0.28)";
@@ -719,40 +774,40 @@ function applyTheme() {
     ib.style.boxShadow = "";
   }
 
-  /* 2号斩草除根:液态下所有整页面板刷实底漆,不透光
-     玻璃质感只留给小件,面板下面压着什么都透不出来了 */
+  /* 液态下整页面板使用实底，不让下层内容透出 */
   let liq = document.getElementById("liquid-fix-style");
   if (!liq) {
     liq = document.createElement("style");
     liq.id = "liquid-fix-style";
     document.head.appendChild(liq);
   }
+
   if (st.skin === "liquid") {
     const solid = "#f2f3f6";
     liq.textContent = [
       ".panel:not(#days-panel){background:" + solid + "!important;",
       "backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}",
-      ".panel:not(#days-panel).panel-header{background:" + solid + "!important;border-bottom:none!important;box-shadow:none!important;}",
+      ".panel:not(#days-panel) .panel-header{background:" + solid + "!important;border-bottom:none!important;box-shadow:none!important;}",
       ".overlay-page{background:" + solid + "!important;",
       "backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}",
-      ".overlay-page.overlay-head{background:" + solid + "!important;border-bottom:none!important;}"
+      ".overlay-page .overlay-head{background:" + solid + "!important;border-bottom:none!important;box-shadow:none!important;}"
     ].join("");
   } else {
     liq.textContent = "";
   }
 
-
   const sb = $("#sidebar");
   const a = (st.sidebarAlpha || 72) / 100;
   const night = st.skin === "night";
-  const base = night? "40,40,40" : "255,255,255";
+  const base = night ? "40,40,40" : "255,255,255";
   const inner = sb.querySelector(".sidebar-inner");
+
   if (st.sidebarStyle === "clear") {
     inner.style.background = "rgba(" + base + "," + (a * 0.3) + ")";
-    inner.style.backdropFilter = st.sidebarBlur > 0? "blur(" + st.sidebarBlur + "px) saturate(1.2)" : "none";
+    inner.style.backdropFilter = st.sidebarBlur > 0 ? "blur(" + st.sidebarBlur + "px) saturate(1.2)" : "none";
     inner.style.webkitBackdropFilter = inner.style.backdropFilter;
   } else {
-    inner.style.background = night? "rgba(38,38,38,1)" : "rgba(255,255,255,1)";
+    inner.style.background = night ? "rgba(38,38,38,1)" : "rgba(255,255,255,1)";
     inner.style.backdropFilter = "";
     inner.style.webkitBackdropFilter = "";
   }
@@ -764,6 +819,7 @@ function applyTheme() {
     gs.id = "skin-glow-style";
     document.head.appendChild(gs);
   }
+
   if (glow > 0) {
     gs.textContent = "#input-box{box-shadow:0 1px " + Math.round(4 + 8 * glow) + "px rgba(150,140,135," + (0.10 * glow).toFixed(2) + ")!important;}";
   } else {
@@ -785,7 +841,7 @@ function applyTheme() {
   $("#role-title").textContent = T.role;
   $("#settings-title").textContent = T.settings;
 
-  $("#model-btn").classList.toggle("hidden",!st.showModelBtn);
+  $("#model-btn").classList.toggle("hidden", !st.showModelBtn);
 }
 
 /* ---------- 布局 ---------- */
@@ -793,6 +849,7 @@ function applyLayout() {
   const st = state.settings;
   const tb = $("#topbar");
   const title = $("#topbar-title");
+
   if (st.titleCenter) {
     title.style.position = "absolute";
     title.style.left = "50%";
@@ -805,11 +862,12 @@ function applyLayout() {
     title.style.transform = "";
     title.style.maxWidth = "";
   }
+
   const ia = $("#input-area");
   const lift = Math.max(0, 34 - st.inputLift);
   ia.style.paddingBottom = "calc(" + lift + "px + env(safe-area-inset-bottom) * 0.4)";
 
-  /* 3号:Dock高度位置变量,拉条实时写入 */
+  /* Dock高度位置变量 */
   document.documentElement.style.setProperty("--dock-drop", st.dockDrop + "px");
 }
 
@@ -821,19 +879,23 @@ function applyChatTypo() {
     s5.id = "typo-style";
     document.head.appendChild(s5);
   }
+
   const st = state.settings;
   const L = [];
-  L.push(".msg-bubble{letter-spacing:" + st.chatSpacing + "px;line-height:" + st.chatLineH + ";font-weight:" + st.chatWeight + ";}");
-    L.push("#sidebar,.menu-item,.session-item{letter-spacing:" + st.uiSpacing + "px;font-weight:" + st.uiWeight + ";font-size:" + (st.uiFs || 14) + "px;}");
 
+  L.push(".msg-bubble{letter-spacing:" + st.chatSpacing + "px;line-height:" + st.chatLineH + ";font-weight:" + st.chatWeight + ";}");
+  L.push("#sidebar,.menu-item,.session-item{letter-spacing:" + st.uiSpacing + "px;font-weight:" + st.uiWeight + ";font-size:" + (st.uiFs || 14) + "px;}");
   L.push(".menu-item,.session-item{line-height:" + st.uiLineH + ";}");
+
   if (st.aiTypoOn) {
     const f = FONT_LIST[st.aiFont2] || FONT_LIST.system;
     L.push(".bub-ai{font-family:" + f + ";font-size:" + st.aiSize2 + "px;font-weight:" + st.aiWeight2 + ";letter-spacing:" + st.aiSpacing2 + "px;line-height:" + st.aiLineH2 + ";}");
   }
+
   if (st.selectOn) {
     L.push(".msg-bubble{-webkit-user-select:text;user-select:text;}");
   }
+
   s5.textContent = L.join(NL);
 }
 /* ==========================================
@@ -850,7 +912,7 @@ function buildThinkBox(m) {
   const box = el("div", "think-box");
   box.style.background = hslaOf(st.thinkHue, st.thinkSat, st.thinkLight, st.thinkAlpha);
   const dark = st.thinkLight < 45;
-  const ink = dark? "#e8e8e8" : "#6a6a6a";
+  const ink = dark ? "#e8e8e8" : "#6a6a6a";
   const head = el("div", "think-head");
   head.style.color = ink;
   const arrow = el("span", "", "▸");
@@ -862,7 +924,7 @@ function buildThinkBox(m) {
   box.appendChild(body);
   head.onclick = () => {
     box.classList.toggle("open");
-    arrow.textContent = box.classList.contains("open")? "▾" : "▸";
+    arrow.textContent = box.classList.contains("open") ? "▾" : "▸";
   };
   return box;
 }
@@ -873,7 +935,7 @@ function groupInfo(list, i) {
   if (!m.grp) return { inGroup: false, isFirst: true, isLast: true };
   const prevSame = i > 0 && list[i - 1].grp === m.grp;
   const nextSame = i < list.length - 1 && list[i + 1].grp === m.grp;
-  return { inGroup: true, isFirst:!prevSame, isLast:!nextSame };
+  return { inGroup: true, isFirst: !prevSame, isLast: !nextSame };
 }
 
 /* ---------- 单行装配 ---------- */
@@ -883,7 +945,7 @@ async function buildMsgRow(m, gi, aiSrc, userSrc) {
   const st = state.settings;
 
   const row = document.createElement("div");
-  row.className = "msg-row " + (isUser? "msg-row-user" : "msg-row-ai");
+  row.className = "msg-row " + (isUser ? "msg-row-user" : "msg-row-ai");
   row.dataset.id = m.id;
 
   const check = document.createElement("input");
@@ -893,36 +955,39 @@ async function buildMsgRow(m, gi, aiSrc, userSrc) {
 
   const avatar = document.createElement("img");
   avatar.className = "msg-avatar";
-  avatar.src = isUser? userSrc : aiSrc;
-  const hideAv = st.splitAvatarOnce && gi.inGroup &&!gi.isFirst;
+  avatar.src = isUser ? userSrc : aiSrc;
+  const hideAv = st.splitAvatarOnce && gi.inGroup && !gi.isFirst;
   if (hideAv) avatar.classList.add("ghost");
+
   const body = document.createElement("div");
-  body.className = "msg-body " + (isUser? "msg-body-user" : "msg-body-ai");
-  if (st.aiBare &&!isUser) {
+  body.className = "msg-body " + (isUser ? "msg-body-user" : "msg-body-ai");
+  if (st.aiBare && !isUser) {
     body.classList.add("bare-full");
     body.style.maxWidth = "96%";
   } else {
     body.style.maxWidth = state.settings.bubbleMaxW + "%";
   }
 
-
   let timeOk = st.showTime;
-  if (st.splitTimeLast && gi.inGroup &&!gi.isLast) timeOk = false;
+  if (st.splitTimeLast && gi.inGroup && !gi.isLast) timeOk = false;
   let nameOk = st.showName;
-  if (st.splitAvatarOnce && gi.inGroup &&!gi.isFirst) nameOk = false;
+  if (st.splitAvatarOnce && gi.inGroup && !gi.isFirst) nameOk = false;
 
   const meta = document.createElement("div");
-  meta.className = "msg-meta " + (isUser? "msg-meta-user" : "msg-meta-ai");
+  meta.className = "msg-meta " + (isUser ? "msg-meta-user" : "msg-meta-ai");
 
   if (nameOk && st.timeAt === "name" && timeOk) {
     const line = document.createElement("div");
     line.className = "msg-name-line";
+
     const nameEl = document.createElement("span");
     nameEl.className = "msg-name";
-    nameEl.textContent = isUser? r.userName : r.aiName;
+    nameEl.textContent = isUser ? r.userName : r.aiName;
+
     const timeEl = document.createElement("span");
     timeEl.className = "msg-time";
     timeEl.textContent = fmtTime(m.time);
+
     line.appendChild(nameEl);
     line.appendChild(timeEl);
     meta.appendChild(line);
@@ -930,9 +995,10 @@ async function buildMsgRow(m, gi, aiSrc, userSrc) {
     if (nameOk) {
       const nameEl = document.createElement("span");
       nameEl.className = "msg-name";
-      nameEl.textContent = isUser? r.userName : r.aiName;
+      nameEl.textContent = isUser ? r.userName : r.aiName;
       meta.appendChild(nameEl);
     }
+
     if (timeOk && st.timeAt === "above") {
       const timeEl = document.createElement("span");
       timeEl.className = "msg-time";
@@ -957,6 +1023,7 @@ async function buildMsgRow(m, gi, aiSrc, userSrc) {
     im.src = m.img;
     bubble.appendChild(im);
   }
+
   const txtNode = document.createElement("span");
   txtNode.className = "msg-txt";
   txtNode.textContent = msgText(m);
@@ -974,21 +1041,34 @@ async function buildMsgRow(m, gi, aiSrc, userSrc) {
   if (!isUser && m.versions.length > 1) {
     const vs = document.createElement("div");
     vs.className = "version-switch";
+
     const prev = document.createElement("button");
     prev.className = "vs-btn";
     prev.textContent = "‹";
+
     const label = document.createElement("span");
     label.textContent = (m.vi + 1) + "/" + m.versions.length;
+
     const next = document.createElement("button");
     next.className = "vs-btn";
     next.textContent = "›";
-    const move = (d) => {
+
+    const move = d => {
       m.vi = Math.max(0, Math.min(m.versions.length - 1, m.vi + d));
       saveState();
       renderMessages();
     };
-    prev.onclick = (e) => { e.stopPropagation(); move(-1); };
-    next.onclick = (e) => { e.stopPropagation(); move(1); };
+
+    prev.onclick = e => {
+      e.stopPropagation();
+      move(-1);
+    };
+
+    next.onclick = e => {
+      e.stopPropagation();
+      move(1);
+    };
+
     vs.appendChild(prev);
     vs.appendChild(label);
     vs.appendChild(next);
@@ -1011,9 +1091,11 @@ async function buildMsgRow(m, gi, aiSrc, userSrc) {
   dressMeta(row, isUser);
   if (hideAv) avatar.classList.add("ghost");
 
-  if (st.showAvatar &&!hideAv) {
+  if (st.showAvatar && !hideAv) {
     bindLongPress(avatar, (x, y) => msgMenu(m, x, y));
-    if (!st.selectOn) bindLongPress(bubble, (x, y) => msgMenu(m, x, y));
+    if (!st.selectOn) {
+      bindLongPress(bubble, (x, y) => msgMenu(m, x, y));
+    }
   } else {
     bindLongPress(bubble, (x, y) => msgMenu(m, x, y));
   }
@@ -1029,16 +1111,20 @@ async function renderMessages() {
   const userSrc = await avatarSrc("user");
 
   const frag = document.createDocumentFragment();
+
   for (let i = 0; i < s.messages.length; i++) {
     const gi = groupInfo(s.messages, i);
     const row = await buildMsgRow(s.messages[i], gi, aiSrc, userSrc);
     frag.appendChild(row);
   }
+
   area.innerHTML = "";
   area.appendChild(frag);
 
   if (document.body.classList.contains("export-mode")) {
-    document.querySelectorAll(".msg-check").forEach(c => { c.style.display = "block"; });
+    document.querySelectorAll(".msg-check").forEach(c => {
+      c.style.display = "block";
+    });
   }
 
   area.scrollTop = area.scrollHeight;
@@ -1051,7 +1137,10 @@ async function appendMessage(m) {
   const aiSrc = await avatarSrc("ai");
   const userSrc = await avatarSrc("user");
   const i = s.messages.indexOf(m);
-  const gi = i >= 0? groupInfo(s.messages, i) : { inGroup: false, isFirst: true, isLast: true };
+  const gi = i >= 0
+    ? groupInfo(s.messages, i)
+    : { inGroup: false, isFirst: true, isLast: true };
+
   const row = await buildMsgRow(m, gi, aiSrc, userSrc);
   row.classList.add("anim-in");
   area.appendChild(row);
@@ -1072,28 +1161,34 @@ function closeActions() {
 
 function showActions(items, x, y) {
   closeActions();
+
   const menu = document.createElement("div");
   menu.className = "msg-actions";
+
   items.forEach(it => {
     const b = document.createElement("button");
-    b.className = "act-btn" + (it.danger? " danger" : "");
+    b.className = "act-btn" + (it.danger ? " danger" : "");
     b.textContent = it.label;
-    const run = (e) => {
+
+    const run = e => {
       e.preventDefault();
       e.stopPropagation();
       closeActions();
       it.fn();
     };
+
     b.addEventListener("touchend", run);
     b.addEventListener("click", run);
     menu.appendChild(b);
   });
+
   document.body.appendChild(menu);
   const rect = menu.getBoundingClientRect();
   menu.style.left = Math.max(8, Math.min(x, window.innerWidth - rect.width - 8)) + "px";
   menu.style.top = Math.max(8, Math.min(y, window.innerHeight - rect.height - 8)) + "px";
+
   setTimeout(() => {
-    menu._closer = (e) => {
+    menu._closer = e => {
       if (!menu.contains(e.target)) closeActions();
     };
     document.addEventListener("touchstart", menu._closer, true);
@@ -1103,16 +1198,25 @@ function showActions(items, x, y) {
 
 function bindLongPress(el2, fn) {
   let timer = null;
-  el2.addEventListener("touchstart", (e) => {
+
+  el2.addEventListener("touchstart", e => {
     const t = e.touches[0];
     timer = setTimeout(() => {
       timer = null;
       fn(t.clientX, t.clientY);
     }, 480);
   }, { passive: true });
-  el2.addEventListener("touchmove", () => { clearTimeout(timer); timer = null; }, { passive: true });
-  el2.addEventListener("touchend", () => { clearTimeout(timer); });
-  el2.addEventListener("contextmenu", (e) => {
+
+  el2.addEventListener("touchmove", () => {
+    clearTimeout(timer);
+    timer = null;
+  }, { passive: true });
+
+  el2.addEventListener("touchend", () => {
+    clearTimeout(timer);
+  });
+
+  el2.addEventListener("contextmenu", e => {
     e.preventDefault();
     fn(e.clientX, e.clientY);
   });
@@ -1120,15 +1224,21 @@ function bindLongPress(el2, fn) {
 
 function msgMenu(m, x, y) {
   if (streaming) return;
+
   const s = curSession();
   const items = [
-    { label: "复制", fn: () => {
+    {
+      label: "复制",
+      fn: () => {
         navigator.clipboard.writeText(msgText(m)).then(
           () => toast("已复制"),
           () => toast("复制失败")
         );
-      } },
-    { label: "编辑", fn: () => {
+      }
+    },
+    {
+      label: "编辑",
+      fn: () => {
         inputDialog("编辑消息", msgText(m), v => {
           if (v.trim()) {
             m.versions[m.vi] = v;
@@ -1136,23 +1246,39 @@ function msgMenu(m, x, y) {
             renderMessages();
           }
         }, true);
-      } }
+      }
+    }
   ];
+
   if (m.img) {
-    items.push({ label: "删除图片", danger: true, fn: () => confirmDialog("删除这张图片？", () => {
+    items.push({
+      label: "删除图片",
+      danger: true,
+      fn: () => confirmDialog("删除这张图片？", () => {
         delete m.img;
         saveState();
         renderMessages();
-      }) });
+      })
+    });
   }
+
   if (m.role === "ai") {
-    items.push({ label: "重新生成", fn: () => regenerate(m) });
+    items.push({
+      label: "重新生成",
+      fn: () => regenerate(m)
+    });
   }
-  items.push({ label: "删除", danger: true, fn: () => confirmDialog("删除这条消息？", () => {
-      s.messages = s.messages.filter(x2 => x2.id!== m.id);
+
+  items.push({
+    label: "删除",
+    danger: true,
+    fn: () => confirmDialog("删除这条消息？", () => {
+      s.messages = s.messages.filter(x2 => x2.id !== m.id);
       saveState();
       renderMessages();
-    }) });
+    })
+  });
+
   showActions(items, x, y);
 }
 
@@ -1160,24 +1286,35 @@ function msgMenu(m, x, y) {
 function inputDialog(title, initial, onOk, multiline) {
   const mask = document.createElement("div");
   mask.className = "dialog-mask";
+
   const dlg = document.createElement("div");
   dlg.className = "dialog";
+
   const h = document.createElement("div");
   h.className = "dialog-title";
   h.textContent = title;
-  const input = document.createElement(multiline? "textarea" : "input");
-  input.className = multiline? "dialog-textarea" : "dialog-input";
+
+  const input = document.createElement(multiline ? "textarea" : "input");
+  input.className = multiline ? "dialog-textarea" : "dialog-input";
   input.value = initial || "";
+
   const btns = document.createElement("div");
   btns.className = "dialog-btns";
+
   const cancel = document.createElement("button");
   cancel.className = "btn secondary";
   cancel.textContent = "取消";
+
   const ok = document.createElement("button");
   ok.className = "btn";
   ok.textContent = "确定";
+
   cancel.onclick = () => mask.remove();
-  ok.onclick = () => { onOk(input.value); mask.remove(); };
+  ok.onclick = () => {
+    onOk(input.value);
+    mask.remove();
+  };
+
   btns.appendChild(cancel);
   btns.appendChild(ok);
   dlg.appendChild(h);
@@ -1191,21 +1328,31 @@ function inputDialog(title, initial, onOk, multiline) {
 function confirmDialog(title, onOk) {
   const mask = document.createElement("div");
   mask.className = "dialog-mask";
+
   const dlg = document.createElement("div");
   dlg.className = "dialog";
+
   const h = document.createElement("div");
   h.className = "dialog-title";
   h.textContent = title;
+
   const btns = document.createElement("div");
   btns.className = "dialog-btns";
+
   const cancel = document.createElement("button");
   cancel.className = "btn secondary";
   cancel.textContent = "取消";
+
   const ok = document.createElement("button");
   ok.className = "btn danger";
   ok.textContent = "确定";
+
   cancel.onclick = () => mask.remove();
-  ok.onclick = () => { onOk(); mask.remove(); };
+  ok.onclick = () => {
+    onOk();
+    mask.remove();
+  };
+
   btns.appendChild(cancel);
   btns.appendChild(ok);
   dlg.appendChild(h);
@@ -1221,20 +1368,33 @@ function buildMessages(uptoId) {
   const msgs = [];
 
   let sys = r.systemPrompt || "";
-  const mems = r.memories.filter(m => m.core || m.checked).map(m => m.text);
+  const mems = r.memories
+    .filter(m => m.core || m.checked)
+    .map(m => m.text);
+
   if (mems.length) {
-    sys += NL + NL + "[记忆]" + NL + mems.map((t, i) => (i + 1) + ". " + t).join(NL);
+    sys += NL + NL + "[记忆]" + NL +
+      mems.map((t, i) => (i + 1) + ". " + t).join(NL);
   }
+
   if (state.settings.splitSend) {
-    sys += NL + NL + "[输出要求]请把回复自然地分成多个段落，每段之间用空行隔开，像连续发多条消息一样，总段数不超过" + state.settings.splitMax + "段。";
+    sys += NL + NL +
+      "[输出要求]请把回复自然地分成多个段落，每段之间用空行隔开，像连续发多条消息一样，总段数不超过" +
+      state.settings.splitMax +
+      "段。";
   }
-  if (sys.trim()) msgs.push({ role: "system", content: sys });
+
+  if (sys.trim()) {
+    msgs.push({ role: "system", content: sys });
+  }
 
   let history = s.messages;
+
   if (uptoId) {
     const idx = history.findIndex(m => m.id === uptoId);
     if (idx >= 0) history = history.slice(0, idx);
   }
+
   let lastImgId = null;
   for (let i = history.length - 1; i >= 0; i--) {
     if (history[i].role === "user" && history[i].img) {
@@ -1242,31 +1402,49 @@ function buildMessages(uptoId) {
       break;
     }
   }
+
   const count = state.settings.contextCount || 20;
   history = history.slice(-count);
 
   history.forEach(m => {
-    const role = m.role === "user"? "user" : "assistant";
+    const role = m.role === "user" ? "user" : "assistant";
+
     if (m.id === lastImgId && m.img) {
       msgs.push({
         role: role,
         content: [
-          { type: "image_url", image_url: { url: m.img } },
-          { type: "text", text: msgText(m) || "（图片）" }
+          {
+            type: "image_url",
+            image_url: { url: m.img }
+          },
+          {
+            type: "text",
+            text: msgText(m) || "（图片）"
+          }
         ]
       });
     } else {
-      msgs.push({ role: role, content: msgText(m) });
+      msgs.push({
+        role: role,
+        content: msgText(m)
+      });
     }
   });
+
   return msgs;
 }
 
 /* ---------- 流式请求 ---------- */
 async function streamChat(messages, onDelta, onThink) {
   const p = curProvider();
-  if (!p.baseURL ||!p.apiKey) throw new Error("请先在设置里配置供应商地址和Key");
-  if (!p.model) throw new Error("请先选择模型");
+
+  if (!p.baseURL || !p.apiKey) {
+    throw new Error("请先在设置里配置供应商地址和Key");
+  }
+
+  if (!p.model) {
+    throw new Error("请先选择模型");
+  }
 
   const url = p.baseURL.replace(/\/+$/, "") + "/chat/completions";
   abortCtrl = new AbortController();
@@ -1289,7 +1467,9 @@ async function streamChat(messages, onDelta, onThink) {
 
   if (!res.ok) {
     let detail = "";
-    try { detail = await res.text(); } catch (e) {}
+    try {
+      detail = await res.text();
+    } catch (e) {}
     throw new Error("请求失败 " + res.status + " " + detail.slice(0, 300));
   }
 
@@ -1301,34 +1481,51 @@ async function streamChat(messages, onDelta, onThink) {
   while (true) {
     const chunk = await reader.read();
     if (chunk.done) break;
+
     buf += decoder.decode(chunk.value, { stream: true });
     const lines = buf.split(NL);
     buf = lines.pop();
+
     for (const line of lines) {
       const t = line.trim();
       if (!t.startsWith("data:")) continue;
+
       const data = t.slice(5).trim();
       if (data === "[DONE]") continue;
+
       try {
         const j = JSON.parse(data);
-        const delta = j.choices && j.choices[0] && j.choices[0].delta;
+        const delta = j.choices &&
+          j.choices[0] &&
+          j.choices[0].delta;
+
         if (delta) {
           const think = delta.reasoning_content || delta.reasoning;
           if (think && onThink) onThink(think);
           if (delta.content) onDelta(delta.content);
         }
-        if (j.usage && j.usage.total_tokens) usage = j.usage.total_tokens;
+
+        if (j.usage && j.usage.total_tokens) {
+          usage = j.usage.total_tokens;
+        }
       } catch (e) {}
     }
   }
+
   return usage;
 }
 
 /* ---------- 非流式请求 ---------- */
 async function plainChat(messages, onDelta, onThink) {
   const p = curProvider();
-  if (!p.baseURL ||!p.apiKey) throw new Error("请先在设置里配置供应商地址和Key");
-  if (!p.model) throw new Error("请先选择模型");
+
+  if (!p.baseURL || !p.apiKey) {
+    throw new Error("请先在设置里配置供应商地址和Key");
+  }
+
+  if (!p.model) {
+    throw new Error("请先选择模型");
+  }
 
   const url = p.baseURL.replace(/\/+$/, "") + "/chat/completions";
   abortCtrl = new AbortController();
@@ -1350,38 +1547,59 @@ async function plainChat(messages, onDelta, onThink) {
 
   if (!res.ok) {
     let detail = "";
-    try { detail = await res.text(); } catch (e) {}
+    try {
+      detail = await res.text();
+    } catch (e) {}
     throw new Error("请求失败 " + res.status + " " + detail.slice(0, 300));
   }
 
   const j = await res.json();
-  if (j.error) throw new Error(String(j.error.message || "接口报错").slice(0, 300));
-  const msg = j.choices && j.choices[0] && j.choices[0].message;
-  if (!msg) throw new Error("接口没给回复");
+
+  if (j.error) {
+    throw new Error(String(j.error.message || "接口报错").slice(0, 300));
+  }
+
+  const msg = j.choices &&
+    j.choices[0] &&
+    j.choices[0].message;
+
+  if (!msg) {
+    throw new Error("接口没给回复");
+  }
+
   const think = msg.reasoning_content || msg.reasoning;
   if (think && onThink) onThink(think);
   if (msg.content) onDelta(msg.content);
-  return j.usage && j.usage.total_tokens? j.usage.total_tokens : null;
+
+  return j.usage && j.usage.total_tokens
+    ? j.usage.total_tokens
+    : null;
 }
 
 /* ---------- 发送 ---------- */
 async function sendMessage() {
   if (streaming) return;
+
   const input = $("#input-text");
   const text = input.value.trim();
-  if (!text &&!pendingImg) return;
+
+  if (!text && !pendingImg) return;
 
   const s = curSession();
   const userMsg = {
-    id: uid(), role: "user",
-    versions: [text || "（图片）"], vi: 0,
+    id: uid(),
+    role: "user",
+    versions: [text || "（图片）"],
+    vi: 0,
     time: Date.now()
   };
+
   if (pendingImg) {
     userMsg.img = pendingImg;
     pendingImg = null;
     renderAttachPreview();
   }
+
   s.messages.push(userMsg);
 
   if (s.name === "新对话" && text) {
@@ -1395,10 +1613,14 @@ async function sendMessage() {
   renderSidebar();
 
   const aiMsg = {
-    id: uid(), role: "ai",
-    versions: [""], vi: 0,
-    time: Date.now(), tokens: null
+    id: uid(),
+    role: "ai",
+    versions: [""],
+    vi: 0,
+    time: Date.now(),
+    tokens: null
   };
+
   s.messages.push(aiMsg);
   await runStream(aiMsg, buildMessages(aiMsg.id));
 }
@@ -1406,6 +1628,7 @@ async function sendMessage() {
 /* ---------- 重roll ---------- */
 async function regenerate(m) {
   if (streaming) return;
+
   m.versions.push("");
   m.vi = m.versions.length - 1;
   await runStream(m, buildMessages(m.id), true);
@@ -1414,49 +1637,84 @@ async function regenerate(m) {
 /* ---------- 执行:流式/非流式一个闸口 ---------- */
 async function runStream(aiMsg, messages, isRegen) {
   streaming = true;
+
   const btn = $("#send-btn");
   btn.textContent = "■";
   btn.disabled = false;
-  btn.onclick = () => { if (abortCtrl) abortCtrl.abort(); };
+  btn.onclick = () => {
+    if (abortCtrl) abortCtrl.abort();
+  };
+
   saveState();
 
   let row;
+
   if (isRegen) {
     await renderMessages();
-    row = document.querySelector('.msg-row[data-id="' + aiMsg.id + '"]');
+    row = document.querySelector(
+      '.msg-row[data-id="' + aiMsg.id + '"]'
+    );
   } else {
     row = await appendMessage(aiMsg);
   }
-  const txtEl = row? row.querySelector(".msg-txt") : null;
-  const bubbleEl = row? row.querySelector(".msg-bubble") : null;
-  if (bubbleEl) bubbleEl.classList.add("typing-cursor");
-  const area = $("#chat-area");
 
-  const engine = state.settings.streamMode === "plain"? plainChat : streamChat;
+  const txtEl = row ? row.querySelector(".msg-txt") : null;
+  const bubbleEl = row ? row.querySelector(".msg-bubble") : null;
+
+  if (bubbleEl) {
+    bubbleEl.classList.add("typing-cursor");
+  }
+
+  const area = $("#chat-area");
+  const engine = state.settings.streamMode === "plain"
+    ? plainChat
+    : streamChat;
 
   try {
-    const usage = await engine(messages, (chunk) => {
-      aiMsg.versions[aiMsg.vi] += chunk;
-      if (txtEl) {
-        txtEl.textContent = aiMsg.versions[aiMsg.vi];
-        area.scrollTop = area.scrollHeight;
+    const usage = await engine(
+      messages,
+      chunk => {
+        aiMsg.versions[aiMsg.vi] += chunk;
+
+        if (txtEl) {
+          txtEl.textContent = aiMsg.versions[aiMsg.vi];
+          area.scrollTop = area.scrollHeight;
+        }
+      },
+      thinkChunk => {
+        aiMsg.think = (aiMsg.think || "") + thinkChunk;
       }
-    }, (thinkChunk) => {
-      aiMsg.think = (aiMsg.think || "") + thinkChunk;
-    });
+    );
+
     if (usage) aiMsg.tokens = usage;
 
-    const TKO = String.fromCharCode(60) + "think" + String.fromCharCode(62);
-    const TKC = String.fromCharCode(60) + "/think" + String.fromCharCode(62);
-    let full = aiMsg.versions[aiMsg.vi];
+    const TKO = String.fromCharCode(60) +
+      "think" +
+      String.fromCharCode(62);
+
+    const TKC = String.fromCharCode(60) +
+      "/think" +
+      String.fromCharCode(62);
+
+    const full = aiMsg.versions[aiMsg.vi];
     const tOpen = full.indexOf(TKO);
+
     if (tOpen >= 0) {
       const tClose = full.indexOf(TKC);
+
       if (tClose > tOpen) {
-        aiMsg.think = (aiMsg.think || "") + full.slice(tOpen + TKO.length, tClose).trim();
-        aiMsg.versions[aiMsg.vi] = (full.slice(0, tOpen) + full.slice(tClose + TKC.length)).trim();
+        aiMsg.think =
+          (aiMsg.think || "") +
+          full.slice(tOpen + TKO.length, tClose).trim();
+
+        aiMsg.versions[aiMsg.vi] =
+          (
+            full.slice(0, tOpen) +
+            full.slice(tClose + TKC.length)
+          ).trim();
       }
     }
+
     if (!aiMsg.versions[aiMsg.vi]) {
       aiMsg.versions[aiMsg.vi] = "(空回复)";
     }
@@ -1469,13 +1727,14 @@ async function runStream(aiMsg, messages, isRegen) {
       toast("已停止生成");
     } else {
       toast(e.message, 6000);
+
       if (!aiMsg.versions[aiMsg.vi]) {
         if (aiMsg.versions.length > 1) {
           aiMsg.versions.pop();
           aiMsg.vi = aiMsg.versions.length - 1;
         } else {
           const s = curSession();
-          s.messages = s.messages.filter(x => x.id!== aiMsg.id);
+          s.messages = s.messages.filter(x => x.id !== aiMsg.id);
         }
       }
     }
@@ -1485,7 +1744,11 @@ async function runStream(aiMsg, messages, isRegen) {
     btn.textContent = "↑";
     btn.disabled = false;
     btn.onclick = sendMessage;
-    if (bubbleEl) bubbleEl.classList.remove("typing-cursor");
+
+    if (bubbleEl) {
+      bubbleEl.classList.remove("typing-cursor");
+    }
+
     saveState();
     await renderMessages();
   }
@@ -1494,40 +1757,60 @@ async function runStream(aiMsg, messages, isRegen) {
 /* ---------- 分段 ---------- */
 function splitAiMessage(aiMsg) {
   if (aiMsg.versions.length > 1) return;
+
   const full = aiMsg.versions[aiMsg.vi];
-  const parts = full.split(NL + NL).map(p => p.trim()).filter(p => p);
+  const parts = full
+    .split(NL + NL)
+    .map(p => p.trim())
+    .filter(p => p);
+
   if (parts.length < 2) return;
+
   const max = state.settings.splitMax || 20;
   const use = parts.slice(0, max);
+
   if (parts.length > max) {
-    use[use.length - 1] = parts.slice(max - 1).join(NL + NL);
+    use[use.length - 1] = parts
+      .slice(max - 1)
+      .join(NL + NL);
   }
+
   const s = curSession();
   const idx = s.messages.findIndex(x => x.id === aiMsg.id);
+
   if (idx < 0) return;
+
   const grp = uid();
+
   const newMsgs = use.map((p, i) => ({
-    id: uid(), role: "ai",
-    versions: [p], vi: 0,
+    id: uid(),
+    role: "ai",
+    versions: [p],
+    vi: 0,
     time: aiMsg.time + i,
-    tokens: i === use.length - 1? aiMsg.tokens : null,
-    think: i === 0? aiMsg.think : undefined,
+    tokens: i === use.length - 1 ? aiMsg.tokens : null,
+    think: i === 0 ? aiMsg.think : undefined,
     grp: grp
   }));
-  s.messages.splice(idx, 1,...newMsgs);
+
+  s.messages.splice(idx, 1, ...newMsgs);
 }
 
 /* ---------- 发图 ---------- */
 function renderAttachPreview() {
   const box = $("#attach-preview");
   box.innerHTML = "";
+
   if (pendingImg) {
     box.classList.add("show");
+
     const wrap = document.createElement("div");
     wrap.className = "attach-thumb";
+
     const im = document.createElement("img");
     im.className = "attach-thumb-img";
     im.src = pendingImg;
+
     const del = document.createElement("button");
     del.className = "attach-del";
     del.textContent = "✕";
@@ -1535,6 +1818,7 @@ function renderAttachPreview() {
       pendingImg = null;
       renderAttachPreview();
     };
+
     wrap.appendChild(im);
     wrap.appendChild(del);
     box.appendChild(wrap);
@@ -1546,12 +1830,14 @@ function renderAttachPreview() {
 async function pickImage(e) {
   const file = e.target.files[0];
   if (!file) return;
+
   try {
     pendingImg = await compressImage(file);
     renderAttachPreview();
   } catch (err) {
     toast(err.message);
   }
+
   e.target.value = "";
 }
 
@@ -1570,38 +1856,78 @@ function renderSidebar() {
   const list = $("#session-list");
   const r = curRole();
   list.innerHTML = "";
+
   r.sessions.forEach(s => {
-    const div = el("div", "session-item" + (s.id === r.currentSessionId? " active" : ""), s.name);
+    const div = el(
+      "div",
+      "session-item" +
+        (s.id === r.currentSessionId ? " active" : ""),
+      s.name
+    );
+
     div.onclick = () => {
       r.currentSessionId = s.id;
       saveState();
       renderAll();
       closeSidebar();
     };
+
     bindLongPress(div, (x, y) => {
       showActions([
-        { label: "重命名", fn: () => inputDialog("重命名会话", s.name, v => {
-            if (v.trim()) { s.name = v.trim(); saveState(); renderSidebar(); }
-          }) },
-        { label: "删除", danger: true, fn: () => confirmDialog("删除这个会话？", () => {
-            r.sessions = r.sessions.filter(x2 => x2.id!== s.id);
-            if (!r.sessions.length) r.sessions.push({ id: uid(), name: "新对话", messages: [] });
-            if (r.currentSessionId === s.id) r.currentSessionId = r.sessions[0].id;
+        {
+          label: "重命名",
+          fn: () => inputDialog("重命名会话", s.name, v => {
+            if (v.trim()) {
+              s.name = v.trim();
+              saveState();
+              renderSidebar();
+            }
+          })
+        },
+        {
+          label: "删除",
+          danger: true,
+          fn: () => confirmDialog("删除这个会话？", () => {
+            r.sessions = r.sessions.filter(x2 => x2.id !== s.id);
+
+            if (!r.sessions.length) {
+              r.sessions.push({
+                id: uid(),
+                name: "新对话",
+                messages: []
+              });
+            }
+
+            if (r.currentSessionId === s.id) {
+              r.currentSessionId = r.sessions[0].id;
+            }
+
             saveState();
             renderAll();
-          }) }
+          })
+        }
       ], x, y);
     });
+
     list.appendChild(div);
   });
+
   $("#topbar-title").textContent = curSession().name;
   $("#current-role-name").textContent = r.name;
-  avatarSrc("ai").then(src => { $("#current-role-avatar").src = src; });
+
+  avatarSrc("ai").then(src => {
+    $("#current-role-avatar").src = src;
+  });
 }
 
 function newSession() {
   const r = curRole();
-  const s = { id: uid(), name: "新对话", messages: [] };
+  const s = {
+    id: uid(),
+    name: "新对话",
+    messages: []
+  };
+
   r.sessions.unshift(s);
   r.currentSessionId = s.id;
   saveState();
@@ -1610,8 +1936,13 @@ function newSession() {
 }
 
 /* ---------- 面板开关 ---------- */
-function openPanel(id) { $(id).classList.add("open"); }
-function closePanel(id) { $(id).classList.remove("open"); }
+function openPanel(id) {
+  $(id).classList.add("open");
+}
+
+function closePanel(id) {
+  $(id).classList.remove("open");
+}
 /* ==========================================
    第三部分:API设置 / 设置页 / 角色页 / 编辑器 / 控件工厂
    ========================================== */
@@ -1987,6 +2318,7 @@ function openCharEditor(r) {
     l.style.cssText = "font-size:13px;font-weight:600;margin:16px 2px 6px;color:var(--text-sub);";
     body.appendChild(l);
   }
+
   function input(val, multiline) {
     const n = document.createElement(multiline? "textarea" : "input");
     n.className = multiline? "form-textarea" : "form-input";
@@ -2368,9 +2700,19 @@ function buildThemePanel() {
   /* 皮肤 */
   let sec = mkSection(body, "皮肤");
   mkSeg(sec,
-    [{ v: "day", name: "白天" }, { v: "night", name: "夜间" }, { v: "official", name: "官方" }, { v: "liquid", name: "液态" }],
+    [
+      { v: "day", name: "白天" },
+      { v: "night", name: "夜间" },
+      { v: "official", name: "官方" },
+      { v: "liquid", name: "液态" }
+    ],
     () => state.settings.skin,
-    (v) => { state.settings.skin = v; saveState(); applyTheme(); renderMessages(); }
+    (v) => {
+      state.settings.skin = v;
+      saveState();
+      applyTheme();
+      renderMessages();
+    }
   );
   mkSlider(sec, "主题润度", 0, 100, 1, "skinGlow", "", applyTheme);
 
@@ -2378,115 +2720,244 @@ function buildThemePanel() {
   sec = mkSection(body, "布局");
   sec.appendChild(el("label", "form-label", "标题位置"));
   mkSeg(sec,
-    [{ v: false, name: "居左" }, { v: true, name: "居中" }],
+    [
+      { v: false, name: "居左" },
+      { v: true, name: "居中" }
+    ],
     () => state.settings.titleCenter,
-    (v) => { state.settings.titleCenter = v; saveState(); applyLayout(); }
+    (v) => {
+      state.settings.titleCenter = v;
+      saveState();
+      applyLayout();
+    }
   );
+
   mkSlider(sec, "标题字号", 12, 24, 1, "titleFs", "px", applyTheme);
   mkSlider(sec, "标题粗细", 300, 800, 50, "titleFw", "", applyTheme);
+
   sec.appendChild(el("label", "form-label", "气泡与头像"));
   mkSeg(sec,
-    [{ v: "side", name: "并排" }, { v: "below", name: "头像下方" }],
+    [
+      { v: "side", name: "并排" },
+      { v: "below", name: "头像下方" }
+    ],
     () => state.settings.bubbleAlign,
-    (v) => { state.settings.bubbleAlign = v; saveState(); renderMessages(); }
+    (v) => {
+      state.settings.bubbleAlign = v;
+      saveState();
+      renderMessages();
+    }
   );
+
   sec.appendChild(el("label", "form-label", "头像形状"));
   mkSeg(sec,
-    [{ v: "circle", name: "圆形" }, { v: "square", name: "微信方圆" }],
+    [
+      { v: "circle", name: "圆形" },
+      { v: "square", name: "微信方圆" }
+    ],
     () => state.settings.avatarShape,
-    (v) => { state.settings.avatarShape = v; saveState(); renderMessages(); }
+    (v) => {
+      state.settings.avatarShape = v;
+      saveState();
+      renderMessages();
+    }
   );
-  mkSlider(sec, "头像大小", 20, 52, 1, "avatarSize", "px", () => { applyTheme(); renderMessages(); });
+
+  mkSlider(sec, "头像大小", 20, 52, 1, "avatarSize", "px", () => {
+    applyTheme();
+    renderMessages();
+  });
+
   mkSlider(sec, "消息之间的间距", 4, 40, 1, "msgGap", "px", () => renderMessages());
   mkSlider(sec, "小字与气泡的距离", 0, 20, 1, "metaGap", "px", () => renderMessages());
   mkSlider(sec, "输入框下移", 0, 34, 1, "inputLift", "", applyLayout);
+
   sec.appendChild(el("label", "form-label", "输入栏模型按钮"));
   mkSeg(sec,
-    [{ v: true, name: "显示" }, { v: false, name: "隐藏" }],
+    [
+      { v: true, name: "显示" },
+      { v: false, name: "隐藏" }
+    ],
     () => state.settings.showModelBtn,
-    (v) => { state.settings.showModelBtn = v; saveState(); applyTheme(); }
+    (v) => {
+      state.settings.showModelBtn = v;
+      saveState();
+      applyTheme();
+    }
   );
 
   /* 显示 */
   sec = mkSection(body, "显示");
   sec.appendChild(el("label", "form-label", "时间戳"));
   mkSeg(sec,
-    [{ v: true, name: "显示" }, { v: false, name: "不显示" }],
+    [
+      { v: true, name: "显示" },
+      { v: false, name: "不显示" }
+    ],
     () => state.settings.showTime,
-    (v) => { state.settings.showTime = v; saveState(); renderMessages(); }
+    (v) => {
+      state.settings.showTime = v;
+      saveState();
+      renderMessages();
+    }
   );
+
   sec.appendChild(el("label", "form-label", "时间格式"));
   mkSeg(sec,
-    [{ v: "hm", name: "只时间" }, { v: "md", name: "月日+时间" }, { v: "ymd", name: "年月日+时间" }],
+    [
+      { v: "hm", name: "只时间" },
+      { v: "md", name: "月日+时间" },
+      { v: "ymd", name: "年月日+时间" }
+    ],
     () => state.settings.timeFmt,
-    (v) => { state.settings.timeFmt = v; saveState(); renderMessages(); }
+    (v) => {
+      state.settings.timeFmt = v;
+      saveState();
+      renderMessages();
+    }
   );
+
   sec.appendChild(el("label", "form-label", "时间戳位置"));
   mkSeg(sec,
-    [{ v: "above", name: "消息上方" }, { v: "name", name: "昵称后面" }, { v: "below", name: "消息下方" }],
+    [
+      { v: "above", name: "消息上方" },
+      { v: "name", name: "昵称后面" },
+      { v: "below", name: "消息下方" }
+    ],
     () => state.settings.timeAt,
-    (v) => { state.settings.timeAt = v; saveState(); renderMessages(); }
+    (v) => {
+      state.settings.timeAt = v;
+      saveState();
+      renderMessages();
+    }
   );
+
   sec.appendChild(el("label", "form-label", "token统计"));
   mkSeg(sec,
-    [{ v: true, name: "显示" }, { v: false, name: "不显示" }],
+    [
+      { v: true, name: "显示" },
+      { v: false, name: "不显示" }
+    ],
     () => state.settings.showToken,
-    (v) => { state.settings.showToken = v; saveState(); renderMessages(); }
+    (v) => {
+      state.settings.showToken = v;
+      saveState();
+      renderMessages();
+    }
   );
+
   sec.appendChild(el("label", "form-label", "双方昵称"));
   mkSeg(sec,
-    [{ v: true, name: "显示" }, { v: false, name: "不显示" }],
+    [
+      { v: true, name: "显示" },
+      { v: false, name: "不显示" }
+    ],
     () => state.settings.showName,
-    (v) => { state.settings.showName = v; saveState(); renderMessages(); }
+    (v) => {
+      state.settings.showName = v;
+      saveState();
+      renderMessages();
+    }
   );
+
   sec.appendChild(el("label", "form-label", "双方头像"));
   mkSeg(sec,
-    [{ v: true, name: "显示" }, { v: false, name: "不显示" }],
+    [
+      { v: true, name: "显示" },
+      { v: false, name: "不显示" }
+    ],
     () => state.settings.showAvatar,
-    (v) => { state.settings.showAvatar = v; saveState(); renderMessages(); }
+    (v) => {
+      state.settings.showAvatar = v;
+      saveState();
+      renderMessages();
+    }
   );
 
   /* 侧边栏 */
   sec = mkSection(body, "侧边栏");
   mkSeg(sec,
-    [{ v: "white", name: "纯白" }, { v: "clear", name: "高透液态" }],
+    [
+      { v: "white", name: "纯白" },
+      { v: "clear", name: "高透液态" }
+    ],
     () => state.settings.sidebarStyle,
-    (v) => { state.settings.sidebarStyle = v; saveState(); applyTheme(); }
+    (v) => {
+      state.settings.sidebarStyle = v;
+      saveState();
+      applyTheme();
+    }
   );
+
   mkSlider(sec, "透明度", 0, 100, 1, "sidebarAlpha", "%", applyTheme);
   mkSlider(sec, "模糊度（0为纯透）", 0, 30, 1, "sidebarBlur", "px", applyTheme);
+
   sec.appendChild(el("label", "form-label", "菜单语言"));
   mkSeg(sec,
-    [{ v: "zh", name: "中文" }, { v: "en", name: "English" }],
+    [
+      { v: "zh", name: "中文" },
+      { v: "en", name: "English" }
+    ],
     () => state.settings.menuLang,
-    (v) => { state.settings.menuLang = v; saveState(); applyTheme(); }
+    (v) => {
+      state.settings.menuLang = v;
+      saveState();
+      applyTheme();
+    }
   );
 
   /* 气泡 */
   sec = mkSection(body, "气泡");
   sec.appendChild(el("label", "form-label", "质感"));
   mkSeg(sec,
-    [{ v: "water", name: "水感液态" }, { v: "plain", name: "素面" }],
+    [
+      { v: "water", name: "水感液态" },
+      { v: "plain", name: "素面" }
+    ],
     () => state.settings.bubbleTexture,
-    (v) => { state.settings.bubbleTexture = v; saveState(); renderMessages(); }
+    (v) => {
+      state.settings.bubbleTexture = v;
+      saveState();
+      renderMessages();
+    }
   );
+
   sec.appendChild(el("label", "form-label", "AI消息"));
   mkSeg(sec,
-    [{ v: false, name: "有气泡" }, { v: true, name: "无气泡（几乎铺满）" }],
+    [
+      { v: false, name: "有气泡" },
+      { v: true, name: "无气泡（几乎铺满）" }
+    ],
     () => state.settings.aiBare,
-    (v) => { state.settings.aiBare = v; saveState(); renderMessages(); }
+    (v) => {
+      state.settings.aiBare = v;
+      saveState();
+      renderMessages();
+    }
   );
+
   sec.appendChild(el("label", "form-label", "形状"));
   mkSeg(sec,
-    Object.keys(BUBBLE_SHAPES).map(k => ({ v: k, name: BUBBLE_SHAPES[k].name })),
+    Object.keys(BUBBLE_SHAPES).map(k => ({
+      v: k,
+      name: BUBBLE_SHAPES[k].name
+    })),
     () => state.settings.bubbleShape,
-    (v) => { state.settings.bubbleShape = v; saveState(); renderMessages(); }
+    (v) => {
+      state.settings.bubbleShape = v;
+      saveState();
+      renderMessages();
+    }
   );
+
   sec.appendChild(el("label", "form-label", "尺寸（你自己捏）"));
   mkSlider(sec, "上下厚度", 2, 18, 1, "bubblePadV", "px", () => renderMessages());
   mkSlider(sec, "左右宽度", 4, 22, 1, "bubblePadH", "px", () => renderMessages());
-  mkSlider(sec, "最大宽度", 55, 100, 1, "bubbleMaxW", "%", () => { applyBubbleBox(); });
+  mkSlider(sec, "最大宽度", 55, 100, 1, "bubbleMaxW", "%", () => {
+    applyBubbleBox();
+  });
   mkSlider(sec, "圆角弧度", 0, 26, 1, "bubbleRadius", "px", () => renderMessages());
+
   mkColorArea(sec, "我的气泡颜色", "userHue", "userSat", "userLight", "userAlpha");
   mkColorArea(sec, "AI气泡颜色", "aiHue", "aiSat", "aiLight", "aiAlpha");
   mkSlider(sec, "润度（0为原味）", 0, 100, 1, "bubbleGlow", "", () => renderMessages());
@@ -2494,17 +2965,31 @@ function buildThemePanel() {
   /* 文字 */
   sec = mkSection(body, "文字");
   mkSlider(sec, "聊天字体大小", 6, 24, 1, "fontSize", "px", applyTheme);
+
   sec.appendChild(el("label", "form-label", "选一个区域来调"));
   mkSeg(sec,
-    [{ v: "chat", name: "聊天" }, { v: "ui", name: "界面" }, { v: "name", name: "昵称" }, { v: "meta", name: "小字" }, { v: "ai", name: "他的文字" }],
+    [
+      { v: "chat", name: "聊天" },
+      { v: "ui", name: "界面" },
+      { v: "name", name: "昵称" },
+      { v: "meta", name: "小字" },
+      { v: "ai", name: "他的文字" }
+    ],
     () => typoScope,
-    (v) => { typoScope = v; buildThemePanel(); }
+    (v) => {
+      typoScope = v;
+      buildThemePanel();
+    }
   );
 
   const box = el("div", "");
   sec.appendChild(box);
+
   const rM = () => renderMessages();
-  const rT = () => { applyChatTypo(); renderMessages(); };
+  const rT = () => {
+    applyChatTypo();
+    renderMessages();
+  };
 
   if (typoScope === "chat") {
     mkFontSelect(box, "聊天字体", "chatFont", applyTheme);
@@ -2512,13 +2997,15 @@ function buildThemePanel() {
     mkSlider(box, "行高", 1.3, 2.2, 0.05, "chatLineH", "", rT);
     mkSlider(box, "粗细", 300, 700, 50, "chatWeight", "", rT);
   }
-     if (typoScope === "ui") {
+
+  if (typoScope === "ui") {
     mkFontSelect(box, "界面字体", "uiFont", applyTheme);
     mkSlider(box, "大小", 10, 18, 1, "uiFs", "px", rT);
     mkSlider(box, "字间距", -1, 3, 0.1, "uiSpacing", "px", rT);
     mkSlider(box, "行高", 1.2, 2.2, 0.05, "uiLineH", "", rT);
     mkSlider(box, "粗细", 300, 700, 50, "uiWeight", "", rT);
   }
+
   if (typoScope === "name") {
     mkFontSelect(box, "昵称字体", "nameFont", rM);
     mkSlider(box, "大小", 8, 16, 1, "nameSize", "px", rM);
@@ -2531,18 +3018,29 @@ function buildThemePanel() {
     mkSlider(box, "粗细", 200, 700, 50, "metaWeight", "", rM);
     mkSlider(box, "深浅（越小越黑）", 80, 210, 5, "metaShade", "", rM);
   }
+
   if (typoScope === "ai") {
-    const sw = el("button", "seg-btn", state.settings.aiTypoOn? "已开启，他自己穿衣服" : "关闭中，跟你穿一样的");
+    const sw = el(
+      "button",
+      "seg-btn",
+      state.settings.aiTypoOn
+        ? "已开启，他自己穿衣服"
+        : "关闭中，跟你穿一样的"
+    );
+
     sw.classList.toggle("on", state.settings.aiTypoOn);
     sw.style.cssText = "width:100%;margin-bottom:8px;";
+
     sw.onclick = () => {
-      state.settings.aiTypoOn =!state.settings.aiTypoOn;
+      state.settings.aiTypoOn = !state.settings.aiTypoOn;
       saveState();
       applyChatTypo();
       renderMessages();
       buildThemePanel();
     };
+
     box.appendChild(sw);
+
     if (state.settings.aiTypoOn) {
       mkFontSelect(box, "他的字体", "aiFont2", rT);
       mkSlider(box, "他的字号", 6, 30, 1, "aiSize2", "px", rT);
@@ -2553,22 +3051,33 @@ function buildThemePanel() {
   }
 
   sec.appendChild(el("label", "form-label", "文字选中（开着时长按菜单挂在头像上）"));
-  const sw2 = el("button", "seg-btn", state.settings.selectOn? "长按气泡可选中复制：开" : "文字选中：关");
+
+  const sw2 = el(
+    "button",
+    "seg-btn",
+    state.settings.selectOn
+      ? "长按气泡可选中复制：开"
+      : "文字选中：关"
+  );
+
   sw2.classList.toggle("on", state.settings.selectOn);
   sw2.style.cssText = "width:100%;";
+
   sw2.onclick = () => {
-    state.settings.selectOn =!state.settings.selectOn;
+    state.settings.selectOn = !state.settings.selectOn;
     saveState();
     applyChatTypo();
     renderMessages();
     buildThemePanel();
   };
+
   sec.appendChild(sw2);
 
   /* 记忆手册 */
   sec = mkSection(body, "记忆手册（卡片和按钮分开调色）");
   mkColorArea(sec, "卡片颜色", "memHue", "memSat", "memLight", "memAlpha", () => {});
   mkColorArea(sec, "按钮颜色", "memBtnHue", "memBtnSat", "memBtnLight", "memBtnAlpha", () => {});
+
   const memTip = el("div", "", "调完打开记忆手册就能看到效果");
   memTip.style.cssText = "font-size:11px;color:var(--text-faint);margin-top:2px;";
   sec.appendChild(memTip);
@@ -2579,41 +3088,62 @@ const DAYS_THEMES = {
   cream: {
     name: "奶油白",
     pageBg: "linear-gradient(180deg,#FFF9F2,#FFEEE8)",
-    inkMain: "#5a4a42", inkSub: "#b39a90", accent: "#E8A79B", cardInk: "#6b5248"
+    inkMain: "#5a4a42",
+    inkSub: "#b39a90",
+    accent: "#E8A79B",
+    cardInk: "#6b5248"
   },
   mist: {
     name: "雾蓝",
     pageBg: "linear-gradient(180deg,#F4F8FB,#E3ECF4)",
-    inkMain: "#3e4c5a", inkSub: "#8fa3b5", accent: "#7C9CBB", cardInk: "#46586a"
+    inkMain: "#3e4c5a",
+    inkSub: "#8fa3b5",
+    accent: "#7C9CBB",
+    cardInk: "#46586a"
   },
   sakura: {
     name: "樱粉",
     pageBg: "linear-gradient(180deg,#FFF5F8,#FFE4EE)",
-    inkMain: "#6b4652", inkSub: "#c99aab", accent: "#E88BA8", cardInk: "#7a5260"
+    inkMain: "#6b4652",
+    inkSub: "#c99aab",
+    accent: "#E88BA8",
+    cardInk: "#7a5260"
   },
   ink: {
     name: "墨夜",
     pageBg: "linear-gradient(180deg,#2b2530,#201d24)",
-    inkMain: "#f0e9e4", inkSub: "#9a8f96", accent: "#D4A954", cardInk: "#e5ddd5"
+    inkMain: "#f0e9e4",
+    inkSub: "#9a8f96",
+    accent: "#D4A954",
+    cardInk: "#e5ddd5"
   },
   mono: {
     name: "黑白灰",
     pageBg: "linear-gradient(180deg,#fafafa,#ececec)",
-    inkMain: "#2a2a2a", inkSub: "#9a9a9a", accent: "#555555", cardInk: "#3a3a3a"
+    inkMain: "#2a2a2a",
+    inkSub: "#9a9a9a",
+    accent: "#555555",
+    cardInk: "#3a3a3a"
   },
   sky: {
     name: "天蓝",
     pageBg: "linear-gradient(180deg,#EFF7FE,#DCEEFB)",
-    inkMain: "#2d4a63", inkSub: "#7fa8c9", accent: "#5B9BD5", cardInk: "#3a5a75"
+    inkMain: "#2d4a63",
+    inkSub: "#7fa8c9",
+    accent: "#5B9BD5",
+    cardInk: "#3a5a75"
   },
   liquid: {
     name: "液态玻璃",
     pageBg: "radial-gradient(circle at 20% 15%, rgba(255,200,180,0.55), transparent 42%), radial-gradient(circle at 80% 25%, rgba(170,200,255,0.5), transparent 45%), radial-gradient(circle at 50% 80%, rgba(200,235,210,0.45), transparent 50%), linear-gradient(180deg,#f4f5f7,#e9ecef)",
-    inkMain: "#2e3338", inkSub: "#8a9299", accent: "#6b7d8f", cardInk: "#2e3338"
+    inkMain: "#2e3338",
+    inkSub: "#8a9299",
+    accent: "#6b7d8f",
+    cardInk: "#2e3338"
   }
 };
 
-/* 当前主题的墨色:5号,房间按钮统一吃这个 */
+/* 当前主题的墨色 */
 function daysT() {
   return DAYS_THEMES[state.settings.daysTheme] || DAYS_THEMES.cream;
 }
@@ -2636,50 +3166,102 @@ const HOME_APPS = [
 
 function appGlyph(k, ink) {
   const s = 'fill="none" stroke="' + ink + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+
   const G = {
-    mood: '<circle cx="14" cy="14" r="9" ' + s + '/><path d="M10.5 16 q3.5 3 7 0" ' + s + '/><circle cx="11" cy="12" r="0.6" fill="' + ink + '"/><circle cx="17" cy="12" r="0.6" fill="' + ink + '"/>',
-    letter: '<rect x="5" y="8" width="18" height="13" rx="2.5" ' + s + '/><path d="M5.5 9.5 L14 16 L22.5 9.5" ' + s + '/><path d="M12 5.5 q2-2.5 4 0" ' + s + '/>',
-    diary: '<path d="M17 4 a8 8 0 1 0 7 11 a6.5 6.5 0 0 1 -7 -11" ' + s + '/><circle cx="21.5" cy="7" r="0.7" fill="' + ink + '"/>',
-    qa: '<rect x="7" y="12" width="14" height="10" rx="2.5" ' + s + '/><path d="M10 12 v-3 a4 4 0 0 1 8 0 v3" ' + s + '/><circle cx="14" cy="17" r="1" fill="' + ink + '"/>',
-    beautify: '<path d="M14 4.5 c-6 5 -8 9 -8 12.5 a8 8 0 0 0 16 0 c0-3.5 -2-7.5 -8-12.5" ' + s + '/><path d="M11 17 a3 3 0 0 0 3 3" ' + s + '/>',
-    couple: '<circle cx="11" cy="12" r="5.5" ' + s + '/><circle cx="17.5" cy="16" r="5.5" ' + s + '/>'
+    mood:
+      '<circle cx="14" cy="14" r="9" ' + s + '/>' +
+      '<path d="M10.5 16 q3.5 3 7 0" ' + s + '/>' +
+      '<circle cx="11" cy="12" r="0.6" fill="' + ink + '"/>' +
+      '<circle cx="17" cy="12" r="0.6" fill="' + ink + '"/>',
+
+    letter:
+      '<rect x="5" y="8" width="18" height="13" rx="2.5" ' + s + '/>' +
+      '<path d="M5.5 9.5 L14 16 L22.5 9.5" ' + s + '/>' +
+      '<path d="M12 5.5 q2-2.5 4 0" ' + s + '/>',
+
+    diary:
+      '<path d="M17 4 a8 8 0 1 0 7 11 a6.5 6.5 0 0 1 -7 -11" ' + s + '/>' +
+      '<circle cx="21.5" cy="7" r="0.7" fill="' + ink + '"/>',
+
+    qa:
+      '<rect x="7" y="12" width="14" height="10" rx="2.5" ' + s + '/>' +
+      '<path d="M10 12 v-3 a4 4 0 0 1 8 0 v3" ' + s + '/>' +
+      '<circle cx="14" cy="17" r="1" fill="' + ink + '"/>',
+
+    beautify:
+      '<path d="M14 4.5 c-6 5 -8 9 -8 12.5 a8 8 0 0 0 16 0 c0-3.5 -2-7.5 -8-12.5" ' + s + '/>' +
+      '<path d="M11 17 a3 3 0 0 0 3 3" ' + s + '/>',
+
+    couple:
+      '<circle cx="11" cy="12" r="5.5" ' + s + '/>' +
+      '<circle cx="17.5" cy="16" r="5.5" ' + s + '/>'
   };
-  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" width="30" height="30">' + (G[k] || G.mood) + "</svg>";
+
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" width="30" height="30">' +
+    (G[k] || G.mood) +
+    "</svg>";
 }
 
 /* ---------- 图标底座 ---------- */
 function iconFaceBase(T) {
   const st = state.settings;
   const face = el("div", "app-icon-face");
-  face.style.borderRadius = st.iconRound === "circle"? "50%" : "26%";
+
+  face.style.borderRadius = st.iconRound === "circle"
+    ? "50%"
+    : "26%";
+
   let bg;
+
   if (st.iconHue < 0) {
-    bg = "rgba(255,255,255," + ((st.iconAlpha / 100) * 0.55).toFixed(2) + ")";
+    bg = "rgba(255,255,255," +
+      ((st.iconAlpha / 100) * 0.55).toFixed(2) +
+      ")";
   } else {
-    bg = hslaOf(st.iconHue, st.iconSat, st.iconLight, st.iconAlpha);
+    bg = hslaOf(
+      st.iconHue,
+      st.iconSat,
+      st.iconLight,
+      st.iconAlpha
+    );
   }
+
   face.style.background = bg;
   face.style.backdropFilter = "blur(14px) saturate(1.4)";
   face.style.webkitBackdropFilter = "blur(14px) saturate(1.4)";
+
   const g = (st.iconGlow || 0) / 100;
-  face.style.boxShadow = "inset 0 1px 1.5px rgba(255,255,255,0.65), 0 4px " + Math.round(10 + 10 * g) + "px rgba(0,0,0," + (0.08 + 0.1 * g).toFixed(2) + ")";
+  face.style.boxShadow =
+    "inset 0 1px 1.5px rgba(255,255,255,0.65), 0 4px " +
+    Math.round(10 + 10 * g) +
+    "px rgba(0,0,0," +
+    (0.08 + 0.1 * g).toFixed(2) +
+    ")";
+
   return face;
 }
 
 async function buildIconFace(app, T) {
   const face = iconFaceBase(T);
   const blob = await getImg("icon_" + app.k);
+
   if (blob) {
     const key = "icon_" + app.k;
-    if (!urlCache[key]) urlCache[key] = URL.createObjectURL(blob);
+
+    if (!urlCache[key]) {
+      urlCache[key] = URL.createObjectURL(blob);
+    }
+
     face.style.background = "none";
     face.style.backdropFilter = "";
     face.style.webkitBackdropFilter = "";
+
     const img = document.createElement("img");
     img.src = urlCache[key];
     face.appendChild(img);
     return face;
   }
+
   face.innerHTML = appGlyph(app.k, T.cardInk);
   return face;
 }
@@ -2687,23 +3269,31 @@ async function buildIconFace(app, T) {
 /* ---------- 文字占位标 ---------- */
 async function buildSlotApp(which, T, ink) {
   const key = "slot_" + which;
-  const nameKey = which === "A"? "slotNameA" : "slotNameB";
+  const nameKey = which === "A"
+    ? "slotNameA"
+    : "slotNameB";
+
   const node = el("div", "grid-app");
   const face = iconFaceBase(T);
-
   const blob = await getImg(key);
+
   if (blob) {
-    if (!urlCache[key]) urlCache[key] = URL.createObjectURL(blob);
+    if (!urlCache[key]) {
+      urlCache[key] = URL.createObjectURL(blob);
+    }
+
     face.style.background = "none";
     face.style.backdropFilter = "";
     face.style.webkitBackdropFilter = "";
+
     const img = document.createElement("img");
     img.src = urlCache[key];
     face.appendChild(img);
   }
 
   const lab = el("div", "app-icon-label", state.home[nameKey]);
-  lab.style.color = "#5a4a42";
+  lab.style.color = "#1a1a1a";
+  lab.style.fontSize = (state.settings.appLabelFs || 11) + "px";
 
   node.appendChild(face);
   node.appendChild(lab);
@@ -2712,61 +3302,112 @@ async function buildSlotApp(which, T, ink) {
   file.type = "file";
   file.accept = "image/*";
   file.style.display = "none";
+
   file.onchange = async (e) => {
     const f = e.target.files[0];
     if (!f) return;
+
     await putImg(key, f);
-    if (urlCache[key]) { URL.revokeObjectURL(urlCache[key]); delete urlCache[key]; }
+
+    if (urlCache[key]) {
+      URL.revokeObjectURL(urlCache[key]);
+      delete urlCache[key];
+    }
+
     e.target.value = "";
     buildDaysPanel();
   };
+
   node.appendChild(file);
 
   node.onclick = (e) => {
     showActions([
-      { label: "改名字", fn: () => inputDialog("这个标叫什么", state.home[nameKey], v => {
-          if (v.trim()) { state.home[nameKey] = v.trim().slice(0, 6); saveState(); buildDaysPanel(); }
-        }) },
-      { label: blob? "换图" : "传图", fn: () => file.click() },
-      { label: "移除图", danger: true, fn: async () => {
+      {
+        label: "改名字",
+        fn: () => inputDialog(
+          "这个标叫什么",
+          state.home[nameKey],
+          v => {
+            if (v.trim()) {
+              state.home[nameKey] = v.trim().slice(0, 6);
+              saveState();
+              buildDaysPanel();
+            }
+          }
+        )
+      },
+      {
+        label: blob ? "换图" : "传图",
+        fn: () => file.click()
+      },
+      {
+        label: "移除图",
+        danger: true,
+        fn: async () => {
           await delImg(key);
-          if (urlCache[key]) { URL.revokeObjectURL(urlCache[key]); delete urlCache[key]; }
+
+          if (urlCache[key]) {
+            URL.revokeObjectURL(urlCache[key]);
+            delete urlCache[key];
+          }
+
           buildDaysPanel();
-        } }
+        }
+      }
     ], e.clientX, e.clientY);
   };
+
   return node;
 }
 
-/* ---------- 2x2大组件:3号,胶囊摘了,素字浮图上,保留换行 ---------- */
+/* ---------- 2x2大组件 ---------- */
 async function buildWidget(which, cardBg, cardBlur, ink) {
   const key = "widget_" + which;
-  const textKey = which === "L"? "widgetLText" : "widgetRText";
+  const textKey = which === "L"
+    ? "widgetLText"
+    : "widgetRText";
+
   const w = el("div", "widget-2x2");
+
   w.style.background = cardBg;
+
   if (cardBlur) {
     w.style.backdropFilter = cardBlur;
     w.style.webkitBackdropFilter = cardBlur;
   }
-  w.style.boxShadow = "inset 0 1px 1px rgba(255,255,255,0.5), 0 4px 14px rgba(0,0,0,0.07)";
+
+  w.style.boxShadow =
+    "inset 0 1px 1px rgba(255,255,255,0.5), 0 4px 14px rgba(0,0,0,0.07)";
+
+  /* 两个2×2组件固定为同宽正方形 */
+  w.style.flex = "0 0 calc(50% - 6px)";
+  w.style.width = "calc(50% - 6px)";
+  w.style.maxWidth = "calc(50% - 6px)";
+  w.style.aspectRatio = "1 / 1";
+  w.style.height = "auto";
 
   const blob = await getImg(key);
+
   if (blob) {
-    if (!urlCache[key]) urlCache[key] = URL.createObjectURL(blob);
+    if (!urlCache[key]) {
+      urlCache[key] = URL.createObjectURL(blob);
+    }
+
     const img = document.createElement("img");
     img.src = urlCache[key];
     w.appendChild(img);
   }
 
   const txt = state.home[textKey];
+
   if (txt) {
     const lab = el("div", "widget-label", txt);
-    /* 素字直接浮图上,细阴影保证任何图上都读得清 */
     lab.style.background = "none";
-    lab.style.color = "#5a4a42";
+    lab.style.color = "#1a1a1a";
     lab.style.textShadow = "none";
+    lab.style.fontSize = (state.settings.widgetFs || 14) + "px";
+    lab.style.fontWeight = "600";
     lab.style.marginBottom = "10px";
-
     w.appendChild(lab);
   }
 
@@ -2774,31 +3415,63 @@ async function buildWidget(which, cardBg, cardBlur, ink) {
   file.type = "file";
   file.accept = "image/*";
   file.style.display = "none";
+
   file.onchange = async (e) => {
     const f = e.target.files[0];
     if (!f) return;
+
     await putImg(key, f);
-    if (urlCache[key]) { URL.revokeObjectURL(urlCache[key]); delete urlCache[key]; }
+
+    if (urlCache[key]) {
+      URL.revokeObjectURL(urlCache[key]);
+      delete urlCache[key];
+    }
+
     e.target.value = "";
     buildDaysPanel();
   };
+
   w.appendChild(file);
 
   w.onclick = (e) => {
     showActions([
-      { label: blob? "换图" : "传图", fn: () => file.click() },
-      { label: "写文字", fn: () => inputDialog("组件上的文字（可换行排版，留空则不显示）", state.home[textKey], v => {
-          state.home[textKey] = v.replace(/\s+$/, "").slice(0, 100);
-          saveState();
-          buildDaysPanel();
-        }, true) },
-      { label: "移除图", danger: true, fn: async () => {
+      {
+        label: blob ? "换图" : "传图",
+        fn: () => file.click()
+      },
+      {
+        label: "写文字",
+        fn: () => inputDialog(
+          "组件上的文字（可换行排版，留空则不显示）",
+          state.home[textKey],
+          v => {
+            state.home[textKey] = v
+              .replace(/\s+$/, "")
+              .slice(0, 100);
+
+            saveState();
+            buildDaysPanel();
+          },
+          true
+        )
+      },
+      {
+        label: "移除图",
+        danger: true,
+        fn: async () => {
           await delImg(key);
-          if (urlCache[key]) { URL.revokeObjectURL(urlCache[key]); delete urlCache[key]; }
+
+          if (urlCache[key]) {
+            URL.revokeObjectURL(urlCache[key]);
+            delete urlCache[key];
+          }
+
           buildDaysPanel();
-        } }
+        }
+      }
     ], e.clientX, e.clientY);
   };
+
   return w;
 }
 
@@ -2808,11 +3481,15 @@ async function buildGridApp(k, T, ink) {
   const node = el("div", "grid-app");
   const face = await buildIconFace(app, T);
   const lab = el("div", "app-icon-label", app.label);
-  lab.style.color = "#5a4a42";
+
+  lab.style.color = "#1a1a1a";
+  lab.style.fontSize = (state.settings.appLabelFs || 11) + "px";
 
   node.appendChild(face);
   node.appendChild(lab);
+
   node.onclick = () => openHomeRoom(k);
+
   return node;
 }
 
@@ -2821,8 +3498,12 @@ async function buildDockSlot(i) {
   const slot = el("div", "dock-slot");
   const key = "dock_" + i;
   const blob = await getImg(key);
+
   if (blob) {
-    if (!urlCache[key]) urlCache[key] = URL.createObjectURL(blob);
+    if (!urlCache[key]) {
+      urlCache[key] = URL.createObjectURL(blob);
+    }
+
     const img = document.createElement("img");
     img.src = urlCache[key];
     slot.appendChild(img);
@@ -2834,31 +3515,52 @@ async function buildDockSlot(i) {
   file.type = "file";
   file.accept = "image/*";
   file.style.display = "none";
+
   file.onchange = async (e) => {
     const f = e.target.files[0];
     if (!f) return;
+
     await putImg(key, f);
-    if (urlCache[key]) { URL.revokeObjectURL(urlCache[key]); delete urlCache[key]; }
+
+    if (urlCache[key]) {
+      URL.revokeObjectURL(urlCache[key]);
+      delete urlCache[key];
+    }
+
     e.target.value = "";
     toast("装进Dock了");
     buildDaysPanel();
   };
+
   slot.appendChild(file);
 
   slot.onclick = (e) => {
     if (blob) {
       showActions([
-        { label: "换图", fn: () => file.click() },
-        { label: "移除", danger: true, fn: async () => {
+        {
+          label: "换图",
+          fn: () => file.click()
+        },
+        {
+          label: "移除",
+          danger: true,
+          fn: async () => {
             await delImg(key);
-            if (urlCache[key]) { URL.revokeObjectURL(urlCache[key]); delete urlCache[key]; }
+
+            if (urlCache[key]) {
+              URL.revokeObjectURL(urlCache[key]);
+              delete urlCache[key];
+            }
+
             buildDaysPanel();
-          } }
+          }
+        }
       ], e.clientX, e.clientY);
     } else {
       file.click();
     }
   };
+
   return slot;
 }
 
@@ -2866,6 +3568,7 @@ async function buildDockSlot(i) {
 async function buildDaysPanel() {
   const panel = $("#days-panel");
   panel.innerHTML = "";
+
   const st = state.settings;
   const T = daysT();
   const isLiquid = st.daysTheme === "liquid";
@@ -2873,189 +3576,391 @@ async function buildDaysPanel() {
   panel.style.background = T.pageBg;
   panel.style.backgroundSize = "cover";
   panel.style.backgroundPosition = "center";
-  /* 3号:面板自己不留任何内边距,壁纸通顶通底 */
   panel.style.padding = "0";
 
   let cardBg = "rgba(255,255,255,0.45)";
   let cardBlur = "";
+
   if (isLiquid) {
     const blob = await getImg("days_wallpaper");
+
     if (blob) {
-      if (!urlCache.days_wp) urlCache.days_wp = URL.createObjectURL(blob);
-      panel.style.backgroundImage = "url(" + urlCache.days_wp + ")";
+      if (!urlCache.days_wp) {
+        urlCache.days_wp = URL.createObjectURL(blob);
+      }
+
+      panel.style.backgroundImage =
+        "url(" + urlCache.days_wp + ")";
     }
+
     const a = (st.daysGlassAlpha || 55) / 100;
+
     if (st.daysGlassMode === "clear") {
-      cardBg = "rgba(255,255,255," + (a * 0.28).toFixed(2) + ")";
+      cardBg =
+        "rgba(255,255,255," +
+        (a * 0.28).toFixed(2) +
+        ")";
+
       cardBlur = "blur(3px) saturate(1.8)";
     } else {
-      cardBg = "rgba(255,255,255," + (a * 0.75).toFixed(2) + ")";
+      cardBg =
+        "rgba(255,255,255," +
+        (a * 0.75).toFixed(2) +
+        ")";
+
       cardBlur = "blur(18px) saturate(1.5)";
     }
   }
 
-  /* 3号:标题栏无底漆无边线,悬浮在壁纸上 */
   const header = el("div", "panel-header");
-  header.style.cssText = "background:transparent;border-bottom:none;box-shadow:none;padding-top:calc(10px + env(safe-area-inset-top));";
+  header.style.cssText =
+    "background:transparent;border-bottom:none;box-shadow:none;padding-top:calc(10px + env(safe-area-inset-top));";
+
   const back = el("button", "topbar-btn", "‹");
   back.style.color = T.inkMain;
   back.onclick = () => closePanel("#days-panel");
   header.appendChild(back);
+
   const pt = el("div", "panel-title", "我们的小家");
-  pt.style.color = T.inkMain;
+  pt.style.color = "#5a4a42";
   header.appendChild(pt);
-  /* 3号:日期加大一号 */
+
   const datePill = el("div", "", todayPretty());
-    datePill.style.cssText = "margin-left:auto;margin-right:11px;transform:translateY(11px);font-size:" + (st.daysDateSize || 12) + "px;letter-spacing:0.5px;color:#b39a90;";
+  datePill.style.cssText =
+    "margin-left:auto;" +
+    "margin-right:11px;" +
+    "transform:translateY(11px);" +
+    "font-size:" + (st.daysDateSize || 12) + "px;" +
+    "letter-spacing:0.5px;" +
+    "color:#5a4a42;";
 
   header.appendChild(datePill);
   panel.appendChild(header);
 
   const scroll = el("div", "");
-  scroll.style.cssText = "flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;";
+  scroll.style.cssText =
+    "flex:1;" +
+    "overflow-y:auto;" +
+    "-webkit-overflow-scrolling:touch;" +
+    "padding-bottom:4px;";
+
   panel.appendChild(scroll);
 
   /* 顶部横跨大组件 */
   const hero = el("div", "home-hero-card");
   hero.style.background = cardBg;
+
   if (cardBlur) {
     hero.style.backdropFilter = cardBlur;
     hero.style.webkitBackdropFilter = cardBlur;
   }
-  hero.style.boxShadow = "inset 0 1px 1px rgba(255,255,255,0.5), 0 4px 14px rgba(0,0,0,0.06)";
+
+  hero.style.boxShadow =
+    "inset 0 1px 1px rgba(255,255,255,0.5), 0 4px 14px rgba(0,0,0,0.06)";
+
   const heroBlob = await getImg("widget_hero");
+
   if (heroBlob) {
-    if (!urlCache.widget_hero) urlCache.widget_hero = URL.createObjectURL(heroBlob);
+    if (!urlCache.widget_hero) {
+      urlCache.widget_hero =
+        URL.createObjectURL(heroBlob);
+    }
+
     const hbg = document.createElement("img");
     hbg.src = urlCache.widget_hero;
-    hbg.style.cssText = "position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;";
+    hbg.style.cssText =
+      "position:absolute;" +
+      "inset:0;" +
+      "width:100%;" +
+      "height:100%;" +
+      "object-fit:cover;" +
+      "z-index:0;";
+
     hero.appendChild(hbg);
   }
+
   const hIn = el("div", "");
-  hIn.style.cssText = "position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;";
+  hIn.style.cssText =
+    "position:relative;" +
+    "z-index:1;" +
+    "display:flex;" +
+    "flex-direction:column;" +
+    "align-items:center;";
+
   const lb = el("div", "", "我 们 在 一 起");
-  lb.style.cssText = "font-size:13px;letter-spacing:4px;color:" + T.inkSub + ";margin-bottom:6px;";
+  lb.style.cssText =
+    "font-size:13px;" +
+    "letter-spacing:4px;" +
+    "color:#5a4a42;" +
+    "margin-bottom:6px;";
+
   const num = el("div", "", String(loveDays()));
-  num.style.cssText = "font-size:" + st.daysNumSize + "px;font-weight:600;line-height:1.1;color:" + daysNumColor(T) + ";";
-  num.style.fontFamily = FONT_LIST[st.daysFont] || FONT_LIST.georgia2;
+  num.style.cssText =
+    "font-size:" + st.daysNumSize + "px;" +
+    "font-weight:600;" +
+    "line-height:1.1;" +
+    "color:" + daysNumColor(T) + ";";
+
+  num.style.fontFamily =
+    FONT_LIST[st.daysFont] ||
+    FONT_LIST.georgia2;
+
   const unit = el("div", "", "天");
-  unit.style.cssText = "font-size:13px;color:" + T.inkSub + ";margin-top:3px;";
+  unit.style.cssText =
+    "font-size:13px;" +
+    "color:#5a4a42;" +
+    "margin-top:3px;";
+
   const heart = el("div", "", "· " + HEART + " ·");
-  heart.style.cssText = "font-size:12px;color:" + T.accent + ";margin-top:8px;";
+  heart.style.cssText =
+    "font-size:12px;" +
+    "color:" + T.accent + ";" +
+    "margin-top:8px;";
+
   const dt = el("div", "", "自 2026.06.07 起");
-  dt.style.cssText = "font-size:10px;color:" + T.inkSub + ";margin-top:4px;letter-spacing:1px;";
+  dt.style.cssText =
+    "font-size:10px;" +
+    "color:#5a4a42;" +
+    "margin-top:4px;" +
+    "letter-spacing:1px;";
+
   hIn.appendChild(lb);
   hIn.appendChild(num);
   hIn.appendChild(unit);
   hIn.appendChild(heart);
   hIn.appendChild(dt);
   hero.appendChild(hIn);
+
   hero.onclick = (e) => {
     showActions([
-      { label: heroBlob? "换背景图" : "传背景图", fn: () => {
+      {
+        label: heroBlob
+          ? "换背景图"
+          : "传背景图",
+
+        fn: () => {
           const f = document.createElement("input");
           f.type = "file";
           f.accept = "image/*";
+
           f.onchange = async (ev) => {
             const fl = ev.target.files[0];
             if (!fl) return;
+
             await putImg("widget_hero", fl);
-            if (urlCache.widget_hero) { URL.revokeObjectURL(urlCache.widget_hero); delete urlCache.widget_hero; }
+
+            if (urlCache.widget_hero) {
+              URL.revokeObjectURL(urlCache.widget_hero);
+              delete urlCache.widget_hero;
+            }
+
             buildDaysPanel();
           };
+
           f.click();
-        } },
-      { label: "移除背景图", danger: true, fn: async () => {
+        }
+      },
+      {
+        label: "移除背景图",
+        danger: true,
+
+        fn: async () => {
           await delImg("widget_hero");
-          if (urlCache.widget_hero) { URL.revokeObjectURL(urlCache.widget_hero); delete urlCache.widget_hero; }
+
+          if (urlCache.widget_hero) {
+            URL.revokeObjectURL(urlCache.widget_hero);
+            delete urlCache.widget_hero;
+          }
+
           buildDaysPanel();
-        } }
+        }
+      }
     ], e.clientX, e.clientY);
   };
+
   scroll.appendChild(hero);
 
-  const cap = el("div", "home-caption", "这里是我们攒起来的日子");
-  cap.style.color = "#b39a90";
+  const cap = el(
+    "div",
+    "home-caption",
+    "这里是我们攒起来的日子"
+  );
+
+  cap.style.color = "#5a4a42";
   scroll.appendChild(cap);
 
   /* 第二区 */
   const row2 = el("div", "home-grid-row");
-  row2.appendChild(await buildWidget("L", cardBg, cardBlur, T.inkMain));
+
+  row2.appendChild(
+    await buildWidget(
+      "L",
+      cardBg,
+      cardBlur,
+      T.inkMain
+    )
+  );
+
   const quad1 = el("div", "icon-quad");
-  quad1.appendChild(await buildSlotApp("A", T, T.inkMain));
-  quad1.appendChild(await buildSlotApp("B", T, T.inkMain));
-  quad1.appendChild(await buildGridApp("letter", T, T.inkMain));
-  quad1.appendChild(await buildGridApp("diary", T, T.inkMain));
+
+  quad1.appendChild(
+    await buildSlotApp("A", T, T.inkMain)
+  );
+
+  quad1.appendChild(
+    await buildSlotApp("B", T, T.inkMain)
+  );
+
+  quad1.appendChild(
+    await buildGridApp("letter", T, T.inkMain)
+  );
+
+  quad1.appendChild(
+    await buildGridApp("diary", T, T.inkMain)
+  );
+
   row2.appendChild(quad1);
   scroll.appendChild(row2);
 
   /* 第三区 */
   const row3 = el("div", "home-grid-row");
   const quad2 = el("div", "icon-quad");
-  quad2.appendChild(await buildGridApp("mood", T, T.inkMain));
-  quad2.appendChild(await buildGridApp("beautify", T, T.inkMain));
-  quad2.appendChild(await buildGridApp("qa", T, T.inkMain));
-  quad2.appendChild(await buildGridApp("couple", T, T.inkMain));
+
+  quad2.appendChild(
+    await buildGridApp("mood", T, T.inkMain)
+  );
+
+  quad2.appendChild(
+    await buildGridApp("beautify", T, T.inkMain)
+  );
+
+  quad2.appendChild(
+    await buildGridApp("qa", T, T.inkMain)
+  );
+
+  quad2.appendChild(
+    await buildGridApp("couple", T, T.inkMain)
+  );
+
   row3.appendChild(quad2);
-  row3.appendChild(await buildWidget("R", cardBg, cardBlur, T.inkMain));
+
+  row3.appendChild(
+    await buildWidget(
+      "R",
+      cardBg,
+      cardBlur,
+      T.inkMain
+    )
+  );
+
   scroll.appendChild(row3);
 
   /* 装饰组件 */
   if (state.home.decoBlocks.length) {
     const deco = el("div", "deco-blocks");
     deco.style.padding = "0 18px 10px";
+
     for (const d of state.home.decoBlocks) {
       const b = el("div", "deco-block");
+
       if (d.shape === "rect") {
         b.classList.add("rect-wide");
       } else {
-        b.style.borderRadius = d.shape === "circle"? "50%" : "24%";
+        b.style.borderRadius =
+          d.shape === "circle"
+            ? "50%"
+            : "24%";
       }
+
       b.style.background = cardBg;
+
       if (cardBlur) {
         b.style.backdropFilter = cardBlur;
         b.style.webkitBackdropFilter = cardBlur;
       }
-      b.style.boxShadow = "inset 0 1px 1px rgba(255,255,255,0.5), 0 4px 12px rgba(0,0,0,0.07)";
+
+      b.style.boxShadow =
+        "inset 0 1px 1px rgba(255,255,255,0.5), 0 4px 12px rgba(0,0,0,0.07)";
+
       const blob = await getImg("deco_" + d.id);
+
       if (blob) {
         const key = "deco_" + d.id;
-        if (!urlCache[key]) urlCache[key] = URL.createObjectURL(blob);
+
+        if (!urlCache[key]) {
+          urlCache[key] =
+            URL.createObjectURL(blob);
+        }
+
         const img = document.createElement("img");
         img.src = urlCache[key];
         b.appendChild(img);
       }
+
       deco.appendChild(b);
     }
+
     scroll.appendChild(deco);
   }
 
-  /* Dock:3号,高度位置吃--dock-drop变量,拉条实时调
-     不再给安全区单独刷色,底部横带消失,Dock悬浮在壁纸上 */
+  /* Dock */
   const dock = el("div", "days-dock");
-  dock.style.marginBottom = "var(--dock-drop, 8px)";
+  dock.style.marginBottom =
+    "var(--dock-drop, 8px)";
+
   const da = (st.dockAlpha || 60) / 100;
+
   if (st.dockStyle === "clear") {
-    dock.style.background = "rgba(255,255,255," + (da * 0.25).toFixed(2) + ")";
-    dock.style.backdropFilter = "blur(4px) saturate(1.8)";
-    dock.style.webkitBackdropFilter = "blur(4px) saturate(1.8)";
-    dock.style.boxShadow = "inset 0 1px 1px rgba(255,255,255,0.6), 0 4px 16px rgba(0,0,0,0.06)";
+    dock.style.background =
+      "rgba(255,255,255," +
+      (da * 0.25).toFixed(2) +
+      ")";
+
+    dock.style.backdropFilter =
+      "blur(4px) saturate(1.8)";
+
+    dock.style.webkitBackdropFilter =
+      "blur(4px) saturate(1.8)";
+
+    dock.style.boxShadow =
+      "inset 0 1px 1px rgba(255,255,255,0.6), 0 4px 16px rgba(0,0,0,0.06)";
   } else {
-    dock.style.background = "rgba(255,255,255," + (da * 0.65).toFixed(2) + ")";
-    dock.style.backdropFilter = "blur(20px) saturate(1.5)";
-    dock.style.webkitBackdropFilter = "blur(20px) saturate(1.5)";
-    dock.style.boxShadow = "0 4px 18px rgba(0,0,0,0.08)";
+    dock.style.background =
+      "rgba(255,255,255," +
+      (da * 0.65).toFixed(2) +
+      ")";
+
+    dock.style.backdropFilter =
+      "blur(20px) saturate(1.5)";
+
+    dock.style.webkitBackdropFilter =
+      "blur(20px) saturate(1.5)";
+
+    dock.style.boxShadow =
+      "0 4px 18px rgba(0,0,0,0.08)";
   }
+
   const dockBlob = await getImg("dock_bg");
+
   if (dockBlob) {
-    if (!urlCache.dock_bg) urlCache.dock_bg = URL.createObjectURL(dockBlob);
+    if (!urlCache.dock_bg) {
+      urlCache.dock_bg =
+        URL.createObjectURL(dockBlob);
+    }
+
     const dbg = el("div", "days-dock-bg");
-    dbg.style.backgroundImage = "url(" + urlCache.dock_bg + ")";
+    dbg.style.backgroundImage =
+      "url(" + urlCache.dock_bg + ")";
+
     dock.appendChild(dbg);
   }
+
   for (let i = 0; i < 4; i++) {
-    dock.appendChild(await buildDockSlot(i));
+    dock.appendChild(
+      await buildDockSlot(i)
+    );
   }
+
   panel.appendChild(dock);
 }
 /* ==========================================
@@ -3192,7 +4097,14 @@ function clearBody(body) {
   return body;
 }
 
-const ROOM_TITLES = { mood: "心情", letter: "信封", diary: "小克日记", qa: "秘密", beautify: "美化", couple: "情侣空间" };
+const ROOM_TITLES = {
+  mood: "心情",
+  letter: "信封",
+  diary: "小克日记",
+  qa: "秘密",
+  beautify: "美化",
+  couple: "情侣空间"
+};
 
 async function openHomeRoom(k) {
   const panel = $("#days-panel");
@@ -3333,8 +4245,13 @@ function renderLetterRoom(body) {
     btn.textContent = "他正在写...";
     btn.disabled = true;
     const ok = await genLetter();
-    if (ok) { toast("信到了 💌"); reload(); }
-    else { btn.textContent = "收今天的信 ✉️"; btn.disabled = false; }
+    if (ok) {
+      toast("信到了 💌");
+      reload();
+    } else {
+      btn.textContent = "收今天的信 ✉️";
+      btn.disabled = false;
+    }
   };
   body.appendChild(btn);
 
@@ -3406,8 +4323,13 @@ function renderDiaryRoom(body) {
     btn.textContent = "他正躲着写...";
     btn.disabled = true;
     const ok = await genDiary();
-    if (ok) { toast("偷看成功 👀"); reload(); }
-    else { btn.textContent = "偷看他今天的日记 📓"; btn.disabled = false; }
+    if (ok) {
+      toast("偷看成功 👀");
+      reload();
+    } else {
+      btn.textContent = "偷看他今天的日记 📓";
+      btn.disabled = false;
+    }
   };
   body.appendChild(btn);
 
@@ -3598,7 +4520,10 @@ function renderBeautifyRoom(body) {
     mkSlider(body, "卡片透明度", 10, 90, 1, "daysGlassAlpha", "%", null);
     body.appendChild(el("label", "form-label", "相识页壁纸（传了壁纸玻璃才有东西可透）"));
     mkUpload(body, "上传壁纸", "days_wallpaper", () => {
-      if (urlCache.days_wp) { URL.revokeObjectURL(urlCache.days_wp); delete urlCache.days_wp; }
+      if (urlCache.days_wp) {
+        URL.revokeObjectURL(urlCache.days_wp);
+        delete urlCache.days_wp;
+      }
     }, "移除壁纸");
   }
 
@@ -3609,6 +4534,8 @@ function renderBeautifyRoom(body) {
   mkFontSelect(body, "数字字体", "daysFont", null);
   mkSlider(body, "数字大小", 30, 110, 1, "daysNumSize", "px", null);
   mkSlider(body, "日期文字大小", 8, 20, 1, "daysDateSize", "px", null);
+  mkSlider(body, "组件文字大小", 10, 22, 1, "widgetFs", "px", null);
+  mkSlider(body, "图标名字大小", 8, 16, 1, "appLabelFs", "px", null);
 
   body.appendChild(el("label", "form-label", "图标形状"));
   mkSeg(body,
@@ -3630,8 +4557,12 @@ function renderBeautifyRoom(body) {
   /* 3号:Dock高度位置拉条,0贴地40悬高,实时生效 */
   mkSlider(body, "Dock高度位置（0最贴底）", 0, 40, 1, "dockDrop", "px", applyLayout);
   mkUpload(body, "上传Dock背景图", "dock_bg", () => {
-    if (urlCache.dock_bg) { URL.revokeObjectURL(urlCache.dock_bg); delete urlCache.dock_bg; }
+    if (urlCache.dock_bg) {
+      URL.revokeObjectURL(urlCache.dock_bg);
+      delete urlCache.dock_bg;
+    }
   }, "移除Dock背景图");
+
   const dockTip = el("div", "", "Dock里的四个图标：回相识页直接点空位上传");
   dockTip.style.cssText = "font-size:11px;color:#aaa;margin:-4px 0 14px;";
   body.appendChild(dockTip);
@@ -3643,14 +4574,20 @@ function renderBeautifyRoom(body) {
     () => iconScope,
     (v) => { iconScope = v; reload(); }
   );
+
   const curApp = HOME_APPS.find(a => a.k === iconScope);
   const iTip = el("div", "", "正在装修：「" + curApp.label + "」的图标");
   iTip.style.cssText = "font-size:12px;color:#aaa;margin:4px 2px 10px;";
   body.appendChild(iTip);
+
   mkUpload(body, "上传「" + curApp.label + "」图标", "icon_" + curApp.k, () => {
     const key = "icon_" + curApp.k;
-    if (urlCache[key]) { URL.revokeObjectURL(urlCache[key]); delete urlCache[key]; }
+    if (urlCache[key]) {
+      URL.revokeObjectURL(urlCache[key]);
+      delete urlCache[key];
+    }
   }, "移除「" + curApp.label + "」图标");
+
   const sTip = el("div", "", "备忘录、相册和两个2×2组件：回相识页直接点它们本体，弹菜单里传图改字");
   sTip.style.cssText = "font-size:11px;color:#aaa;margin:-4px 0 14px;";
   body.appendChild(sTip);
@@ -3662,6 +4599,7 @@ function renderBeautifyRoom(body) {
     row.style.cssText = "display:flex;align-items:center;gap:10px;margin-bottom:8px;";
     const shapeName = d.shape === "circle"? "圆形块" : (d.shape === "rect"? "长条块" : "方圆块");
     row.appendChild(el("span", "", shapeName));
+
     const up = el("button", "seg-btn", "传图");
     const file = document.createElement("input");
     file.type = "file";
@@ -3672,11 +4610,15 @@ function renderBeautifyRoom(body) {
       if (!f) return;
       await putImg("deco_" + d.id, f);
       const key = "deco_" + d.id;
-      if (urlCache[key]) { URL.revokeObjectURL(urlCache[key]); delete urlCache[key]; }
+      if (urlCache[key]) {
+        URL.revokeObjectURL(urlCache[key]);
+        delete urlCache[key];
+      }
       toast("贴好了");
       e.target.value = "";
     };
     up.onclick = () => file.click();
+
     const del = el("button", "seg-btn", "删除");
     del.onclick = () => {
       delImg("deco_" + d.id);
@@ -3684,22 +4626,38 @@ function renderBeautifyRoom(body) {
       saveState();
       reload();
     };
+
     row.appendChild(up);
     row.appendChild(file);
     row.appendChild(del);
     body.appendChild(row);
   });
+
   const addC = el("button", "btn secondary", "＋ 加一个圆形块");
   addC.style.cssText = "width:100%;margin-bottom:8px;";
-  addC.onclick = () => { state.home.decoBlocks.push({ id: uid(), shape: "circle" }); saveState(); reload(); };
+  addC.onclick = () => {
+    state.home.decoBlocks.push({ id: uid(), shape: "circle" });
+    saveState();
+    reload();
+  };
   body.appendChild(addC);
+
   const addS = el("button", "btn secondary", "＋ 加一个方圆块");
   addS.style.cssText = "width:100%;margin-bottom:8px;";
-  addS.onclick = () => { state.home.decoBlocks.push({ id: uid(), shape: "squircle" }); saveState(); reload(); };
+  addS.onclick = () => {
+    state.home.decoBlocks.push({ id: uid(), shape: "squircle" });
+    saveState();
+    reload();
+  };
   body.appendChild(addS);
+
   const addR = el("button", "btn secondary", "＋ 加一个长条块（iOS小组件那种）");
   addR.style.cssText = "width:100%;";
-  addR.onclick = () => { state.home.decoBlocks.push({ id: uid(), shape: "rect" }); saveState(); reload(); };
+  addR.onclick = () => {
+    state.home.decoBlocks.push({ id: uid(), shape: "rect" });
+    saveState();
+    reload();
+  };
   body.appendChild(addR);
 }
 
@@ -3708,7 +4666,13 @@ async function aiFeedPost() {
   const sys = HOME_PERSONA + " 现在你在我们俩的私密朋友圈发一条动态，50字以内，像随手发的：可以是想她了、看到什么想起她、或者一点小情绪。别像写信，要像刷手机时随手发的。";
   const txt = await homeAsk(sys, homeMaterial() + " 发一条动态。");
   if (!txt) return false;
-  state.home.feed.push({ id: uid(), who: "ai", time: Date.now(), text: txt.trim(), comments: [] });
+  state.home.feed.push({
+    id: uid(),
+    who: "ai",
+    time: Date.now(),
+    text: txt.trim(),
+    comments: []
+  });
   state.home.lastFeedDay = todayKey();
   saveState();
   return true;
@@ -3718,7 +4682,11 @@ async function aiCommentOn(post) {
   const sys = HOME_PERSONA + " 她刚在我们的私密朋友圈发了动态：「" + post.text.slice(0, 100) + "」。你去评论一句，25字以内，像刷到恋人动态时的自然反应。";
   const txt = await homeAsk(sys, "评论她。");
   if (txt) {
-    post.comments.push({ who: "ai", text: txt.trim(), time: Date.now() });
+    post.comments.push({
+      who: "ai",
+      text: txt.trim(),
+      time: Date.now()
+    });
     saveState();
   }
 }
@@ -3727,7 +4695,11 @@ async function aiReplyComment(post, myComment) {
   const sys = HOME_PERSONA + " 你发的动态「" + post.text.slice(0, 80) + "」下面，她评论了：「" + myComment.slice(0, 80) + "」。你回她一句，25字以内。";
   const txt = await homeAsk(sys, "回她。");
   if (txt) {
-    post.comments.push({ who: "ai", text: txt.trim(), time: Date.now() });
+    post.comments.push({
+      who: "ai",
+      text: txt.trim(),
+      time: Date.now()
+    });
     saveState();
   }
 }
@@ -3739,19 +4711,24 @@ function renderCoupleRoom(body) {
 
   const compose = el("div", "feed-card");
   compose.style.background = "rgba(255,255,255,0.55)";
+
   const ta = document.createElement("textarea");
   ta.className = "form-textarea";
   ta.placeholder = "发条动态...";
   ta.style.minHeight = "60px";
   compose.appendChild(ta);
+
   const cRow = el("div", "");
   cRow.style.cssText = "display:flex;gap:8px;margin-top:8px;align-items:center;";
+
   let composeImg = null;
+
   const imgBtn = el("button", "seg-btn", "配图");
   const imgFile = document.createElement("input");
   imgFile.type = "file";
   imgFile.accept = "image/*";
   imgFile.style.display = "none";
+
   imgFile.onchange = async (e) => {
     const f = e.target.files[0];
     if (!f) return;
@@ -3759,18 +4736,33 @@ function renderCoupleRoom(body) {
     imgBtn.textContent = "已配图 ✓";
     e.target.value = "";
   };
+
   imgBtn.onclick = () => imgFile.click();
+
   const postBtn = el("button", "btn", "发布");
   postBtn.style.cssText = "background:" + c.bg + ";color:" + c.ink + ";border:none;";
   postBtn.onclick = async () => {
     const t = ta.value.trim();
-    if (!t &&!composeImg) { toast("写点什么吧"); return; }
-    const post = { id: uid(), who: "me", time: Date.now(), text: t, img: composeImg, comments: [] };
+    if (!t &&!composeImg) {
+      toast("写点什么吧");
+      return;
+    }
+
+    const post = {
+      id: uid(),
+      who: "me",
+      time: Date.now(),
+      text: t,
+      img: composeImg,
+      comments: []
+    };
+
     state.home.feed.push(post);
     saveState();
     reload();
     aiCommentOn(post).then(() => reload());
   };
+
   cRow.appendChild(imgBtn);
   cRow.appendChild(imgFile);
   cRow.appendChild(postBtn);
@@ -3779,16 +4771,26 @@ function renderCoupleRoom(body) {
 
   const opRow = el("div", "");
   opRow.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:10px;";
+
   const seeBtn = el("button", "btn secondary", "看看他有没有发新的");
   seeBtn.style.flex = "1";
   seeBtn.onclick = async () => {
-    if (state.home.lastFeedDay === todayKey()) { toast("他今天发过了，往下翻"); return; }
+    if (state.home.lastFeedDay === todayKey()) {
+      toast("他今天发过了，往下翻");
+      return;
+    }
     seeBtn.textContent = "翻他主页中...";
     seeBtn.disabled = true;
     const ok = await aiFeedPost();
-    if (ok) { praise("他发了新动态 👀"); reload(); }
-    else { seeBtn.textContent = "看看他有没有发新的"; seeBtn.disabled = false; }
+    if (ok) {
+      praise("他发了新动态 👀");
+      reload();
+    } else {
+      seeBtn.textContent = "看看他有没有发新的";
+      seeBtn.disabled = false;
+    }
   };
+
   const autoSw = el("button", "seg-btn", state.settings.coupleAuto? "自动:开" : "自动:关");
   autoSw.classList.toggle("on", state.settings.coupleAuto);
   autoSw.onclick = () => {
@@ -3796,68 +4798,101 @@ function renderCoupleRoom(body) {
     saveState();
     reload();
   };
+
   opRow.appendChild(seeBtn);
   opRow.appendChild(autoSw);
   body.appendChild(opRow);
 
   if (state.settings.coupleAuto && state.home.lastFeedDay!== todayKey()) {
-    aiFeedPost().then(ok => { if (ok) reload(); });
+    aiFeedPost().then(ok => {
+      if (ok) reload();
+    });
   }
 
   mkCountFold(body, state.home.feed.length + " 篇说说", "feed", reload);
   if (roomFold.feed) return;
 
   const list = state.home.feed.slice().reverse();
+
   if (!list.length) {
     const e = el("div", "", "空间还空着，发第一条动态吧");
     e.style.cssText = "text-align:center;color:#bbb;font-size:13px;padding:30px 0;";
     body.appendChild(e);
   }
+
   list.forEach(post => {
     const card = el("div", "feed-card");
     card.style.background = "rgba(255,255,255,0.5)";
+
     const head = el("div", "feed-head");
     const av = el("img", "feed-avatar");
-    avatarSrc(post.who === "me"? "user" : "ai").then(src => { av.src = src; });
+
+    avatarSrc(post.who === "me"? "user" : "ai").then(src => {
+      av.src = src;
+    });
+
     const nm = el("div", "");
     nm.appendChild(el("div", "feed-name", post.who === "me"? r.userName : r.aiName));
     nm.appendChild(el("div", "feed-time", fmtTime(post.time)));
+
     head.appendChild(av);
     head.appendChild(nm);
     card.appendChild(head);
-    if (post.text) card.appendChild(el("div", "feed-text", post.text));
+
+    if (post.text) {
+      card.appendChild(el("div", "feed-text", post.text));
+    }
+
     if (post.img) {
       const im = el("img", "feed-img");
       im.src = post.img;
       card.appendChild(im);
     }
+
     if (post.comments && post.comments.length) {
       const cbox = el("div", "feed-comments");
       post.comments.forEach(cm2 => {
-        cbox.appendChild(el("div", "feed-comment", (cm2.who === "me"? r.userName : r.aiName) + "：" + cm2.text));
+        cbox.appendChild(
+          el(
+            "div",
+            "feed-comment",
+            (cm2.who === "me"? r.userName : r.aiName) + "：" + cm2.text
+          )
+        );
       });
       card.appendChild(cbox);
     }
+
     const ops = el("div", "feed-ops");
+
     const cm = el("span", "", "评论");
     cm.onclick = () => {
       inputDialog("评论", "", async v => {
         if (!v.trim()) return;
-        post.comments.push({ who: "me", text: v.trim(), time: Date.now() });
+
+        post.comments.push({
+          who: "me",
+          text: v.trim(),
+          time: Date.now()
+        });
+
         saveState();
         reload();
+
         if (post.who === "ai") {
           await aiReplyComment(post, v.trim());
           reload();
         }
       }, false);
     };
+
     const dl = el("span", "", "删除");
     dl.onclick = () => confirmDialog("删除这条动态？", () => {
       state.home.feed = state.home.feed.filter(x => x.id!== post.id);
       saveState();
       reload();
     });
+
     ops.appendChild(cm);
     ops.appendChild(dl);
     card.appendChild(ops);
@@ -3930,7 +4965,10 @@ function renderMemBook(body, ch) {
   sumBtn.style.cssText = btnCss;
   sumBtn.onclick = async () => {
     const s = curSession();
-    if (!s ||!s.messages ||!s.messages.length) { toast("这会话还没聊呢"); return; }
+    if (!s ||!s.messages ||!s.messages.length) {
+      toast("这会话还没聊呢");
+      return;
+    }
     sumBtn.textContent = "我在回忆...";
     sumBtn.disabled = true;
     const recent = s.messages.slice(-60).map(m => (m.role === "user"? "她：" : "我：") + msgText(m).slice(0, 100)).join(NL);
@@ -3952,7 +4990,17 @@ function renderMemBook(body, ch) {
   add.style.cssText = btnCss + "margin-bottom:14px;";
   add.onclick = () => {
     inputDialog("新记忆", "", v => {
-      if (v.trim()) { ch.memories.push({ id: uid(), text: v.trim(), checked: true, core: false, cat: "日常" }); saveState(); renderMemBook(body, ch); }
+      if (v.trim()) {
+        ch.memories.push({
+          id: uid(),
+          text: v.trim(),
+          checked: true,
+          core: false,
+          cat: "日常"
+        });
+        saveState();
+        renderMemBook(body, ch);
+      }
     }, true);
   };
   sumCard.appendChild(add);
@@ -3963,7 +5011,11 @@ function renderMemBook(body, ch) {
   swL.style.cssText = "font-size:12px;color:" + (ink || "#999") + ";";
   const sw = el("button", "seg-btn", state.settings.sumRemindOn? "开" : "关");
   sw.classList.toggle("on", state.settings.sumRemindOn);
-  sw.onclick = () => { state.settings.sumRemindOn =!state.settings.sumRemindOn; saveState(); renderMemBook(body, ch); };
+  sw.onclick = () => {
+    state.settings.sumRemindOn =!state.settings.sumRemindOn;
+    saveState();
+    renderMemBook(body, ch);
+  };
   rowSw.appendChild(swL);
   rowSw.appendChild(sw);
   sumCard.appendChild(rowSw);
@@ -3971,12 +5023,22 @@ function renderMemBook(body, ch) {
   const rowSl = el("div", "");
   rowSl.style.cssText = "display:flex;align-items:center;gap:8px;";
   const sl = document.createElement("input");
-  sl.type = "range"; sl.min = "10"; sl.max = "300"; sl.step = "10";
+  sl.type = "range";
+  sl.min = "10";
+  sl.max = "300";
+  sl.step = "10";
   sl.value = state.settings.sumEvery;
   sl.style.flex = "1";
+
   const slV = el("span", "", state.settings.sumEvery + "条");
   slV.style.cssText = "font-size:12px;color:" + (ink || "#999") + ";min-width:44px;text-align:right;";
-  sl.oninput = () => { state.settings.sumEvery = Number(sl.value); slV.textContent = sl.value + "条"; saveState(); };
+
+  sl.oninput = () => {
+    state.settings.sumEvery = Number(sl.value);
+    slV.textContent = sl.value + "条";
+    saveState();
+  };
+
   rowSl.appendChild(sl);
   rowSl.appendChild(slV);
   sumCard.appendChild(rowSl);
@@ -3986,49 +5048,108 @@ function renderMemBook(body, ch) {
     const pT = el("div", "", "待你过目（收下才入库）");
     pT.style.cssText = "font-size:12px;color:" + (ink || "#8e8e93") + ";margin:4px 2px 8px;";
     body.appendChild(pT);
+
     ch.memPending.forEach((p, i) => {
       const r = el("div", "");
       r.style.cssText = "display:flex;align-items:center;gap:8px;border-radius:12px;padding:10px 12px;margin-bottom:6px;";
       r.style.background = cardBg;
+
       const t = el("div", "", p);
       t.style.cssText = "flex:1;font-size:13px;line-height:1.5;color:" + (ink || "inherit") + ";";
+
       const ok = el("button", "seg-btn", "收下");
-      ok.onclick = () => { ch.memories.push({ id: uid(), text: p, checked: false, core: false, cat: "日常" }); ch.memPending.splice(i, 1); saveState(); renderMemBook(body, ch); };
+      ok.onclick = () => {
+        ch.memories.push({
+          id: uid(),
+          text: p,
+          checked: false,
+          core: false,
+          cat: "日常"
+        });
+        ch.memPending.splice(i, 1);
+        saveState();
+        renderMemBook(body, ch);
+      };
+
       const no = el("button", "seg-btn", "丢掉");
-      no.onclick = () => { ch.memPending.splice(i, 1); saveState(); renderMemBook(body, ch); };
-      r.appendChild(t); r.appendChild(ok); r.appendChild(no);
+      no.onclick = () => {
+        ch.memPending.splice(i, 1);
+        saveState();
+        renderMemBook(body, ch);
+      };
+
+      r.appendChild(t);
+      r.appendChild(ok);
+      r.appendChild(no);
       body.appendChild(r);
     });
   }
 
   const list = ch.memories.slice().sort((a, b) => (b.core? 1 : 0) - (a.core? 1 : 0));
+
   list.forEach(m => {
     const idx = ch.memories.indexOf(m);
     const r = el("div", "");
     r.style.cssText = "display:flex;align-items:center;gap:8px;border-radius:12px;padding:10px 12px;margin-bottom:6px;" + (m.core? "box-shadow:0 0 0 1px rgba(200,85,96,0.35);" : "");
     r.style.background = cardBg;
+
     const heart = el("span", "", m.core? HEART : "♡");
     heart.style.cssText = "font-size:15px;color:" + (m.core? "#c85560" : "#c7c7cc") + ";";
-    heart.onclick = () => { m.core =!m.core; if (m.core) m.checked = true; saveState(); renderMemBook(body, ch); };
+    heart.onclick = () => {
+      m.core =!m.core;
+      if (m.core) m.checked = true;
+      saveState();
+      renderMemBook(body, ch);
+    };
+
     const chk = el("span", "", (m.checked || m.core)? "☑" : "☐");
     chk.style.cssText = "font-size:15px;color:" + (ink || "#8e8e93") + ";";
     chk.onclick = () => {
-      if (m.core) { toast("核心记忆永远随身，摘掉" + HEART + "才能取消"); return; }
+      if (m.core) {
+        toast("核心记忆永远随身，摘掉" + HEART + "才能取消");
+        return;
+      }
       m.checked =!m.checked;
-      saveState(); renderMemBook(body, ch);
+      saveState();
+      renderMemBook(body, ch);
     };
+
     const t = el("div", "", m.text);
     t.style.cssText = "flex:1;font-size:13px;line-height:1.5;color:" + (ink || "inherit") + ";";
-    t.onclick = () => { inputDialog("编辑记忆", m.text, v => { if (v.trim()) { m.text = v.trim(); saveState(); renderMemBook(body, ch); } }, true); };
+    t.onclick = () => {
+      inputDialog("编辑记忆", m.text, v => {
+        if (v.trim()) {
+          m.text = v.trim();
+          saveState();
+          renderMemBook(body, ch);
+        }
+      }, true);
+    };
+
     const cat = el("span", "", m.cat || "日常");
     cat.style.cssText = "font-size:10px;color:" + (ink || "#8e8e93") + ";background:rgba(0,0,0,0.06);border-radius:8px;padding:2px 7px;";
-    cat.onclick = () => { m.cat = MEM_CATS[(MEM_CATS.indexOf(m.cat || "日常") + 1) % MEM_CATS.length]; saveState(); renderMemBook(body, ch); };
+    cat.onclick = () => {
+      m.cat = MEM_CATS[(MEM_CATS.indexOf(m.cat || "日常") + 1) % MEM_CATS.length];
+      saveState();
+      renderMemBook(body, ch);
+    };
+
     const del = el("span", "", "✕");
     del.style.cssText = "color:#ccc;padding:0 2px;";
-    del.onclick = () => confirmDialog("删除这条记忆？", () => { ch.memories.splice(idx, 1); saveState(); renderMemBook(body, ch); });
-    r.appendChild(heart); r.appendChild(chk); r.appendChild(t); r.appendChild(cat); r.appendChild(del);
+    del.onclick = () => confirmDialog("删除这条记忆？", () => {
+      ch.memories.splice(idx, 1);
+      saveState();
+      renderMemBook(body, ch);
+    });
+
+    r.appendChild(heart);
+    r.appendChild(chk);
+    r.appendChild(t);
+    r.appendChild(cat);
+    r.appendChild(del);
     body.appendChild(r);
   });
+
   if (!ch.memories.length &&!ch.memPending.length) {
     const e = el("div", "", "记忆本还空着，我们的日子会慢慢填满它");
     e.style.cssText = "text-align:center;color:#bbb;font-size:13px;padding:24px 0;";
@@ -4040,6 +5161,7 @@ function renderMemBook(body, ch) {
 function openSearch() {
   const old = document.getElementById("search-overlay");
   if (old) old.remove();
+
   const ov = el("div", "overlay-page");
   ov.id = "search-overlay";
 
@@ -4048,11 +5170,14 @@ function openSearch() {
   inp.placeholder = "搜我们说过的话...";
   inp.className = "form-input";
   inp.style.cssText = "flex:1;margin-right:8px;";
+
   const close = el("button", "seg-btn", "关闭");
   close.onclick = () => ov.remove();
+
   head.appendChild(inp);
   head.appendChild(close);
   ov.appendChild(head);
+
   const res = el("div", "overlay-body");
   ov.appendChild(res);
   document.body.appendChild(ov);
@@ -4062,41 +5187,53 @@ function openSearch() {
     const q = inp.value.trim().toLowerCase();
     res.innerHTML = "";
     if (q.length < 1) return;
+
     const r = curRole();
     let hits = 0;
+
     r.sessions.forEach(s => {
       (s.messages || []).forEach(m => {
         const t = msgText(m);
         if (hits >= 50 || t.toLowerCase().indexOf(q) < 0) return;
         hits++;
+
         const card = el("div", "");
         card.style.cssText = "background:rgba(0,0,0,0.03);border-radius:14px;padding:12px;margin-bottom:8px;";
+
         const head2 = el("div", "", (m.role === "user"? "你" : "他") + " · " + s.name);
         head2.style.cssText = "font-size:11px;color:#8e8e93;margin-bottom:4px;";
+
         const idx = t.toLowerCase().indexOf(q);
         const snip = (idx > 20? "..." : "") + t.slice(Math.max(0, idx - 20), idx + q.length + 40);
         const bodyEl = el("div", "", snip);
         bodyEl.style.cssText = "font-size:13px;line-height:1.6;";
+
         card.appendChild(head2);
         card.appendChild(bodyEl);
+
         card.onclick = () => {
           r.currentSessionId = s.id;
           saveState();
           renderAll();
           ov.remove();
+
           setTimeout(() => {
             const target = document.querySelector('.msg-row[data-id="' + m.id + '"]');
             if (target) {
               target.scrollIntoView({ block: "center" });
               target.style.transition = "background 0.4s";
               target.style.background = "rgba(255,200,120,0.25)";
-              setTimeout(() => { target.style.background = ""; }, 1600);
+              setTimeout(() => {
+                target.style.background = "";
+              }, 1600);
             }
           }, 400);
         };
+
         res.appendChild(card);
       });
     });
+
     if (!hits) {
       const e = el("div", "", "没搜到，换个词试试");
       e.style.cssText = "text-align:center;color:#bbb;padding:30px 0;font-size:13px;";
@@ -4108,23 +5245,52 @@ function openSearch() {
 /* ---------- 小菜单 ---------- */
 function toggleMiniMenu() {
   const old = document.getElementById("mini-menu");
-  if (old) { old.remove(); return; }
+  if (old) {
+    old.remove();
+    return;
+  }
+
   const m = el("div", "");
   m.id = "mini-menu";
   m.style.cssText = "position:fixed;right:14px;bottom:96px;background:rgba(255,255,255,0.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,0.12);z-index:180;overflow:hidden;min-width:150px;";
-  if (state.settings.skin === "night") m.style.background = "rgba(50,48,52,0.95)";
+
+  if (state.settings.skin === "night") {
+    m.style.background = "rgba(50,48,52,0.95)";
+  }
+
   const items = [
-    { t: "搜索聊天 🔍", f: () => { m.remove(); openSearch(); } },
-    { t: "记忆手册 ✨", f: () => { m.remove(); openMemoryBook(); } },
-    { t: "备份导出 " + HEART, f: () => { m.remove(); exportData(); } }
+    {
+      t: "搜索聊天 🔍",
+      f: () => {
+        m.remove();
+        openSearch();
+      }
+    },
+    {
+      t: "记忆手册 ✨",
+      f: () => {
+        m.remove();
+        openMemoryBook();
+      }
+    },
+    {
+      t: "备份导出 " + HEART,
+      f: () => {
+        m.remove();
+        exportData();
+      }
+    }
   ];
+
   items.forEach((it, i) => {
     const r = el("div", "", it.t);
     r.style.cssText = "padding:13px 16px;font-size:14px;" + (i? "border-top:1px solid rgba(0,0,0,0.05);" : "");
     r.onclick = it.f;
     m.appendChild(r);
   });
+
   document.body.appendChild(m);
+
   setTimeout(() => {
     document.addEventListener("click", function h(e) {
       if (!m.contains(e.target) && e.target.id!== "mini-menu-btn") {
@@ -4146,21 +5312,39 @@ function checkBackupRemind() {
 /* ---------- 总结提醒 ---------- */
 function startSumWatch() {
   let shown = false;
+
   setInterval(() => {
     if (!state.settings.sumRemindOn || shown) return;
+
     const s = curSession();
     if (!s ||!s.messages) return;
+
     if (s.messages.length - state.home.lastSumLen >= state.settings.sumEvery) {
       shown = true;
+
       const bar = el("div", "");
       bar.style.cssText = "position:fixed;left:16px;right:16px;bottom:96px;background:rgba(255,255,255,0.96);border-radius:16px;padding:12px 14px;box-shadow:0 4px 20px rgba(0,0,0,0.12);z-index:150;font-size:13px;display:flex;align-items:center;gap:8px;";
+
       const t = el("span", "", "又攒了一堆话，要收进记忆吗？");
       t.style.flex = "1";
+
       const go = el("button", "seg-btn", "去总结");
-      go.onclick = () => { bar.remove(); openMemoryBook(); };
+      go.onclick = () => {
+        bar.remove();
+        openMemoryBook();
+      };
+
       const no = el("button", "seg-btn", "先不");
-      no.onclick = () => { state.home.lastSumLen = s.messages.length; saveState(); bar.remove(); shown = false; };
-      bar.appendChild(t); bar.appendChild(go); bar.appendChild(no);
+      no.onclick = () => {
+        state.home.lastSumLen = s.messages.length;
+        saveState();
+        bar.remove();
+        shown = false;
+      };
+
+      bar.appendChild(t);
+      bar.appendChild(go);
+      bar.appendChild(no);
       document.body.appendChild(bar);
     }
   }, 30000);
@@ -4172,13 +5356,16 @@ function initScrollArrow() {
   const arrow = el("div", "", "↓");
   arrow.style.cssText = "position:fixed;right:16px;bottom:110px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.92);box-shadow:0 2px 10px rgba(0,0,0,0.15);display:none;align-items:center;justify-content:center;font-size:18px;color:#666;z-index:50;";
   document.body.appendChild(arrow);
+
   arrow.onclick = () => {
     box.scrollTop = box.scrollHeight;
     arrow.style.display = "none";
   };
+
   function nearBottom() {
     return box.scrollHeight - box.scrollTop - box.clientHeight < box.clientHeight;
   }
+
   box.addEventListener("scroll", () => {
     arrow.style.display = nearBottom()? "none" : "flex";
   });
@@ -4192,7 +5379,10 @@ function initKeyboardFix() {
 
   if (!window.visualViewport) {
     document.addEventListener("focusout", () => {
-      setTimeout(() => { window.scrollTo(0, 0); document.body.scrollTop = 0; }, 80);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+      }, 80);
     });
     return;
   }
@@ -4202,6 +5392,7 @@ function initKeyboardFix() {
 
   function fit() {
     const gap = window.innerHeight - vv.height - vv.offsetTop;
+
     if (gap > 40) {
       ia.style.transform = "translateY(-" + gap + "px)";
       area.style.paddingBottom = (gap + 8) + "px";
@@ -4233,7 +5424,9 @@ function initKeyboardFix() {
     }, 50);
   });
 
-  document.addEventListener("focusout", () => { setTimeout(fit, 90); });
+  document.addEventListener("focusout", () => {
+    setTimeout(fit, 90);
+  });
 }
 
 /* ---------- 总渲染 ---------- */
@@ -4249,12 +5442,37 @@ function bindEvents() {
   $("#sidebar-mask").onclick = closeSidebar;
   $("#new-session-btn").onclick = newSession;
 
-  $("#menu-theme").onclick = () => { buildThemePanel(); openPanel("#theme-panel"); };
-  $("#menu-role").onclick = () => { renderRolePage(); openPanel("#role-panel"); };
-  $("#menu-memory").onclick = () => { closeSidebar(); openMemoryBook(); };
-  $("#menu-days").onclick = () => { buildDaysPanel(); openPanel("#days-panel"); };
-  $("#settings-btn").onclick = () => { fillProviderForm(); renderProviders(); buildSettingsExtras(); openPanel("#settings-panel"); };
-  $("#sidebar-role").onclick = () => { renderRolePage(); openPanel("#role-panel"); };
+  $("#menu-theme").onclick = () => {
+    buildThemePanel();
+    openPanel("#theme-panel");
+  };
+
+  $("#menu-role").onclick = () => {
+    renderRolePage();
+    openPanel("#role-panel");
+  };
+
+  $("#menu-memory").onclick = () => {
+    closeSidebar();
+    openMemoryBook();
+  };
+
+  $("#menu-days").onclick = () => {
+    buildDaysPanel();
+    openPanel("#days-panel");
+  };
+
+  $("#settings-btn").onclick = () => {
+    fillProviderForm();
+    renderProviders();
+    buildSettingsExtras();
+    openPanel("#settings-panel");
+  };
+
+  $("#sidebar-role").onclick = () => {
+    renderRolePage();
+    openPanel("#role-panel");
+  };
 
   $("#theme-back").onclick = () => closePanel("#theme-panel");
   $("#role-back").onclick = () => closePanel("#role-panel");
@@ -4262,7 +5480,12 @@ function bindEvents() {
 
   $("#send-btn").onclick = sendMessage;
   $("#model-btn").onclick = toggleModelPopup;
-  $("#mini-menu-btn").onclick = (ev) => { ev.stopPropagation(); toggleMiniMenu(); };
+
+  $("#mini-menu-btn").onclick = (ev) => {
+    ev.stopPropagation();
+    toggleMiniMenu();
+  };
+
   $("#attach-btn").onclick = () => $("#attach-input").click();
   $("#attach-input").addEventListener("change", pickImage);
 
