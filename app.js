@@ -622,7 +622,8 @@ function dressMeta(row, isUser) {
   row.querySelectorAll(".msg-name").forEach(e => {
     e.style.fontFamily = nameF;
     e.style.fontWeight = String(st.nameWeight);
-    e.style.fontSize = (st.metaSize + 1) + "px";
+        e.style.fontSize = (st.nameSize || 11) + "px";
+
     e.style.color = nameGray;
     e.style.display = st.showName? "" : "none";
   });
@@ -731,12 +732,15 @@ function applyTheme() {
     liq.textContent = [
       ".panel:not(#days-panel){background:" + solid + "!important;",
       "backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}",
+      ".panel:not(#days-panel).panel-header{background:" + solid + "!important;border-bottom:none!important;box-shadow:none!important;}",
       ".overlay-page{background:" + solid + "!important;",
-      "backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}"
+      "backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}",
+      ".overlay-page.overlay-head{background:" + solid + "!important;border-bottom:none!important;}"
     ].join("");
   } else {
     liq.textContent = "";
   }
+
 
   const sb = $("#sidebar");
   const a = (st.sidebarAlpha || 72) / 100;
@@ -820,7 +824,8 @@ function applyChatTypo() {
   const st = state.settings;
   const L = [];
   L.push(".msg-bubble{letter-spacing:" + st.chatSpacing + "px;line-height:" + st.chatLineH + ";font-weight:" + st.chatWeight + ";}");
-  L.push("#sidebar,.menu-item,.session-item{letter-spacing:" + st.uiSpacing + "px;font-weight:" + st.uiWeight + ";}");
+    L.push("#sidebar,.menu-item,.session-item{letter-spacing:" + st.uiSpacing + "px;font-weight:" + st.uiWeight + ";font-size:" + (st.uiFs || 14) + "px;}");
+
   L.push(".menu-item,.session-item{line-height:" + st.uiLineH + ";}");
   if (st.aiTypoOn) {
     const f = FONT_LIST[st.aiFont2] || FONT_LIST.system;
@@ -2507,16 +2512,19 @@ function buildThemePanel() {
     mkSlider(box, "行高", 1.3, 2.2, 0.05, "chatLineH", "", rT);
     mkSlider(box, "粗细", 300, 700, 50, "chatWeight", "", rT);
   }
-  if (typoScope === "ui") {
+     if (typoScope === "ui") {
     mkFontSelect(box, "界面字体", "uiFont", applyTheme);
+    mkSlider(box, "大小", 10, 18, 1, "uiFs", "px", rT);
     mkSlider(box, "字间距", -1, 3, 0.1, "uiSpacing", "px", rT);
     mkSlider(box, "行高", 1.2, 2.2, 0.05, "uiLineH", "", rT);
     mkSlider(box, "粗细", 300, 700, 50, "uiWeight", "", rT);
   }
   if (typoScope === "name") {
     mkFontSelect(box, "昵称字体", "nameFont", rM);
+    mkSlider(box, "大小", 8, 16, 1, "nameSize", "px", rM);
     mkSlider(box, "粗细", 200, 700, 50, "nameWeight", "", rM);
   }
+
   if (typoScope === "meta") {
     mkFontSelect(box, "小字字体（时间 token）", "metaFont", rM);
     mkSlider(box, "大小", 6, 14, 1, "metaSize", "px", rM);
@@ -2695,7 +2703,8 @@ async function buildSlotApp(which, T, ink) {
   }
 
   const lab = el("div", "app-icon-label", state.home[nameKey]);
-  lab.style.color = ink;
+  lab.style.color = "#5a4a42";
+
   node.appendChild(face);
   node.appendChild(lab);
 
@@ -2754,9 +2763,10 @@ async function buildWidget(which, cardBg, cardBlur, ink) {
     const lab = el("div", "widget-label", txt);
     /* 素字直接浮图上,细阴影保证任何图上都读得清 */
     lab.style.background = "none";
-    lab.style.color = blob? "#ffffff" : ink;
-    if (blob) lab.style.textShadow = "0 1px 4px rgba(0,0,0,0.45)";
+    lab.style.color = "#5a4a42";
+    lab.style.textShadow = "none";
     lab.style.marginBottom = "10px";
+
     w.appendChild(lab);
   }
 
@@ -2798,7 +2808,8 @@ async function buildGridApp(k, T, ink) {
   const node = el("div", "grid-app");
   const face = await buildIconFace(app, T);
   const lab = el("div", "app-icon-label", app.label);
-  lab.style.color = ink;
+  lab.style.color = "#5a4a42";
+
   node.appendChild(face);
   node.appendChild(lab);
   node.onclick = () => openHomeRoom(k);
@@ -2895,7 +2906,8 @@ async function buildDaysPanel() {
   header.appendChild(pt);
   /* 3号:日期加大一号 */
   const datePill = el("div", "", todayPretty());
-  datePill.style.cssText = "margin-left:auto;font-size:12px;letter-spacing:0.5px;color:" + T.inkSub + ";";
+    datePill.style.cssText = "margin-left:auto;margin-right:11px;transform:translateY(11px);font-size:" + (st.daysDateSize || 12) + "px;letter-spacing:0.5px;color:#b39a90;";
+
   header.appendChild(datePill);
   panel.appendChild(header);
 
@@ -2963,7 +2975,7 @@ async function buildDaysPanel() {
   scroll.appendChild(hero);
 
   const cap = el("div", "home-caption", "这里是我们攒起来的日子");
-  cap.style.color = T.inkSub;
+  cap.style.color = "#b39a90";
   scroll.appendChild(cap);
 
   /* 第二区 */
@@ -3596,6 +3608,7 @@ function renderBeautifyRoom(body) {
   body.appendChild(el("label", "form-label", "天数数字"));
   mkFontSelect(body, "数字字体", "daysFont", null);
   mkSlider(body, "数字大小", 30, 110, 1, "daysNumSize", "px", null);
+  mkSlider(body, "日期文字大小", 8, 20, 1, "daysDateSize", "px", null);
 
   body.appendChild(el("label", "form-label", "图标形状"));
   mkSeg(body,
