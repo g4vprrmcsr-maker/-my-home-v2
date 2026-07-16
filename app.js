@@ -3478,8 +3478,7 @@ function renderBeautifyRoom(body) {
 
   body.appendChild(el("label", "form-label", "天数数字"));
   mkFontSelect(body, "数字字体", "daysFont", null);
-  mkSlider(body, "数字大小", 30, 110
-  , 1, "daysNumSize", "px", null);
+  mkSlider(body, "数字大小", 30, 110, 1, "daysNumSize", "px", null);
   mkSlider(body, "日期文字大小", 8, 20, 1, "daysDateSize", "px", null);
   mkSlider(body, "组件文字大小", 10, 18, 1, "widgetTextSize", "px", null);
 
