@@ -956,3 +956,71 @@ body.dark.overlay-page { background: rgba(38, 36, 40, 0.98); }.overlay-bg {
   border-width: 0 7px 8px 7px;
   border-color: transparent transparent var(--tail-c) transparent;
 }
+/* ==========================================
+   v104 追加补丁:贴在style.css最末尾
+   ========================================== */
+
+/* 1. 拉角尾:从气泡角落拽出来的尖
+   直边贴底边+侧边,斜边朝外撇,跟气泡长在一起 */.bs-pull-user {
+  border-bottom-right-radius: 4px!important;
+}.bs-pull-user::after {
+  content: "";
+  position: absolute;
+  right: -9px;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 9px 11px 0;
+  border-color: transparent transparent var(--tail-c) transparent;
+}.bs-pull-ai {
+  border-bottom-left-radius: 4px!important;
+}.bs-pull-ai::after {
+  content: "";
+  position: absolute;
+  left: -9px;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 11px 9px;
+  border-color: transparent transparent var(--tail-c) transparent;
+}
+
+/* 3. 相识页通顶通底:壁纸从最顶铺到最底,横带消失 */
+#days-panel {
+  padding: 0;
+  height: 100vh;
+  height: 100dvh;
+}
+#days-panel.panel-header {
+  background: transparent;
+  border-bottom: none;
+  box-shadow: none;
+  padding-top: calc(10px + env(safe-area-inset-top));
+}
+
+/* Dock:高度位置交给拉条(JS写--dock-drop),图标填满坑 */.days-dock {
+  margin-bottom: var(--dock-drop, 10px);
+}.dock-slot {
+  position: relative;
+  overflow: hidden;
+  border-radius: 26%;
+}.dock-slot img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* 组件文字:胶囊摘掉后素字浮图上,保留换行排版 */.widget-label {
+  white-space: pre-wrap;
+  overflow: visible;
+  text-overflow: clip;
+  max-width: 94%;
+  text-align: center;
+  line-height: 1.5;
+}
