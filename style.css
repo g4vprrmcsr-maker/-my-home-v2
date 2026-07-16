@@ -832,7 +832,7 @@ body.dark.overlay-page { background: rgba(38, 36, 40, 0.98); }.overlay-bg {
 
 /* 7. 全部色块改圆形,颜色不变 */.color-dot { border-radius: 50%; }
 
-/* 5. 无气泡时AI消息几乎铺满,右边留一口气 */.msg-body-ai.bare-full { max-width: 96%; }
+/* 5. 无气泡时AI消息几乎铺满,右边留一口气 */
 
 /* ===== 相识页 v103 网格 ===== */.home-hero-card {
   border-radius: 26px;
@@ -960,32 +960,6 @@ body.dark.overlay-page { background: rgba(38, 36, 40, 0.98); }.overlay-bg {
    v104 追加补丁:贴在style.css最末尾
    ========================================== */
 
-/* 1. 拉角尾:从气泡角落拽出来的尖
-   直边贴底边+侧边,斜边朝外撇,跟气泡长在一起 */.bs-pull-user {
-  border-bottom-right-radius: 4px!important;
-}.bs-pull-user::after {
-  content: "";
-  position: absolute;
-  right: -9px;
-  bottom: 0;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 0 9px 11px 0;
-  border-color: transparent transparent var(--tail-c) transparent;
-}.bs-pull-ai {
-  border-bottom-left-radius: 4px!important;
-}.bs-pull-ai::after {
-  content: "";
-  position: absolute;
-  left: -9px;
-  bottom: 0;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 0 0 11px 9px;
-  border-color: transparent transparent var(--tail-c) transparent;
-}
 
 /* 3. 相识页通顶通底:壁纸从最顶铺到最底,横带消失 */
 #days-panel {
@@ -1023,4 +997,51 @@ body.dark.overlay-page { background: rgba(38, 36, 40, 0.98); }.overlay-bg {
   max-width: 94%;
   text-align: center;
   line-height: 1.5;
+}
+/* ==========================================
+   v105 修复补丁
+   ========================================== */
+
+/* 设置页字变大的真凶:PWA独立模式下iOS自动放大文字,这行焊死,字回原样 */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* 拉角尾重做:直边贴气泡底边和侧边,斜边朝外,贴合角圆角归零,零缝隙 */.bs-pull-user {
+  border-bottom-right-radius: 0!important;
+}.bs-pull-user::after {
+  content: "";
+  position: absolute;
+  right: -8px;
+  bottom: 0;
+  width: 8px;
+  height: 11px;
+  background: var(--tail-c);
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+}.bs-pull-ai {
+  border-bottom-left-radius: 0!important;
+}.bs-pull-ai::after {
+  content: "";
+  position: absolute;
+  left: -8px;
+  bottom: 0;
+  width: 8px;
+  height: 11px;
+  background: var(--tail-c);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+/* 两个2x2组件锁死同宽:右边图标格文字换行再也撑不歪它 */.home-grid-row {
+  align-items: flex-start;
+}.widget-2x2 {
+  flex: 0 0 calc(50% - 6px);
+  max-width: calc(50% - 6px);
+}.icon-quad {
+  flex: 1;
+}
+
+/* 组件文字:禁阴影 */.widget-label {
+  text-shadow: none;
+  background: none;
 }
