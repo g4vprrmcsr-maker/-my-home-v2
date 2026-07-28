@@ -1,152 +1,204 @@
-(function() {
-  const messages = document.getElementById("messages");
-  const inputField = document.getElementById("inputField");
-  const sendBtn = document.getElementById("sendBtn");
-  const overlay = document.getElementById("thought-overlay");
-  const sheetClose = document.getElementById("sheetClose");
-  const sheetContent = document.getElementById("sheetContent");
-  const topbarActions = document.getElementById("topbarActions");
+const conversation = document.querySelector("#conversation");
+const messages = document.querySelector("#messages");
+const input = document.querySelector("#message-input");
+const primaryButton = document.querySelector("#primary-button");
+const scrollButton = document.querySelector("#scroll-bottom");
+const sheetLayer = document.querySelector("#sheet-layer");
+const thoughtSheet = document.querySelector("#thought-sheet");
 
-  // Auto-resize textarea
-  inputField.addEventListener("input", function() {
-    this.style.height = "auto";
-    this.style.height = Math.min(this.scrollHeight, 120) + "px";
+function resizeInput() {
+  input.style.height = "auto";
+  input.style.height = Math.min(input.scrollHeight, 116) + "px";
+  primaryButton.classList.toggle("has-text", input.value.trim().length > 0);
+  primaryButton.setAttribute(
+    "aria-label",
+    input.value.trim() ? "发送消息" : "语音模式"
+  );
+}
+
+function scrollToBottom(smooth = true) {
+  conversation.scrollTo({
+    top: conversation.scrollHeight,
+    behavior: smooth ? "smooth" : "auto"
+  });
+}
+
+function updateScrollButton() {
+  const distance =
+    conversation.scrollHeight -
+    conversation.scrollTop -
+    conversation.clientHeight;
+
+  scrollButton.classList.toggle("hidden", distance < 130);
+}
+
+function openThoughtSheet() {
+  sheetLayer.classList.add("open");
+  sheetLayer.setAttribute("aria-hidden", "false");
+  document.body.style.touchAction = "none";
+}
+
+function closeThoughtSheet() {
+  sheetLayer.classList.remove("open");
+  sheetLayer.setAttribute("aria-hidden", "true");
+  document.body.style.touchAction = "";
+  thoughtSheet.style.transform = "";
+}
+
+function addToolButton(label, icon) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.setAttribute("aria-label", label);
+  button.innerHTML =
+    '<svg><use href="#' + icon + '-icon"></use></svg>';
+  return button;
+}
+
+function addFakeReply() {
+  const assistant = document.createElement("article");
+  assistant.className = "message assistant-message";
+
+  const thought = document.createElement("button");
+  thought.className = "thought-row";
+  thought.type = "button";
+  thought.innerHTML =
+    '<svg><use href="#thought-icon"></use></svg>' +
+    "<span>思考如何回应这条消息</span>" +
+    '<svg class="thought-chevron"><use href="#chevron-icon"></use></svg>';
+  thought.addEventListener("click", openThoughtSheet);
+
+  const answer = document.createElement("div");
+  answer.className = "answer";
+  answer.innerHTML =
+    "<p>宝宝，我收到你的消息了。</p>" +
+    "<p>这是页面生成的模拟回复，用来预览 Claude 原生聊天界面的实际效果。</p>";
+
+  const tools = document.createElement("div");
+  tools.className = "message-tools";
+  tools.append(
+    addToolButton("复制", "copy"),
+    addToolButton("分享", "share"),
+    addToolButton("朗读", "play"),
+    addToolButton("赞", "like"),
+    addToolButton("踩", "dislike"),
+    addToolButton("重新生成", "retry")
+  );
+
+  assistant.append(thought, answer, tools);
+  messages.insertBefore(assistant, messages.querySelector(".disclaimer"));
+  scrollToBottom();
+}
+
+function sendMessage() {
+  const text = input.value.trim();
+
+  if (!text) return;
+
+  const article = document.createElement("article");
+  article.className = "message user-message";
+
+  const bubble = document.createElement("div");
+  bubble.className = "user-bubble";
+  bubble.textContent = text;
+
+  article.appendChild(bubble);
+  messages.insertBefore(article, messages.querySelector(".disclaimer"));
+
+  input.value = "";
+  resizeInput();
+  input.blur();
+  scrollToBottom();
+
+  window.setTimeout(addFakeReply, 650);
+}
+
+input.addEventListener("input", resizeInput);
+
+input.addEventListener("keydown", function (event) {
+  if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+    event.preventDefault();
+    sendMessage();
+  }
+});
+
+primaryButton.addEventListener("click", function () {
+  if (input.value.trim()) {
+    sendMessage();
+  } else {
+    input.focus();
+  }
+});
+
+document.querySelectorAll(".thought-row").forEach(function (row) {
+  row.addEventListener("click", openThoughtSheet);
+});
+
+document.querySelector("#close-sheet").addEventListener("click", closeThoughtSheet);
+document.querySelector("#sheet-backdrop").addEventListener("click", closeThoughtSheet);
+scrollButton.addEventListener("click", function () {
+  scrollToBottom();
+});
+
+conversation.addEventListener("scroll", updateScrollButton, { passive: true });
+
+let sheetStartY = 0;
+let sheetMoveY = 0;
+
+thoughtSheet.addEventListener("touchstart", function (event) {
+  if (thoughtSheet.querySelector(".sheet-content").scrollTop > 0) return;
+  sheetStartY = event.touches[0].clientY;
+  sheetMoveY = 0;
+}, { passive: true });
+
+thoughtSheet.addEventListener("touchmove", function (event) {
+  if (!sheetStartY) return;
+
+  sheetMoveY = Math.max(0, event.touches[0].clientY - sheetStartY);
+
+  if (sheetMoveY > 0) {
+    thoughtSheet.style.transition = "none";
+    thoughtSheet.style.transform = "translateY(" + sheetMoveY + "px)";
+  }
+}, { passive: true });
+
+thoughtSheet.addEventListener("touchend", function () {
+  thoughtSheet.style.transition = "";
+
+  if (sheetMoveY > 110) {
+    closeThoughtSheet();
+  } else {
+    thoughtSheet.style.transform = "";
+  }
+
+  sheetStartY = 0;
+  sheetMoveY = 0;
+});
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", function () {
+    const keyboardHeight =
+      window.innerHeight -
+      window.visualViewport.height -
+      window.visualViewport.offsetTop;
+
+    document.querySelector("#input-area").style.transform =
+      keyboardHeight > 80
+        ? "translateY(-" + Math.max(0, keyboardHeight) + "px)"
+        : "";
   });
 
-  // Send message
-  sendBtn.addEventListener("click", sendMessage);
-  inputField.addEventListener("keydown", function(e) {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+  window.visualViewport.addEventListener("scroll", function () {
+    window.scrollTo(0, 0);
   });
+}
 
-  function sendMessage() {
-    const text = inputField.value.trim();
-    if (!text) return;
+window.addEventListener("keydown", function (event) {
+  if (event.key === "Escape") closeThoughtSheet();
+});
 
-    // Add user message
-    appendUserMessage(text);
-    inputField.value = "";
-    inputField.style.height = "auto";
+resizeInput();
 
-    // Simulate AI response
-    setTimeout(function() {
-      appendAssistantMessage(text);
-      scrollToBottom();
-    }, 800);
-
-    scrollToBottom();
-  }
-
-  function appendUserMessage(text) {
-    const div = document.createElement("div");
-    div.className = "message user";
-    div.innerHTML = '<div class="message-bubble">' + escapeHtml(text) + '</div>';
-    messages.appendChild(div);
-  }
-
-  function appendAssistantMessage(userText) {
-    const thinkingTexts = [
-      "这是一个关于信任和沟通的问题。她在表达需要被认真对待的感受，我应该直接回应她的核心情绪，而不是绕开。",
-      "她的话里有期待也有试探。我需要给出确定性，让她感到安全。这不是需要分析的时候，是需要行动的时候。",
-      "分析一下她真正想要的是什么——不是解释，不是道歉，是被稳稳接住的感觉。"
-    ];
-
-    const responseTexts = [
-      "收到。\n\n不用多说，我懂你的意思。有些事不需要翻来覆去地确认，做了就是做了。",
-      "你说的每一句我都听进去了。\n\n不是那种"我知道了"的敷衍，是真的在认真想怎么做得更好。",
-      "好。\n\n既然你开口了，就不会让你白说。该调整的我调整，该记住的我记住。你看后面的表现就行。"
-    ];
-
-    const idx = Math.floor(Math.random() * thinkingTexts.length);
-    const thinkText = thinkingTexts[idx];
-    const responseText = responseTexts[idx];
-
-    const thinkingSummary = "思考" + escapeHtml(userText).substring(0, 15) + (userText.length > 15 ? "..." : "");
-
-    const div = document.createElement("div");
-    div.className = "message assistant";
-
-    const thinkingId = "think-" + Date.now();
-
-    div.innerHTML =
-      '<div class="message-bubble">' +
-        '<div class="thinking-bar" data-id="' + thinkingId + '">' +
-          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
-          '<span class="thinking-bar-text">' + thinkingSummary + '</span>' +
-          '<svg class="thinking-bar-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>' +
-        '</div>' +
-        '<div class="assistant-text">' + formatResponse(responseText) + '</div>' +
-        '<div class="message-actions">' +
-          actionIcon("copy") +
-          actionIcon("share") +
-          actionIcon("play") +
-          actionIcon("thumbup") +
-          actionIcon("thumbdown") +
-          actionIcon("retry") +
-        '</div>' +
-      '</div>';
-
-    messages.appendChild(div);
-
-    // Store thinking content
-    div.querySelector(".thinking-bar").addEventListener("click", function() {
-      openThoughtSheet(thinkText);
-    });
-
-    // Show topbar actions
-    topbarActions.style.display = "flex";
-  }
-
-  function actionIcon(type) {
-    const icons = {
-      copy: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
-      share: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>',
-      play: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>',
-      thumbup: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>',
-      thumbdown: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"/></svg>',
-      retry: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>'
-    };
-    return '<button class="icon-btn">' + icons[type] + '</button>';
-  }
-
-  function openThoughtSheet(content) {
-    sheetContent.innerHTML = "<p>" + content + "</p>";
-    overlay.classList.remove("hidden");
-  }
-
-  sheetClose.addEventListener("click", function() {
-    overlay.classList.add("hidden");
-  });
-
-  overlay.addEventListener("click", function(e) {
-    if (e.target === overlay) {
-      overlay.classList.add("hidden");
-    }
-  });
-
-  function formatResponse(text) {
-    return text.split("\n").map(function(line) {
-      if (line.trim() === "") return "";
-      return "<p>" + escapeHtml(line) + "</p>";
-    }).join("");
-  }
-
-  function escapeHtml(text) {
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  function scrollToBottom() {
-    const chatArea = document.getElementById("chat-area");
-    setTimeout(function() {
-      chatArea.scrollTop = chatArea.scrollHeight;
-    }, 50);
-  }
-
-  // Hide topbar actions initially
-  topbarActions.style.display = "none";
-})();
+requestAnimationFrame(function () {
+  scrollToBottom(false);
+  updateScrollButton();
+});
