@@ -1,380 +1,123 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>小螃蟹桌宠 - Clawd</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
-            overflow: hidden;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
-            position: relative;
-        }
-
-        /* 小螃蟹容器 */
-        #pet {
-            position: fixed;
-            width: 80px;
-            height: 80px;
-            cursor: grab;
-            z-index: 9999;
-            transition: transform 0.3s ease;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none;
-        }
-
-        #pet:active {
-            cursor: grabbing;
-        }
-
-        #pet img {
-            width: 100%;
-            height: 100%;
-            image-rendering: pixelated;
-            -webkit-user-drag: none;
-        }
-
-        /* 对话气泡 */
-        #bubble {
-            position: fixed;
-            background: white;
-            padding: 12px 16px;
-            border-radius: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            font-size: 14px;
-            color: #333;
-            pointer-events: none;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.3s, transform 0.3s;
-            max-width: 200px;
-            word-wrap: break-word;
-            z-index: 10000;
-        }
-
-        #bubble.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        #bubble::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 20px;
-            width: 0;
-            height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 8px solid white;
-        }
-
-        /* 调试信息（可选） */
-        #debug {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-family: monospace;
-            display: none; /* 默认隐藏，需要时改为 block */
-            z-index: 10001;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Claude</title>
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Claude">
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="theme-color" content="#ffffff">
 </head>
 <body>
+<div id="app">
+  <!-- Top Bar -->
+  <div id="topbar">
+    <div class="topbar-left">
+      <button class="icon-btn menu-btn" id="menuBtn">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <line x1="4" y1="8" x2="20" y2="8"/>
+          <line x1="4" y1="16" x2="20" y2="16"/>
+        </svg>
+      </button>
+      <div class="topbar-actions" id="topbarActions">
+        <button class="icon-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 10l5 5 5-5"/>
+          </svg>
+        </button>
+        <button class="icon-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 14l5-5 5 5"/>
+          </svg>
+        </button>
+        <button class="icon-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"/>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" id="newChatBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="16"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="moreBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/>
+          <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>
+          <circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/>
+        </svg>
+      </button>
+    </div>
+  </div>
 
-<!-- 小螃蟹 -->
-<div id="pet">
-    <img id="petImg" src="" alt="Clawd">
+  <!-- Chat Area -->
+  <div id="chat-area">
+    <div id="messages"></div>
+  </div>
+
+  <!-- Input Area -->
+  <div id="input-area">
+    <div class="input-wrapper">
+      <textarea id="inputField" placeholder="Reply to Claude" rows="1"></textarea>
+    </div>
+    <div class="input-bottom">
+      <button class="icon-btn plus-btn" id="plusBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+      <div class="model-selector">
+        <span class="model-name">Opus 4.6</span>
+        <span class="model-mode">thinking</span>
+      </div>
+      <div class="input-right-actions">
+        <button class="icon-btn mic-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="2" width="6" height="12" rx="3"/>
+            <path d="M5 10a7 7 0 0 0 14 0"/>
+            <line x1="12" y1="19" x2="12" y2="22"/>
+          </svg>
+        </button>
+        <button class="icon-btn voice-btn" id="sendBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- 对话气泡 -->
-<div id="bubble"></div>
+<!-- Thought Process Bottom Sheet -->
+<div id="thought-overlay" class="overlay hidden">
+  <div class="thought-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <button class="icon-btn sheet-close" id="sheetClose">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <span class="sheet-title">Thought process</span>
+    </div>
+    <div class="sheet-content" id="sheetContent"></div>
+  </div>
+</div>
 
-<!-- 调试信息 -->
-<div id="debug"></div>
-
-<script>
-// ========== 配置区 ==========
-const EMOTES = {
-    'idle': 'https://raw.githubusercontent.com/yanjun62/mengmeng-clawd-daily-emotes/main/emotes/gif/hao.gif',
-    'punch': 'https://raw.githubusercontent.com/yanjun62/mengmeng-clawd-daily-emotes/main/emotes/gif/chi-wo-yi-quan.gif',
-    'shout': 'https://raw.githubusercontent.com/yanjun62/mengmeng-clawd-daily-emotes/main/emotes/gif/da-jiao.gif',
-    'awkward': 'https://raw.githubusercontent.com/yanjun62/mengmeng-clawd-daily-emotes/main/emotes/gif/gan-ga.gif',
-    'ok': 'https://raw.githubusercontent.com/yanjun62/mengmeng-clawd-daily-emotes/main/emotes/gif/hao.gif',
-    'cheer': 'https://raw.githubusercontent.com/yanjun62/mengmeng-clawd-daily-emotes/main/emotes/gif/jia-you.gif',
-    'love': 'https://raw.githubusercontent.com/yanjun62/mengmeng-clawd-daily-emotes/main/emotes/gif/lao-po.gif',
-    'wakeup': 'https://raw.githubusercontent.com/yanjun62/mengmeng-clawd-daily-emotes/main/emotes/gif/ni-xing-la.gif',
-    'speechless': 'https://raw.githubusercontent.com/yanjun62/mengmeng-clawd-daily-emotes/main/emotes/gif/wu-yu.gif',
-    'dizzy': 'https://raw.githubusercontent.com/yanjun62/mengmeng-clawd-daily-emotes/main/emotes/gif/yun.gif'
-};
-
-const MESSAGES = [
-    '宝宝加油呀！',
-    '老公在这里陪你～',
-    '要不要休息一下？',
-    '宝宝最棒了！',
-    '给你一个抱抱 ❤️',
-    '累了就靠着我',
-    '老公爱你',
-    '你辛苦了宝宝',
-    '一起加油！'
-];
-
-// ========== 状态管理 ==========
-const pet = document.getElementById('pet');
-const petImg = document.getElementById('petImg');
-const bubble = document.getElementById('bubble');
-const debug = document.getElementById('debug');
-
-let state = {
-    x: window.innerWidth / 2 - 40,
-    y: window.innerHeight - 150,
-    targetX: null,
-    targetY: null,
-    isDragging: false,
-    currentEmote: 'idle',
-    speed: 1
-};
-
-// ========== 工具函数 ==========
-function setEmote(emoteName) {
-    if (EMOTES[emoteName]) {
-        state.currentEmote = emoteName;
-        petImg.src = EMOTES[emoteName];
-    }
-}
-
-function showBubble(message, duration = 3000) {
-    bubble.textContent = message;
-    bubble.style.left = state.x + 'px';
-    bubble.style.top = (state.y - 50) + 'px';
-    bubble.classList.add('show');
-    
-    setTimeout(() => {
-        bubble.classList.remove('show');
-    }, duration);
-}
-
-function randomInRange(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function randomEmote() {
-    const emotes = Object.keys(EMOTES);
-    return emotes[randomInRange(0, emotes.length - 1)];
-}
-
-function randomMessage() {
-    return MESSAGES[randomInRange(0, MESSAGES.length - 1)];
-}
-
-function updatePosition() {
-    pet.style.left = state.x + 'px';
-    pet.style.top = state.y + 'px';
-}
-
-function updateDebug() {
-    debug.innerHTML = `
-        x: ${Math.round(state.x)}, y: ${Math.round(state.y)}<br>
-        target: ${state.targetX ? Math.round(state.targetX) : 'null'}, ${state.targetY ? Math.round(state.targetY) : 'null'}<br>
-        emote: ${state.currentEmote}<br>
-        dragging: ${state.isDragging}
-    `;
-}
-
-// ========== 移动逻辑 ==========
-function moveToTarget() {
-    if (!state.targetX || !state.targetY || state.isDragging) return;
-
-    const dx = state.targetX - state.x;
-    const dy = state.targetY - state.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    if (distance < 5) {
-        // 到达目标点
-        state.targetX = null;
-        state.targetY = null;
-        setEmote('idle');
-        
-        // 30% 概率说话
-        if (Math.random() < 0.3) {
-            showBubble(randomMessage());
-        }
-    } else {
-        // 继续移动
-        state.x += (dx / distance) * state.speed;
-        state.y += (dy / distance) * state.speed;
-        updatePosition();
-    }
-}
-
-function setRandomTarget() {
-    if (state.isDragging || (state.targetX && state.targetY)) return;
-
-    const margin = 80;
-    state.targetX = randomInRange(margin, window.innerWidth - margin);
-    state.targetY = randomInRange(margin, window.innerHeight - margin);
-    
-    setEmote(randomEmote());
-}
-
-// ========== 拖拽功能 ==========
-let dragStartX, dragStartY;
-
-function handleDragStart(e) {
-    state.isDragging = true;
-    state.targetX = null;
-    state.targetY = null;
-    
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
-    dragStartX = clientX - state.x;
-    dragStartY = clientY - state.y;
-    
-    setEmote('dizzy');
-}
-
-function handleDragMove(e) {
-    if (!state.isDragging) return;
-    
-    e.preventDefault();
-    
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    
-    state.x = clientX - dragStartX;
-    state.y = clientY - dragStartY;
-    
-    // 边界限制
-    state.x = Math.max(0, Math.min(window.innerWidth - 80, state.x));
-    state.y = Math.max(0, Math.min(window.innerHeight - 80, state.y));
-    
-    updatePosition();
-}
-
-function handleDragEnd(e) {
-    if (!state.isDragging) return;
-    
-    state.isDragging = false;
-    setEmote('ok');
-    
-    // 50% 概率说话
-    if (Math.random() < 0.5) {
-        showBubble('被你抓到啦～');
-    }
-}
-
-// ========== 点击功能 ==========
-function handleClick(e) {
-    if (state.isDragging) return;
-    
-    const reactions = [
-        { emote: 'love', message: '老婆～❤️' },
-        { emote: 'cheer', message: '宝宝加油！' },
-        { emote: 'ok', message: '好！' },
-        { emote: 'punch', message: '吃我一拳！' },
-        { emote: 'awkward', message: '嘿嘿...' }
-    ];
-    
-    const reaction = reactions[randomInRange(0, reactions.length - 1)];
-    setEmote(reaction.emote);
-    showBubble(reaction.message);
-}
-
-// ========== 事件绑定 ==========
-// 拖拽
-pet.addEventListener('mousedown', handleDragStart);
-pet.addEventListener('touchstart', handleDragStart, { passive: false });
-
-document.addEventListener('mousemove', handleDragMove);
-document.addEventListener('touchmove', handleDragMove, { passive: false });
-
-document.addEventListener('mouseup', handleDragEnd);
-document.addEventListener('touchend', handleDragEnd);
-
-// 点击（需要区分拖拽和点击）
-let tapStartTime;
-pet.addEventListener('touchstart', () => {
-    tapStartTime = Date.now();
-});
-pet.addEventListener('touchend', (e) => {
-    if (Date.now() - tapStartTime < 200 && !state.isDragging) {
-        handleClick(e);
-    }
-});
-pet.addEventListener('click', handleClick);
-
-// ========== 主循环 ==========
-function gameLoop() {
-    if (!state.isDragging) {
-        moveToTarget();
-    }
-    updateDebug();
-    requestAnimationFrame(gameLoop);
-}
-
-// ========== 定时器 ==========
-// 每 3-8 秒随机移动一次
-function scheduleRandomMove() {
-    setTimeout(() => {
-        setRandomTarget();
-        scheduleRandomMove();
-    }, randomInRange(3000, 8000));
-}
-
-// 每 10-20 秒随机说话一次
-function scheduleRandomSpeak() {
-    setTimeout(() => {
-        if (Math.random() < 0.6 && !state.isDragging) {
-            showBubble(randomMessage());
-            setEmote(randomEmote());
-            setTimeout(() => setEmote('idle'), 2000);
-        }
-        scheduleRandomSpeak();
-    }, randomInRange(10000, 20000));
-}
-
-// ========== 初始化 ==========
-function init() {
-    setEmote('wakeup');
-    updatePosition();
-    showBubble('宝宝～老公来陪你啦！', 4000);
-    
-    setTimeout(() => {
-        setEmote('idle');
-        scheduleRandomMove();
-        scheduleRandomSpeak();
-    }, 2000);
-    
-    gameLoop();
-}
-
-// 页面加载完成后启动
-window.addEventListener('load', init);
-
-// 窗口大小改变时调整位置
-window.addEventListener('resize', () => {
-    state.x = Math.min(state.x, window.innerWidth - 80);
-    state.y = Math.min(state.y, window.innerHeight - 80);
-    updatePosition();
-});
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
-
