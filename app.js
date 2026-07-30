@@ -828,7 +828,6 @@ function applyTheme() {
   }
 
   $("#chat-area").style.fontFamily = FONT_LIST[st.chatFont];
-  $("#input-text").style.fontFamily = FONT_LIST[st.chatFont];
   sb.style.fontFamily = FONT_LIST[st.uiFont];
   $("#topbar-title").style.fontFamily = FONT_LIST[st.uiFont];
 
