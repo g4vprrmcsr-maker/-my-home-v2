@@ -1571,7 +1571,7 @@ body.gpt-ui .menu-icon-gpt { display: block; }
     to bottom,
     transparent 0,
     #000 calc(env(safe-area-inset-top) + 76px),
-    #000 var(--chat-fade-start, calc(100% - 100px)),
+    #000 var(--chat-fade-start, calc(100% - 120px)),
     transparent 100%
   );
 
@@ -1579,7 +1579,7 @@ body.gpt-ui .menu-icon-gpt { display: block; }
     to bottom,
     transparent 0,
     #000 calc(env(safe-area-inset-top) + 76px),
-    #000 var(--chat-fade-start, calc(100% - 100px)),
+    #000 var(--chat-fade-start, calc(100% - 120px)),
     transparent 100%
   );
 }
