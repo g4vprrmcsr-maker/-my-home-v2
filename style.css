@@ -1591,6 +1591,7 @@ body.gpt-ui .menu-icon-gpt { display: block; }
 }
 
 #chat-area {
+  padding-top: calc(env(safe-area-inset-top) + 76px);
   padding-bottom: var(--input-reserve, 140px);
 
   -webkit-mask-image: linear-gradient(
