@@ -1564,29 +1564,29 @@ body.gpt-ui .menu-icon-gpt { display: block; }
   z-index: 20;
 }
 
-#chat-area {
-  padding-bottom: var(--input-reserve, 140px);
+#bottom-fade-layer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9;
+  pointer-events: none;
+
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
 
   -webkit-mask-image: linear-gradient(
     to bottom,
-    transparent 0,
-    #000 calc(env(safe-area-inset-top) + 76px),
-    #000 var(--chat-fade-start, calc(100% - 100px)),
-    rgba(0, 0, 0, 0.72) calc(var(--chat-fade-start, calc(100% - 100px)) + 18px),
-    rgba(0, 0, 0, 0.38) calc(var(--chat-fade-start, calc(100% - 100px)) + 48px),
-    rgba(0, 0, 0, 0.12) calc(var(--chat-fade-start, calc(100% - 100px)) + 76px),
-    transparent 100%
+    transparent 0%,
+    rgba(0, 0, 0, 0.55) 35%,
+    #000 100%
   );
 
   mask-image: linear-gradient(
     to bottom,
-    transparent 0,
-    #000 calc(env(safe-area-inset-top) + 76px),
-    #000 var(--chat-fade-start, calc(100% - 100px)),
-    rgba(0, 0, 0, 0.72) calc(var(--chat-fade-start, calc(100% - 100px)) + 18px),
-    rgba(0, 0, 0, 0.38) calc(var(--chat-fade-start, calc(100% - 100px)) + 48px),
-    rgba(0, 0, 0, 0.12) calc(var(--chat-fade-start, calc(100% - 100px)) + 76px),
-    transparent 100%
+    transparent 0%,
+    rgba(0, 0, 0, 0.55) 35%,
+    #000 100%
   );
 }
 
