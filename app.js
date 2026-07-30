@@ -887,7 +887,7 @@ function updateChatFade() {
   );
 
   chat.style.setProperty("--chat-fade-start", fadeStart + "px");
-  chat.style.setProperty("--chat-fade-end", chatRect.height + "px");
+
 }
 
 window.addEventListener("resize", updateChatFade);
