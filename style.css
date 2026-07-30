@@ -457,7 +457,7 @@ body.multi-mode .msg-check {
   font-size: 15px;
   line-height: 1.5;
   max-height: 120px;
-  font-family: inherit;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
   background: transparent;
   color: var(--text-main);
   position: relative;
