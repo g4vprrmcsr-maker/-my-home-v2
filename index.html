@@ -13,7 +13,7 @@
 
 
   <title>my home</title>
-  <link rel="stylesheet" href="style.css?v=301">
+  <link rel="stylesheet" href="style.css?v=302">
 </head>
 <body>
   <div id="app">
@@ -203,55 +203,6 @@
   })();
   </script>
 
-  <script src="app.js?v=301"></script>
-  
-  <script>
-setTimeout(function () {
-  var ia = document.getElementById('input-area');
-  var r = ia.getBoundingClientRect();
-  var x = Math.round(window.innerWidth / 2);
-
-  function dump(y, label) {
-    var out = '--- ' + label + ' (y=' + Math.round(y) + ') ---\n';
-    var els = document.elementsFromPoint(x, y);
-    els.forEach(function (e) {
-      var s = getComputedStyle(e);
-      var b = e.getBoundingClientRect();
-      out += (e.id ? '#' + e.id : e.tagName.toLowerCase());
-      if (typeof e.className === 'string' && e.className.trim()) {
-        out += '.' + e.className.trim().replace(/\s+/g, '.');
-      }
-      out += '\n   bg=' + s.backgroundColor;
-      out += ' img=' + (s.backgroundImage === 'none' ? 'no' : 'YES');
-      out += '\n   bdf=' + (s.webkitBackdropFilter || s.backdropFilter || 'none');
-      out += '\n   op=' + s.opacity + ' tf=' + s.transform;
-      out += '\n   shadow=' + s.boxShadow;
-      out += '\n   rect=' + Math.round(b.top) + '~' + Math.round(b.bottom) + '\n';
-    });
-    return out + '\n';
-  }
-
-  var bg = document.getElementById('chat-bg').getBoundingClientRect();
-  var ca = document.getElementById('chat-area').getBoundingClientRect();
-
-  var txt = 'innerH=' + window.innerHeight
-    + ' vvH=' + (window.visualViewport ? Math.round(window.visualViewport.height) : '-')
-    + '\nchat-bg  ' + Math.round(bg.top) + '~' + Math.round(bg.bottom)
-    + '\nchat-area ' + Math.round(ca.top) + '~' + Math.round(ca.bottom)
-    + '\ninput-area ' + Math.round(r.top) + '~' + Math.round(r.bottom)
-    + '\nia.style.transform=' + (ia.style.transform || '(empty)')
-    + '\n\n'
-    + dump(r.top + r.height / 2, '横幅内')
-    + dump(r.top - 60, '横幅上方');
-
-  var box = document.createElement('pre');
-  box.textContent = txt;
-  box.style.cssText = 'position:fixed;inset:0;z-index:99999;margin:0;padding:10px;'
-    + 'background:#fff;color:#000;font:10px/1.35 monospace;'
-    + 'white-space:pre-wrap;overflow:auto;';
-  box.onclick = function () { box.remove(); };
-  document.body.appendChild(box);
-}, 800);
-</script>
+  <script src="app.js?v=302"></script>
 </body>
 </html>
