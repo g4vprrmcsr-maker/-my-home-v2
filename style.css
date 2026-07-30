@@ -1599,15 +1599,7 @@ body.gpt-ui .menu-icon-gpt { display: block; }
     transparent 0,
     #000 calc(env(safe-area-inset-top) + 76px),
     #000 var(--chat-fade-start, 70%),
-    transparent var(--chat-fade-end, 100%)
-  );
-
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 calc(env(safe-area-inset-top) + 76px),
-    #000 var(--chat-fade-start, 70%),
-    transparent var(--chat-fade-end, 100%)
+    transparent 100%
   );
 }
 
