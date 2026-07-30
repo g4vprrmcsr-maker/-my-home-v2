@@ -4945,7 +4945,6 @@ function initKeyboardFix() {
   const input = $("#input-text");
   const root = document.documentElement;
   const vv = window.visualViewport;
-
   let keyboardGap = 0;
   let raf = 0;
   let timer = 0;
@@ -4958,9 +4957,7 @@ function initKeyboardFix() {
   function syncReserve() {
     const reserve = Math.ceil(ia.offsetHeight) + 8;
     root.style.setProperty("--input-reserve", reserve + "px");
-    area.style.paddingBottom = keyboardGap
-      ? (keyboardGap + reserve) + "px"
-      : "";
+    area.style.paddingBottom = keyboardGap ? keyboardGap + reserve + "px" : "";
   }
 
   if (window.ResizeObserver) {
@@ -4990,23 +4987,11 @@ function initKeyboardFix() {
       syncReserve();
       return;
     }
-
-    const gap = Math.max(
-      0,
-      window.innerHeight - vv.height - vv.offsetTop
-    );
-
+    const gap = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
     keyboardGap = gap > 40 ? gap : 0;
-    ia.style.transform = keyboardGap
-      ? "translateY(-" + keyboardGap + "px)"
-      : "";
-
+    ia.style.transform = keyboardGap ? "translateY(-" + keyboardGap + "px)" : "";
     syncReserve();
-
-    if (keyboardGap) {
-      area.scrollTop = area.scrollHeight;
-    }
-
+    if (keyboardGap) area.scrollTop = area.scrollHeight;
     resetScroll();
   }
 
@@ -5024,7 +5009,6 @@ function initKeyboardFix() {
   input.addEventListener("focus", () => {
     clearInterval(timer);
     let count = 0;
-
     timer = setInterval(() => {
       fit();
       if (++count > 20) {
@@ -5037,7 +5021,6 @@ function initKeyboardFix() {
   document.addEventListener("focusout", () => {
     clearInterval(timer);
     timer = 0;
-
     setTimeout(() => {
       fit();
       resetScroll();
