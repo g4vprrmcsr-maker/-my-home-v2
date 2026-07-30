@@ -585,7 +585,7 @@ async function dressBubble(bubble, isUser) {
     if (!urlCache[bgKey]) urlCache[bgKey] = URL.createObjectURL(bgBlob);
     bubble.style.backgroundImage = "url(" + urlCache[bgKey] + ")";
     bubble.style.backgroundSize = "cover";
-    bubble.style.color = st.skin === "night" ? "#f2f2f2" : "#000000";
+    bubble.style.color = st.skin === "night" ? "#f2f2f2" : "var(--text-main)";
     bubble.style.boxShadow = "0 1px 6px rgba(0,0,0,0.08)";
     return;
   }
@@ -608,7 +608,7 @@ async function dressBubble(bubble, isUser) {
       bg = "hsl(" + hue + "," + s + "%," + l + "%)";
     }
     bubble.style.background = bg;
-    bubble.style.color = hsl.dark ? "#f2f2f2" : "#000000";
+    bubble.style.color = hsl.dark ? "#f2f2f2" : "var(--text-main)";
 
     if (g > 0) {
       const glow = "hsla(" + hue + "," + Math.max(s, 25) + "%," + Math.max(l - 28, 10) + "%," + (0.22 * g).toFixed(2) + ")";
@@ -642,7 +642,7 @@ async function dressBubble(bubble, isUser) {
     if (tailed) {
       addTailClass(st.skin === "night" ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.55)");
     }
-    bubble.style.color = st.skin === "night" ? "#f2f2f2" : "#000000";
+    bubble.style.color = st.skin === "night" ? "#f2f2f2" : "var(--text-main)";
   }
 }
 
