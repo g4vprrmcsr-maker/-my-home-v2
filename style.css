@@ -71,7 +71,6 @@ html, body {
   color: var(--text-main);
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
   overscroll-behavior: none;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
@@ -301,7 +300,6 @@ body.export-mode .msg-row, body.multi-mode .msg-row { padding-left: 32px; }
   max-width: 100%;
   border-radius: 14px;
   padding: 8px 12px;
-  line-height: 1.65;
   word-break: break-word;
   white-space: pre-wrap;
   color: var(--text-main);
