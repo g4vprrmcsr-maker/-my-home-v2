@@ -870,20 +870,18 @@ function applyTheme() {
   $("#model-btn").classList.toggle("hidden", !st.showModelBtn);
 }
 function updateChatFade() {
-  const chat = $("#chat-area");
   const box = $("#input-box");
+  if (!box) return;
 
-  if (!chat || !box) return;
+  let layer = $("#bottom-fade-layer");
 
-  const chatRect = chat.getBoundingClientRect();
-  const boxRect = box.getBoundingClientRect();
+  if (!layer) {
+    layer = document.createElement("div");
+    layer.id = "bottom-fade-layer";
+    document.body.appendChild(layer);
+  }
 
-  const fadeStart = Math.max(
-    0,
-    Math.min(chatRect.height, boxRect.bottom - chatRect.top)
-  );
-
-  chat.style.setProperty("--chat-fade-start", fadeStart + "px");
+  layer.style.top = box.getBoundingClientRect().bottom + "px";
 }
 
 window.addEventListener("resize", updateChatFade);
