@@ -1566,7 +1566,24 @@ body.gpt-ui .menu-icon-gpt { display: block; }
 
 #chat-area {
   padding-bottom: var(--input-reserve, 140px);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 calc(env(safe-area-inset-top) + 76px),
+    #000 calc(100% - var(--input-reserve, 140px) - 30px),
+    transparent calc(100% - var(--input-reserve, 140px) + 26px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 calc(env(safe-area-inset-top) + 76px),
+    #000 calc(100% - var(--input-reserve, 140px) - 30px),
+    transparent calc(100% - var(--input-reserve, 140px) + 26px),
+    transparent 100%
+  );
 }
+
 /* 输入栏透明度和柔和悬浮阴影：经典模式与 GPT 模式共用 */
 body #input-box,
 body.skin-liquid #input-box,
