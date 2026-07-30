@@ -1,7 +1,6 @@
 /* ==========================================
    my home style.css v200
    ========================================== */
-
 :root {
   --bg: #ffffff;
   --bg-panel: #ffffff;
@@ -16,8 +15,6 @@
   --msg-fs: 14px;
   --avatar-size: 30px;
   --glass-blur: 14px;
-  --title-fs: 15px;
-  --title-fw: 600;
   --dock-drop: 8px;
 }
 
@@ -35,10 +32,10 @@ body.dark {
 }
 
 body.skin-official {
-  --bg: #FAF9F5;
+  --bg: #FAFAF8;
   --bg-panel: #FDFCF9;
   --bg-input: rgba(255, 255, 255, 0.78);
-  --text-main: #3d3929;
+  --text-main: #20201E;
   --text-sub: #73705f;
   --text-faint: #b8b4a6;
   --line: rgba(61, 57, 41, 0.08);
@@ -217,10 +214,13 @@ body {
   margin-left: auto;
 }
 .topbar-btn {
-  width: 36px; height: 36px;
+  width: 40px; height: 40px;
   border-radius: 50%;
   border: none;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 3px 12px rgba(0,0,0,0.06);
   font-size: 19px;
   color: var(--text-main);
   display: flex;
@@ -229,35 +229,30 @@ body {
   cursor: pointer;
   flex-shrink: 0;
 }
-.topbar-btn:active { background: var(--press); }
+body.dark .topbar-btn {
+  background: rgba(60, 60, 60, 0.4);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 3px 12px rgba(0,0,0,0.2);
+}
+.topbar-btn:active { opacity: 0.7; }
 
 #topbar-title {
-  font-size: var(--title-fs);
-  font-weight: var(--title-fw);
+  font-size: var(--title-fs, 15px);
+  font-weight: var(--title-fw, 600);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  margin-left: 2px;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border-radius: 999px;
+  padding: 10px 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 3px 12px rgba(0,0,0,0.06);
+  margin-left: 10px;
 }
 
-body.skin-liquid #topbar {
-  background: transparent;
-  border-bottom: none;
-  box-shadow: none;
-}
-body.skin-liquid .topbar-btn {
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(16px) saturate(1.5);
-  -webkit-backdrop-filter: blur(16px) saturate(1.5);
-  box-shadow: inset 0 1px 1px rgba(255,255,255,0.5), 0 2px 8px rgba(0,0,0,0.05);
-}
-body.skin-liquid #topbar-title {
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(16px) saturate(1.5);
-  -webkit-backdrop-filter: blur(16px) saturate(1.5);
-  border-radius: 999px;
-  padding: 6px 14px;
-  box-shadow: inset 0 1px 1px rgba(255,255,255,0.5), 0 2px 8px rgba(0,0,0,0.05);
+body.dark #topbar-title {
+  background: rgba(60, 60, 60, 0.4);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 3px 12px rgba(0,0,0,0.2);
 }
 
 body.skin-liquid #input-box {
@@ -459,6 +454,10 @@ body.multi-mode .msg-check { display: block; }
   color: var(--text-main);
   position: relative;
   z-index: 1;
+  min-height: 42px;
+}
+body.gpt-ui #input-text {
+  min-height: auto;
 }
 .input-toolbar {
   display: flex;
@@ -1432,19 +1431,19 @@ body.gpt-ui #topbar-title {
   -webkit-backdrop-filter: blur(20px) saturate(1.8);
   border-radius: 999px;
   padding: 10px 20px;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--title-fs, 15px);
+  font-weight: var(--title-fw, 600);
   box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 3px 12px rgba(0,0,0,0.06);
   margin-left: 10px;
   position: static;
 }
-body.gpt-ui #topbar.title-centered #topbar-title {
+#topbar.title-centered #topbar-title {
   margin-left: 0;
 }
-body.gpt-ui #topbar.title-centered {
+#topbar.title-centered {
   gap: 0;
 }
-body.gpt-ui #topbar.title-centered .topbar-btn:last-child {
+#topbar.title-centered .topbar-btn:last-child {
   margin-left: 0;
   position: absolute;
   right: 12px;
@@ -1567,3 +1566,7 @@ body.gpt-ui #mini-menu-btn {
   position: relative;
   z-index: 10;
 }
+.menu-icon-classic { display: block; }
+.menu-icon-gpt { display: none; }
+body.gpt-ui .menu-icon-classic { display: none; }
+body.gpt-ui .menu-icon-gpt { display: block; }
