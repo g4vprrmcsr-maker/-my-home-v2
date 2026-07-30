@@ -1585,6 +1585,8 @@ body.gpt-ui .menu-icon-gpt { display: block; }
 /* =========================================================
    经典模式：Claude 官方风格实体悬浮材质
    只作用于非 gpt-ui 页面
+   ========================================================= */
+
 body:not(.gpt-ui) {
   --classic-surface:
     linear-gradient(180deg, #fbfbfa 0%, #f7f7f4 52%, #f2f2ef 100%);
