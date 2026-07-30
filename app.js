@@ -4943,57 +4943,106 @@ function initKeyboardFix() {
   const ia = $("#input-area");
   const area = $("#chat-area");
   const input = $("#input-text");
+  const root = document.documentElement;
+  const vv = window.visualViewport;
 
-  if (!window.visualViewport) {
+  let keyboardGap = 0;
+  let raf = 0;
+  let timer = 0;
+
+  function resetScroll() {
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+  }
+
+  function syncReserve() {
+    const reserve = Math.ceil(ia.offsetHeight) + 8;
+    root.style.setProperty("--input-reserve", reserve + "px");
+    area.style.paddingBottom = keyboardGap
+      ? (keyboardGap + reserve) + "px"
+      : "";
+  }
+
+  if (window.ResizeObserver) {
+    ia._reserveObserver = new ResizeObserver(syncReserve);
+    ia._reserveObserver.observe(ia);
+  } else {
+    input.addEventListener("input", syncReserve);
+    window.addEventListener("resize", syncReserve);
+  }
+
+  syncReserve();
+
+  if (!vv) {
     document.addEventListener("focusout", () => {
-      setTimeout(() => { window.scrollTo(0, 0); document.body.scrollTop = 0; }, 80);
+      keyboardGap = 0;
+      ia.style.transform = "";
+      syncReserve();
+      setTimeout(resetScroll, 80);
     });
     return;
   }
 
-  const vv = window.visualViewport;
-  let raf = null;
-
-    function fit() {
+  function fit() {
     if (document.activeElement !== input) {
+      keyboardGap = 0;
       ia.style.transform = "";
-      area.style.paddingBottom = "";
+      syncReserve();
       return;
     }
-    const gap = window.innerHeight - vv.height - vv.offsetTop;
 
-    if (gap > 40) {
-      ia.style.transform = "translateY(-" + gap + "px)";
-      area.style.paddingBottom = (gap + 8) + "px";
+    const gap = Math.max(
+      0,
+      window.innerHeight - vv.height - vv.offsetTop
+    );
+
+    keyboardGap = gap > 40 ? gap : 0;
+    ia.style.transform = keyboardGap
+      ? "translateY(-" + keyboardGap + "px)"
+      : "";
+
+    syncReserve();
+
+    if (keyboardGap) {
       area.scrollTop = area.scrollHeight;
-      window.scrollTo(0, 0);
-      document.body.scrollTop = 0;
-    } else {
-      ia.style.transform = "";
-      area.style.paddingBottom = "";
-      window.scrollTo(0, 0);
-      document.body.scrollTop = 0;
     }
+
+    resetScroll();
   }
 
-  function onChange() {
+  function scheduleFit() {
     if (raf) cancelAnimationFrame(raf);
-    raf = requestAnimationFrame(fit);
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      fit();
+    });
   }
 
-  vv.addEventListener("resize", onChange);
-  vv.addEventListener("scroll", onChange);
+  vv.addEventListener("resize", scheduleFit);
+  vv.addEventListener("scroll", scheduleFit);
 
   input.addEventListener("focus", () => {
-    let n = 0;
-    const t = setInterval(() => {
+    clearInterval(timer);
+    let count = 0;
+
+    timer = setInterval(() => {
       fit();
-      n++;
-      if (n > 20) clearInterval(t);
+      if (++count > 20) {
+        clearInterval(timer);
+        timer = 0;
+      }
     }, 50);
   });
 
-  document.addEventListener("focusout", () => { setTimeout(fit, 90); });
+  document.addEventListener("focusout", () => {
+    clearInterval(timer);
+    timer = 0;
+
+    setTimeout(() => {
+      fit();
+      resetScroll();
+    }, 90);
+  });
 }
 
 /* ---------- 总渲染 ---------- */
