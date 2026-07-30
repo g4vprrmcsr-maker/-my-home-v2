@@ -311,7 +311,6 @@ body.export-mode .msg-row, body.multi-mode .msg-row { padding-left: 32px; }
   background-size: cover;
   background-position: center;
 }
-body:not(.dark) .msg-bubble { color: #000000; }
 .msg-bubble strong { font-weight: 600; }
 
 .msg-bubble em { font-style: italic; }
