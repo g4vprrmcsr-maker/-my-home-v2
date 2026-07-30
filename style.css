@@ -296,6 +296,8 @@ body.export-mode .msg-row, body.multi-mode .msg-row { padding-left: 32px; }
 .msg-name { font-size: 11px; color: var(--text-sub); letter-spacing: 0.2px; }
 .msg-time { font-size: 9px; color: var(--text-faint); }
 .msg-bubble {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   width: fit-content;
   max-width: 100%;
   border-radius: 14px;
