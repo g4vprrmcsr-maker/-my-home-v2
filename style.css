@@ -273,7 +273,8 @@ body.skin-liquid #input-box {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.msg-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.msg-row { position: relative; display: flex; gap: 8px; margin-bottom: 16px; }
+body.export-mode .msg-row, body.multi-mode .msg-row { padding-left: 32px; }
 .msg-row.anim-in { animation: msgIn 0.22s ease-out; }
 .msg-row-user { flex-direction: row-reverse; }
 .msg-avatar {
@@ -391,15 +392,22 @@ body:not(.dark) .msg-bubble { color: #000000; }
 }
 @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
 .msg-check {
-  width: 18px; height: 18px;
-  accent-color: var(--btn-main);
-  align-self: center;
-  flex-shrink: 0;
   display: none;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  transform: translateY(-50%);
+  accent-color: var(--btn-main);
+  z-index: 2;
 }
-body.export-mode .msg-check { display: block; }
-body.multi-mode .msg-check { display: block; }
 
+body.export-mode .msg-check,
+body.multi-mode .msg-check {
+  display: block;
+}
 #input-area {
   padding: 2px 12px 0;
   background: transparent;
@@ -562,8 +570,27 @@ body.gpt-ui #input-text {
 .act-btn:active { background: var(--press); }
 .act-btn.danger { color: #e5484d; }
 
-#export-txt-bar, #multi-del-bar { display: none; padding: 8px 14px; gap: 10px; }
-#export-txt-bar.show, #multi-del-bar.show { display: flex; }
+#export-txt-bar {
+  display: none;
+  padding: 8px 14px;
+  gap: 10px;
+}
+#export-txt-bar.show { display: flex; }
+
+#multi-del-bar {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  gap: 10px;
+  padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+  background: var(--bg-panel);
+}
+#multi-del-bar.show { display: flex; }
+#multi-del-bar .btn { flex: 1; }
+body.multi-mode #input-area { display: none; }
 
 .panel {
   position: fixed;
