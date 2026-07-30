@@ -869,12 +869,34 @@ function applyTheme() {
 
   $("#model-btn").classList.toggle("hidden", !st.showModelBtn);
 }
+function updateChatFade() {
+  const chat = $("#chat-area");
+  const box = $("#input-box");
+
+  if (!chat || !box) return;
+
+  const chatRect = chat.getBoundingClientRect();
+  const boxRect = box.getBoundingClientRect();
+
+  const fadeStartPx = boxRect.bottom - chatRect.top;
+  const fadeStartPercent = Math.max(
+    0,
+    Math.min(100, (fadeStartPx / chatRect.height) * 100)
+  );
+
+  chat.style.setProperty(
+    "--chat-fade-start",
+    fadeStartPercent + "%"
+  );
+}
+window.addEventListener("resize", updateChatFade);
 
 /* ---------- 布局 ---------- */
 function applyLayout() {
   const st = state.settings;
   const tb = $("#topbar");
   const title = $("#topbar-title");
+
   if (st.titleCenter) {
     tb.classList.add("title-centered");
     title.style.position = "absolute";
@@ -888,10 +910,19 @@ function applyLayout() {
     title.style.transform = "";
     title.style.maxWidth = "";
   }
+
   const ia = $("#input-area");
   const lift = Math.max(0, 34 - st.inputLift);
-  ia.style.paddingBottom = "calc(" + lift + "px + env(safe-area-inset-bottom) * 0.4)";
-  document.documentElement.style.setProperty("--dock-drop", st.dockDrop + "px");
+
+  ia.style.paddingBottom =
+    "calc(" + lift + "px + env(safe-area-inset-bottom) * 0.4)";
+
+  document.documentElement.style.setProperty(
+    "--dock-drop",
+    st.dockDrop + "px"
+  );
+
+  updateChatFade();
 }
 
 /* ---------- 文字手感 ---------- */
