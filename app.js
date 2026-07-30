@@ -878,17 +878,14 @@ function updateChatFade() {
   const chatRect = chat.getBoundingClientRect();
   const boxRect = box.getBoundingClientRect();
 
-  const fadeStartPx = boxRect.bottom - chatRect.top;
-  const fadeStartPercent = Math.max(
+  const fadeStart = Math.max(
     0,
-    Math.min(100, (fadeStartPx / chatRect.height) * 100)
+    Math.min(chatRect.height, boxRect.bottom - chatRect.top)
   );
 
-  chat.style.setProperty(
-    "--chat-fade-start",
-    fadeStartPercent + "%"
-  );
+  chat.style.setProperty("--chat-fade-start", fadeStart + "px");
 }
+
 window.addEventListener("resize", updateChatFade);
 
 /* ---------- 布局 ---------- */
