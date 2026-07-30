@@ -1571,19 +1571,18 @@ body.gpt-ui .menu-icon-gpt { display: block; }
     to bottom,
     transparent 0,
     #000 calc(env(safe-area-inset-top) + 76px),
-    #000 var(--chat-fade-start, 75%),
-    transparent 100%
+    #000 var(--chat-fade-start, 70%),
+    transparent var(--chat-fade-end, 100%)
   );
 
   mask-image: linear-gradient(
     to bottom,
     transparent 0,
     #000 calc(env(safe-area-inset-top) + 76px),
-    #000 var(--chat-fade-start, 75%),
-    transparent 100%
+    #000 var(--chat-fade-start, 70%),
+    transparent var(--chat-fade-end, 100%)
   );
 }
-
 
 /* 输入栏透明度和柔和悬浮阴影：经典模式与 GPT 模式共用 */
 body #input-box,
