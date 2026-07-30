@@ -1566,20 +1566,20 @@ body.gpt-ui .menu-icon-gpt { display: block; }
 
 #chat-area {
   padding-bottom: var(--input-reserve, 140px);
+
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0,
     #000 calc(env(safe-area-inset-top) + 76px),
-    #000 calc(100% - var(--input-reserve, 140px) - 30px),
-    transparent calc(100% - var(--input-reserve, 140px) + 26px),
+    #000 var(--chat-fade-start, calc(100% - 100px)),
     transparent 100%
   );
+
   mask-image: linear-gradient(
     to bottom,
     transparent 0,
     #000 calc(env(safe-area-inset-top) + 76px),
-    #000 calc(100% - var(--input-reserve, 140px) - 30px),
-    transparent calc(100% - var(--input-reserve, 140px) + 26px),
+    #000 var(--chat-fade-start, calc(100% - 100px)),
     transparent 100%
   );
 }
