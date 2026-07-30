@@ -4,7 +4,7 @@
 :root {
   --bg: #ffffff;
   --bg-panel: #ffffff;
-  --bg-input: rgba(255, 255, 255, 0.70);
+  --bg-input: rgba(255, 255, 255, 0.58);
   --text-main: #1a1a1a;
   --text-sub: #666666;
   --text-faint: #b0b0b0;
@@ -21,7 +21,7 @@
 body.dark {
   --bg: #1f1f1f;
   --bg-panel: #262626;
-  --bg-input: rgba(50, 50, 50, 0.72);
+  --bg-input: rgba(50, 50, 50, 0.62);
   --text-main: #eaeaea;
   --text-sub: #a0a0a0;
   --text-faint: #6e6e6e;
@@ -34,7 +34,7 @@ body.dark {
 body.skin-official {
   --bg: #FAFAF8;
   --bg-panel: #FDFCF9;
-  --bg-input: rgba(255, 255, 255, 0.88);
+  --bg-input: rgba(255, 255, 255, 0.68);
   --text-main: #20201E;
   --text-sub: #73705f;
   --text-faint: #b8b4a6;
@@ -47,7 +47,7 @@ body.skin-official {
 body.skin-liquid {
   --bg: #eef0f3;
   --bg-panel: rgba(255, 255, 255, 0.82);
-  --bg-input: rgba(255, 255, 255, 0.65);
+  --bg-input: rgba(255, 255, 255, 0.52);
   --text-main: #23272c;
   --text-sub: #5f666e;
   --text-faint: #a6adb5;
@@ -1567,22 +1567,20 @@ body.gpt-ui .menu-icon-gpt { display: block; }
 #chat-area {
   padding-bottom: var(--input-reserve, 140px);
 }
-/* 输入栏透明度和悬浮阴影：经典模式与 GPT 模式共用 */
+/* 输入栏透明度和柔和悬浮阴影：经典模式与 GPT 模式共用 */
 body #input-box,
 body.skin-liquid #input-box,
 body.gpt-ui #input-box,
 body.dark.gpt-ui #input-box {
   background: var(--bg-input);
   box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.07),
-    0 12px 28px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.48);
+    0 2px 8px rgba(0, 0, 0, 0.035),
+    0 8px 22px rgba(0, 0, 0, 0.065);
 }
 
 body.dark #input-box,
 body.dark.gpt-ui #input-box {
   box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.18),
-    0 12px 28px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    0 2px 8px rgba(0, 0, 0, 0.10),
+    0 8px 22px rgba(0, 0, 0, 0.16);
 }
