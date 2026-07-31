@@ -1619,7 +1619,7 @@ body.dark.gpt-ui #input-box {
     0 2px 8px rgba(0, 0, 0, 0.10),
     0 8px 22px rgba(0, 0, 0, 0.16);
 }
-/* ========== 经典模式:轻磨砂玻璃悬浮(对标官方iOS,不碰 GPT / 夜间) ========== */
+/* ========== 经典模式:薄玻璃悬浮(对标官方iOS,不碰 GPT / 夜间) ========== */
 
 /* 输入区两侧 16px 气口 */
 body:not(.gpt-ui) #input-area {
@@ -1633,11 +1633,11 @@ body:not(.gpt-ui) #topbar {
   padding-right: 16px;
 }
 
-/* 输入框:半透亮白 + 轻磨砂 + 提饱和,细边,柔浮影,圆角30 */
+/* 输入框:薄玻璃(白薄到透得出下面) + 轻磨砂,细边,柔浮影,圆角30 */
 body:not(.gpt-ui):not(.dark) #input-box {
-  background: rgba(255, 255, 255, 0.62);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 30px;
   padding: 10px 14px 8px;
@@ -1673,13 +1673,13 @@ body:not(.gpt-ui):not(.dark) #mini-menu-btn {
   justify-content: center;
 }
 
-/* 顶栏圆钮:42px 半透亮白 + 轻磨砂 + 很轻的浮影 */
+/* 顶栏圆钮:42px 薄玻璃 + 轻磨砂 + 很轻浮影 */
 body:not(.gpt-ui):not(.dark) #topbar .topbar-btn {
   width: 42px;
   height: 42px;
-  background: rgba(255, 255, 255, 0.62);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
   border: 1px solid rgba(255, 255, 255, 0.7);
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.04),
@@ -1688,14 +1688,13 @@ body:not(.gpt-ui):not(.dark) #topbar .topbar-btn {
 
 /* 顶栏标题胶囊:同款,长高对齐 42 圆钮 */
 body:not(.gpt-ui):not(.dark) #topbar-title {
-  background: rgba(255, 255, 255, 0.62);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
   border: 1px solid rgba(255, 255, 255, 0.7);
   padding: 11px 20px;
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.04),
     0 6px 16px rgba(0, 0, 0, 0.04);
 }
-
 
