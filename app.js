@@ -745,9 +745,6 @@ function dressMeta(row, isUser) {
 }
 /* ---------- 发送键图形 ---------- */
 function sendGlyphHtml() {
-  if (state.settings.chatUi === "gpt") {
-    return '<svg viewBox="0 0 24 24" width="17" height="17"><path d="M4.5 11.5 L19.5 4.5 L16.2 19.5 L11.8 13.6 L4.5 11.5 Z M11.8 13.6 L19.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  }
   return "↑";
 }
 
