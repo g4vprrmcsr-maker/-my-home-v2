@@ -1287,18 +1287,26 @@ async function buildMsgRow(m, gi, aiSrc, userSrc) {
           saveState();
           renderMessages();
         }) });
-      showActions(items, ev.clientX, ev.clientY);
+      showActions(items, 0, 0);
       const mn = document.querySelector(".msg-actions");
       if (mn) {
-        mn.style.display = "flex";
-        mn.style.flexDirection = "column";
-        mn.style.alignItems = "stretch";
-        mn.querySelectorAll(".act-btn").forEach(b3 => { b3.style.textAlign = "left"; });
+        const br = ev.currentTarget.getBoundingClientRect();
         const r2 = mn.getBoundingClientRect();
-        mn.style.left = Math.max(8, Math.min(ev.clientX, window.innerWidth - r2.width - 8)) + "px";
-        mn.style.top = Math.max(8, Math.min(ev.clientY, window.innerHeight - r2.height - 8)) + "px";
+        const gap = 8;
+        // 用户消息:菜单右缘对齐按钮;AI消息:左缘对齐按钮
+        let left = isUser ? (br.right - r2.width) : br.left;
+        left = Math.max(gap, Math.min(left, window.innerWidth - r2.width - gap));
+        // 默认贴按钮下方弹出;下方放不下就翻到上方
+        let top = br.bottom + 6;
+        if (top + r2.height > window.innerHeight - gap) {
+          top = br.top - r2.height - 6;
+        }
+        top = Math.max(gap, Math.min(top, window.innerHeight - r2.height - gap));
+        mn.style.left = left + "px";
+        mn.style.top = top + "px";
       }
     });
+
     if (!isUser && st.tokenInBar && st.showToken && m.tokens) {
       const tk = document.createElement("span");
       tk.textContent = m.tokens + " tokens";
