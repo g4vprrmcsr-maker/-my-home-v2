@@ -5,7 +5,7 @@
   --bg: #ffffff;
   --bg-panel: #ffffff;
   --bg-input: rgba(255, 255, 255, 0.58);
-  --text-main: #1a1a1a;
+  --text-main: #333331;
   --text-sub: #666666;
   --text-faint: #b0b0b0;
   --line: rgba(0, 0, 0, 0.06);
@@ -32,11 +32,11 @@ body.dark {
 }
 
 body.skin-official {
-  --bg: #FAFAF8;
+  --bg: #F9F9F7;
   --bg-panel: #FDFCF9;
   --bg-input: rgba(255, 255, 255, 0.68);
-  --text-main: #20201E;
-  --text-sub: #73705f;
+  --text-main: #333331;
+  --text-sub: #7A7874;
   --text-faint: #b8b4a6;
   --line: rgba(61, 57, 41, 0.08);
   --press: rgba(61, 57, 41, 0.055);
@@ -48,7 +48,7 @@ body.skin-liquid {
   --bg: #eef0f3;
   --bg-panel: rgba(255, 255, 255, 0.82);
   --bg-input: rgba(255, 255, 255, 0.52);
-  --text-main: #23272c;
+  --text-main: #333331;
   --text-sub: #5f666e;
   --text-faint: #a6adb5;
   --line: rgba(30, 40, 50, 0.07);
