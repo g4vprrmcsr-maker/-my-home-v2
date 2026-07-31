@@ -1591,13 +1591,13 @@ body.gpt-ui .menu-icon-gpt { display: block; }
 }
 
 #chat-area {
-  padding-top: calc(env(safe-area-inset-top) + 70px);
+  padding-top: calc(env(safe-area-inset-top) + 60px);
   padding-bottom: var(--input-reserve, 140px);
 
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0,
-    #000 calc(env(safe-area-inset-top) + 70px),
+    #000 calc(env(safe-area-inset-top) + 60px),
     #000 var(--chat-fade-start, 70%),
     transparent 100%
   );
