@@ -1619,4 +1619,65 @@ body.dark.gpt-ui #input-box {
     0 2px 8px rgba(0, 0, 0, 0.10),
     0 8px 22px rgba(0, 0, 0, 0.16);
 }
+/* ========== 经典模式:苹果原生输入区 + 顶栏(不碰 GPT / 夜间) ========== */
+
+/* 输入框:实底 #F7F7F7 + 白边 + 28圆角,去磨砂,两侧留 16px 气口 */
+body:not(.gpt-ui) #input-area {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+body:not(.gpt-ui):not(.dark) #input-box {
+  background: #F7F7F7;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid #FFFFFF;
+  border-radius: 28px;
+  padding: 12px 14px 10px;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(0, 0, 0, 0.07);
+}
+
+/* 输入框内部按钮:底色 #F0EFEC,无悬浮阴影,尺寸略放大 */
+/* 加号 */
+body:not(.gpt-ui):not(.dark) #attach-btn {
+  width: 32px;
+  height: 32px;
+  background: #F0EFEC;
+  color: var(--text-sub);
+  box-shadow: none;
+}
+/* 模型胶囊:改成胶囊形 */
+body:not(.gpt-ui):not(.dark) #model-btn {
+  background: #F0EFEC;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  box-shadow: none;
+}
+/* 三个点:补成圆钮,底色同上 */
+body:not(.gpt-ui):not(.dark) #mini-menu-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #F0EFEC;
+  color: var(--text-sub);
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* 发送键头:完全不碰,保持原黑圆钮 */
+
+/* 顶栏圆钮 + 标题胶囊:实底 #F7F7F7 + 白边,去磨砂,保留悬浮层次 */
+body:not(.gpt-ui):not(.dark) #topbar .topbar-btn,
+body:not(.gpt-ui):not(.dark) #topbar-title {
+  background: #F7F7F7;
+  border: 1px solid #FFFFFF;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 3px 12px rgba(0, 0, 0, 0.06);
+}
 
