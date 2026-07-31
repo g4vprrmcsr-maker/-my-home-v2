@@ -262,7 +262,7 @@ body.skin-liquid #input-box {
 #chat-area {
   flex: 1;
   overflow-y: auto;
-  padding: 10px 14px 8px;
+  padding: 10px 16px 8px;
   -webkit-overflow-scrolling: touch;
   font-size: var(--msg-fs);
   scroll-behavior: auto;
