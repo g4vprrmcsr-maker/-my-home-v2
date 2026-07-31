@@ -1251,7 +1251,7 @@ body.dark .overlay-page { background: rgba(38, 36, 40, 0.98); }
 /* ========== 设置美化第一刀:灰底白卡地基 ========== */
 :root { --set-bg: #f2f2f7; }
 body.dark { --set-bg: #181818; }
-body.skin-official { --set-bg: #F2F0E9; }
+body.skin-official { --set-bg: #F3F3F0; }
 body.skin-liquid { --set-bg: #e9ecf0; }
 
 #theme-panel, #settings-panel { background: var(--set-bg); }
