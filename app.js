@@ -514,9 +514,9 @@ const QUICK_COLORS = [
   { name: "纯白", h: 0, s: 0, l: 100, a: 100 },
   { name: "灰", h: 45, s: 12, l: 93, a: 100 },
   { name: "黑", h: 0, s: 0, l: 8, a: 100 },
-  { name: "Claude米", h: 46, s: 20, l: 91, a: 100 },
-  { name: "天蓝", h: 205, s: 75, l: 82, a: 90 },
-  { name: "粉", h: 340, s: 70, l: 86, a: 90 },
+  { name: "奶茶", h: 0, s: 0, l: 88, a: 100 },
+  { name: "蓝", h: 238, s: 81, l: 84, a: 100 },
+  { name: "粉", h: 354, s: 100, l: 90, a: 100 },
   { name: "微信绿", h: 100, s: 65, l: 72, a: 92 }
 ];
 
@@ -3122,11 +3122,11 @@ function buildTabBubble(body) {
   szBtn.onclick = () => { bubbleSizeFold = !bubbleSizeFold; buildThemePanel(); };
   sec.appendChild(szBtn);
   if (!bubbleSizeFold) {
-    mkSlider(sec, "上下厚度", 2, 18, 1, "bubblePadV", "px", () => renderMessages());
-    mkSlider(sec, "左右宽度", 4, 22, 1, "bubblePadH", "px", () => renderMessages());
+    mkSlider(sec, "上下厚度", 2, 30, 1, "bubblePadV", "px", () => renderMessages());
+    mkSlider(sec, "左右宽度", 4,30, 1, "bubblePadH", "px", () => renderMessages());
     mkSlider(sec, "最大宽度", 55, 100, 1, "bubbleMaxW", "%", () => { applyBubbleBox(); renderMessages(); });
-    mkSlider(sec, "圆角弧度", 0, 26, 1, "bubbleRadius", "px", () => renderMessages());
-    mkSlider(sec, "段落间距（消息里空行的高度）", 0, 24, 1, "paraGap", "px", () => renderMessages());
+    mkSlider(sec, "圆角弧度", 0, 40, 1, "bubbleRadius", "px", () => renderMessages());
+    mkSlider(sec, "段落间距（消息里空行的高度）", 0, 30, 1, "paraGap", "px", () => renderMessages());
   }
 
   mkColorArea(sec, "我的气泡颜色", "userHue", "userSat", "userLight", "userAlpha");
