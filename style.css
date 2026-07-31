@@ -1775,9 +1775,5 @@ body.gpt-ui #send-btn {
   background: var(--btn-main);
   color: var(--btn-main-text);
 }
-/* 官方皮肤:主题页 + 设置页的白卡片改 #F0EFEC */
-body.skin-official .set-card,
-body.skin-official #settings-panel .settings-section {
-  background: #F0EFEC;
-}
+
 
