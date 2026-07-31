@@ -1621,26 +1621,34 @@ body.dark.gpt-ui #input-box {
 }
 /* ========== 经典模式:实色悬浮输入区 + 顶栏(不碰 GPT / 夜间) ========== */
 
-/* 两侧 16px 气口 */
+/* 输入区两侧 16px 气口 */
 body:not(.gpt-ui) #input-area {
   padding-left: 16px;
   padding-right: 16px;
 }
 
-/* 输入框:实色 #F6F6F6,无透明无磨砂,保留悬浮,圆角30,高度减4 */
+/* 顶栏两侧 16px 呼吸口 */
+body:not(.gpt-ui) #topbar {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* 输入框:上亮下沉微渐变 + 顶部高光 + 三层轻柔浮影,圆角30 */
 body:not(.gpt-ui):not(.dark) #input-box {
-  background: #F6F6F6;
+  background: linear-gradient(180deg, #FCFCFC 0%, #F6F6F6 100%);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: 1px solid #FFFFFF;
   border-radius: 30px;
   padding: 10px 14px 8px;
   box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    0 8px 24px rgba(0, 0, 0, 0.07);
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.95),
+    0 1px 2px rgba(0, 0, 0, 0.03),
+    0 6px 16px rgba(0, 0, 0, 0.05),
+    0 14px 34px rgba(0, 0, 0, 0.05);
 }
 
-/* 内部按钮:实底 #F0EFEC,平的无阴影 */
+/* 内部按钮:实底 #F0EFEC,平的无阴影(保持不动) */
 body:not(.gpt-ui):not(.dark) #attach-btn {
   width: 32px;
   height: 32px;
@@ -1667,14 +1675,31 @@ body:not(.gpt-ui):not(.dark) #mini-menu-btn {
   justify-content: center;
 }
 
-/* 顶栏圆钮 + 标题胶囊:实色 #F6F6F6 + 1px 白边 + 悬浮 */
-body:not(.gpt-ui):not(.dark) #topbar .topbar-btn,
-body:not(.gpt-ui):not(.dark) #topbar-title {
-  background: #F6F6F6;
+/* 顶栏圆钮:42px + 上亮下沉渐变 + 高光 + 三层轻浮影 */
+body:not(.gpt-ui):not(.dark) #topbar .topbar-btn {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(180deg, #FCFCFC 0%, #F6F6F6 100%);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: 1px solid #FFFFFF;
   box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.05),
-    0 3px 12px rgba(0, 0, 0, 0.06);
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.95),
+    0 1px 2px rgba(0, 0, 0, 0.03),
+    0 4px 12px rgba(0, 0, 0, 0.05),
+    0 10px 26px rgba(0, 0, 0, 0.05);
+}
+
+/* 顶栏标题胶囊:同款质感,长高对齐 42 圆钮 */
+body:not(.gpt-ui):not(.dark) #topbar-title {
+  background: linear-gradient(180deg, #FCFCFC 0%, #F6F6F6 100%);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid #FFFFFF;
+  padding: 11px 20px;
+  box-shadow:
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.95),
+    0 1px 2px rgba(0, 0, 0, 0.03),
+    0 4px 12px rgba(0, 0, 0, 0.05),
+    0 10px 26px rgba(0, 0, 0, 0.05);
 }
