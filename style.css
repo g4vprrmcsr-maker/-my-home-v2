@@ -1709,3 +1709,69 @@ body:not(.gpt-ui):not(.dark) #topbar .topbar-btn {
 body:not(.gpt-ui):not(.dark) #topbar-title {
   color: #383835;
 }
+/* 输入框白边加宽到 1.5px（顶栏按钮仍 1px 不动） */
+body:not(.gpt-ui):not(.dark) #input-box {
+  border-width: 1.5px;
+}
+
+/* 标题胶囊:降 2px 高度 + 向左靠近三条杠约 4px(≈0.1cm) */
+body:not(.gpt-ui):not(.dark) #topbar-title {
+  padding: 9px 20px;
+  margin-left: 6px;
+}
+/* ========== GPT模式:输入框恢复成原版老经典布局与尺寸(其余不动) ========== */
+
+/* 盒子:回到竖排块状,圆角20,内边距10 12 8 */
+body.gpt-ui #input-box {
+  display: block;
+  border-radius: 20px;
+  padding: 10px 12px 8px;
+}
+
+/* 工具条:回到文字下方单独一行 */
+body.gpt-ui .input-toolbar {
+  display: flex;
+  align-items: center;
+  margin-top: 6px;
+  gap: 8px;
+}
+body.gpt-ui .toolbar-spacer {
+  display: block;
+  flex: 1;
+}
+
+/* 清掉GPT横排的order,恢复DOM自然顺序 */
+body.gpt-ui #input-text,
+body.gpt-ui #attach-btn,
+body.gpt-ui #model-btn,
+body.gpt-ui #mini-menu-btn,
+body.gpt-ui #send-btn {
+  order: 0;
+}
+
+/* 输入区:整行文字,高度42 */
+body.gpt-ui #input-text {
+  min-height: 42px;
+  flex: none;
+}
+
+/* 加号:经典28圆钮 */
+body.gpt-ui #attach-btn {
+  width: 28px;
+  height: 28px;
+  background: var(--press);
+  font-size: 17px;
+}
+
+/* 模型胶囊:经典宽度 */
+body.gpt-ui #model-btn {
+  max-width: 150px;
+}
+
+/* 发送键:经典32圆钮(图标已在JS改回↑) */
+body.gpt-ui #send-btn {
+  width: 32px;
+  height: 32px;
+  background: var(--btn-main);
+  color: var(--btn-main-text);
+}
