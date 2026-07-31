@@ -3123,7 +3123,7 @@ function buildTabBubble(body) {
   sec.appendChild(szBtn);
   if (!bubbleSizeFold) {
     mkSlider(sec, "上下厚度", 2, 30, 1, "bubblePadV", "px", () => renderMessages());
-    mkSlider(sec, "左右宽度", 4,30, 1, "bubblePadH", "px", () => renderMessages());
+    mkSlider(sec, "左右宽度", 4, 30, 1, "bubblePadH", "px", () => renderMessages());
     mkSlider(sec, "最大宽度", 55, 100, 1, "bubbleMaxW", "%", () => { applyBubbleBox(); renderMessages(); });
     mkSlider(sec, "圆角弧度", 0, 40, 1, "bubbleRadius", "px", () => renderMessages());
     mkSlider(sec, "段落间距（消息里空行的高度）", 0, 30, 1, "paraGap", "px", () => renderMessages());
