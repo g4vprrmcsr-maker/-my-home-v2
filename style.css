@@ -1627,21 +1627,26 @@ body:not(.gpt-ui) #input-area {
   padding-right: 16px;
 }
 
-/* 输入框:#FAFAF8 半透 + 磨砂透字 + 顶部高光,高度减 4px */
+/* 输入框:#F8F8F8 中间透边缘实的液态渐变 + 弱磨砂 + 高光,圆角30,高度减4 */
 body:not(.gpt-ui):not(.dark) #input-box {
-  background: rgba(250, 250, 248, 0.68);
-  backdrop-filter: blur(18px) saturate(1.7);
-  -webkit-backdrop-filter: blur(18px) saturate(1.7);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  border-radius: 28px;
+  background:
+    radial-gradient(140% 110% at 50% 38%,
+      rgba(248, 248, 248, 0.28) 0%,
+      rgba(248, 248, 248, 0.58) 58%,
+      rgba(248, 248, 248, 0.82) 100%);
+  backdrop-filter: blur(9px) saturate(1.7);
+  -webkit-backdrop-filter: blur(9px) saturate(1.7);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 30px;
   padding: 10px 14px 8px;
   box-shadow:
-    inset 0 1px 1.5px rgba(255, 255, 255, 0.75),
+    inset 0 1px 1px rgba(255, 255, 255, 0.7),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.35),
     0 2px 8px rgba(0, 0, 0, 0.04),
     0 8px 24px rgba(0, 0, 0, 0.07);
 }
 
-/* 内部按钮:实底 #F0EFEC,平的不浮不透(官方内部按钮也是实心) */
+/* 内部按钮:实底 #F0EFEC,平的不透(官方内部按钮也是实心) */
 body:not(.gpt-ui):not(.dark) #attach-btn {
   width: 32px;
   height: 32px;
@@ -1668,15 +1673,19 @@ body:not(.gpt-ui):not(.dark) #mini-menu-btn {
   justify-content: center;
 }
 
-/* 顶栏圆钮 + 标题胶囊:#FAFAF8 半透 + 磨砂透字 + 高光 */
+/* 顶栏圆钮 + 标题胶囊:中间透边缘实渐变 + 细白边(0.5px) + 上下均匀高光 */
 body:not(.gpt-ui):not(.dark) #topbar .topbar-btn,
 body:not(.gpt-ui):not(.dark) #topbar-title {
-  background: rgba(250, 250, 248, 0.66);
-  backdrop-filter: blur(18px) saturate(1.7);
-  -webkit-backdrop-filter: blur(18px) saturate(1.7);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  background:
+    radial-gradient(120% 120% at 50% 40%,
+      rgba(248, 248, 248, 0.26) 0%,
+      rgba(248, 248, 248, 0.55) 55%,
+      rgba(248, 248, 248, 0.8) 100%);
+  backdrop-filter: blur(8px) saturate(1.7);
+  -webkit-backdrop-filter: blur(8px) saturate(1.7);
+  border: 0.5px solid rgba(255, 255, 255, 0.7);
   box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.75),
-    0 1px 3px rgba(0, 0, 0, 0.04),
-    0 3px 12px rgba(0, 0, 0, 0.06);
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.05);
 }
