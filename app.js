@@ -614,7 +614,7 @@ async function dressBubble(bubble, isUser) {
       const glow = "hsla(" + hue + "," + Math.max(s, 25) + "%," + Math.max(l - 28, 10) + "%," + (0.22 * g).toFixed(2) + ")";
       bubble.style.boxShadow = "0 1px 4px rgba(0,0,0,0.05), 0 2px " + Math.round(3 + 4 * g) + "px " + glow;
     } else {
-      bubble.style.boxShadow = "0 1px 6px rgba(0,0,0,0.05)";
+      bubble.style.boxShadow = "none";
     }
     if (st.bubbleTexture === "frost" && !tailed) {
       bubble.style.backdropFilter = "blur(20px) saturate(1.6)";
