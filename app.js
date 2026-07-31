@@ -512,7 +512,7 @@ const BUBBLE_SHAPES = {
 /* ---------- 快捷色块 ---------- */
 const QUICK_COLORS = [
   { name: "纯白", h: 0, s: 0, l: 100, a: 100 },
-  { name: "灰", h: 0, s: 0, l: 78, a: 90 },
+  { name: "灰", h: 45, s: 12, l: 93, a: 100 },
   { name: "黑", h: 0, s: 0, l: 8, a: 100 },
   { name: "Claude米", h: 46, s: 20, l: 91, a: 100 },
   { name: "天蓝", h: 205, s: 75, l: 82, a: 90 },
