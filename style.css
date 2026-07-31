@@ -1711,7 +1711,7 @@ body:not(.gpt-ui):not(.dark) #topbar-title {
 }
 /* 输入框白边加宽到 1.5px（顶栏按钮仍 1px 不动） */
 body:not(.gpt-ui):not(.dark) #input-box {
-  border-width: 2px;
+  border-width: 1.6px;
 }
 
 /* 标题胶囊:降 2px 高度 + 向左靠近三条杠约 4px(≈0.1cm) */
@@ -1774,4 +1774,9 @@ body.gpt-ui #send-btn {
   height: 32px;
   background: var(--btn-main);
   color: var(--btn-main-text);
+}
+/* 官方皮肤:主题页 + 设置页的白卡片改 #F0EFEC */
+body.skin-official .set-card,
+body.skin-official #settings-panel .settings-section {
+  background: #F0EFEC;
 }
