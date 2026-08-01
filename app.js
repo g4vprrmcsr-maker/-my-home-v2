@@ -5009,7 +5009,7 @@ function toggleMiniMenu() {
   ];
   items.forEach((it, i) => {
     const r = el("div", "");
-    r.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 16px;font-size:14px;color:var(--text-main);" +
+       r.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:16px;padding:9px 16px;font-size:14px;color:var(--text-main);" +
       (i ? ("border-top:1px solid " + (night ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)") + ";") : "");
     const lab = el("span", "", it.t);
     const icn = el("span", "");
