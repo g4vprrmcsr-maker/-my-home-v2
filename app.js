@@ -4578,6 +4578,9 @@ async function aiFeedPost() {
 }
 
 async function aiCommentOn(post) {
+  if (!post.likes) post.likes = [];
+  if (post.likes.indexOf("ai") < 0) post.likes.push("ai");
+  saveState();
   const sys = HOME_PERSONA + " 她刚在我们的私密朋友圈发了动态：「" + post.text.slice(0, 100) + "」。你去评论一句，25字以内，像刷到恋人动态时的自然反应。";
   const txt = await homeAsk(sys, "评论她。");
   if (txt) {
@@ -4587,18 +4590,129 @@ async function aiCommentOn(post) {
 }
 
 async function aiReplyComment(post, myComment) {
-  const sys = HOME_PERSONA + " 你发的动态「" + post.text.slice(0, 80) + "」下面，她评论了：「" + myComment.slice(0, 80) + "」。你回她一句，25字以内。";
+  const sys = HOME_PERSONA + " 你们的私密朋友圈动态「" + post.text.slice(0, 80) + "」下面，她说：「" + myComment.slice(0, 80) + "」。你回她一句，25字以内。";
   const txt = await homeAsk(sys, "回她。");
   if (txt) {
-    post.comments.push({ who: "ai", text: txt.trim(), time: Date.now() });
+    post.comments.push({ who: "ai", text: txt.trim(), time: Date.now(), replyTo: "me" });
     saveState();
   }
+}
+
+/* ---------- 朋友圈手绘图标 ---------- */
+function feedHeartIcon(filled, color) {
+  const c = color || "currentColor";
+  const d = "M12 20 C7 16.5 4 13.5 4 9.8 C4 7.3 6 5.5 8.3 5.5 c1.6 0 3 0.9 3.7 2.3 c0.7 -1.4 2.1 -2.3 3.7 -2.3 C18 5.5 20 7.3 20 9.8 C20 13.5 17 16.5 12 20 Z";
+  return '<svg viewBox="0 0 24 24" width="16" height="16" fill="' + (filled ? c : "none") + '" stroke="' + c + '" stroke-width="1.6" stroke-linejoin="round"><path d="' + d + '"/></svg>';
+}
+function feedCommentIcon(color) {
+  const c = color || "currentColor";
+  return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="' + c + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5 h16 a1.5 1.5 0 0 1 1.5 1.5 v8 a1.5 1.5 0 0 1 -1.5 1.5 H9 l-4 3.5 v-3.5 H4 a1.5 1.5 0 0 1 -1.5 -1.5 V7 A1.5 1.5 0 0 1 4 5.5 Z"/></svg>';
+}
+function feedRollIcon(color) {
+  const c = color || "currentColor";
+  return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="' + c + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 3.5v3.7h-3.7"/></svg>';
+}
+function feedDotsIcon(color) {
+  const c = color || "#5b6b7d";
+  return '<svg viewBox="0 0 24 24" width="18" height="18"><circle cx="9" cy="12" r="1.7" fill="' + c + '"/><circle cx="15" cy="12" r="1.7" fill="' + c + '"/></svg>';
+}
+
+function feedName(name) {
+  const accent = daysT().accent;
+  const s = el("span", "", name);
+  s.style.cssText = "color:" + accent + ";font-weight:600;";
+  return s;
+}
+
+function toggleMyLike(post, reload) {
+  if (!post.likes) post.likes = [];
+  const i = post.likes.indexOf("me");
+  if (i >= 0) post.likes.splice(i, 1);
+  else post.likes.push("me");
+  saveState();
+  reload();
+}
+
+function addMyComment(post, replyTo, reload) {
+  const r = curRole();
+  const title = replyTo ? ("回复 " + (replyTo === "me" ? r.userName : r.aiName)) : "评论";
+  inputDialog(title, "", async v => {
+    if (!v.trim()) return;
+    const c = { who: "me", text: v.trim(), time: Date.now() };
+    if (replyTo) c.replyTo = replyTo;
+    post.comments.push(c);
+    saveState();
+    reload();
+    if (post.who === "ai" || replyTo === "ai") {
+      await aiReplyComment(post, v.trim());
+      reload();
+    }
+  }, false);
+}
+
+async function rerollFeed(post, reload) {
+  const sys = HOME_PERSONA + " 你想把刚发的动态「" + post.text.slice(0, 60) + "」删了重发一条完全不同的，50字以内，随手发的感觉。";
+  const txt = await homeAsk(sys, "重发一条。");
+  if (txt) { post.text = txt.trim(); saveState(); }
+  reload();
+}
+
+function showFeedMenu(btn, post, reload) {
+  document.querySelectorAll(".feed-menu").forEach(x => x.remove());
+  if (!post.likes) post.likes = [];
+  const menu = el("div", "feed-menu");
+  menu.style.cssText = "position:fixed;display:flex;align-items:center;background:#4c4c4c;border-radius:9px;box-shadow:0 4px 16px rgba(0,0,0,0.25);z-index:470;overflow:hidden;";
+  const liked = post.likes.indexOf("me") >= 0;
+  const items = [
+    { ic: feedHeartIcon(liked, "#fff"), label: liked ? "取消" : "赞", fn: () => toggleMyLike(post, reload) },
+    { ic: feedCommentIcon("#fff"), label: "评论", fn: () => addMyComment(post, null, reload) }
+  ];
+  if (post.who === "ai") {
+    items.push({ ic: feedRollIcon("#fff"), label: "重发", fn: () => rerollFeed(post, reload) });
+  }
+  items.forEach((it, idx) => {
+    if (idx) {
+      const dv = el("div", "");
+      dv.style.cssText = "width:1px;height:18px;background:rgba(255,255,255,0.22);";
+      menu.appendChild(dv);
+    }
+    const b = el("div", "");
+    b.style.cssText = "display:flex;align-items:center;gap:5px;padding:8px 15px;color:#fff;font-size:13px;cursor:pointer;white-space:nowrap;";
+    const ics = el("span", "");
+    ics.style.cssText = "display:inline-flex;";
+    ics.innerHTML = it.ic;
+    b.appendChild(ics);
+    b.appendChild(el("span", "", it.label));
+    b.onclick = (e) => { e.stopPropagation(); menu.remove(); it.fn(); };
+    menu.appendChild(b);
+  });
+  document.body.appendChild(menu);
+  const br = btn.getBoundingClientRect();
+  const mw = menu.offsetWidth, mh = menu.offsetHeight;
+  let left = br.left - mw - 8;
+  if (left < 8) left = br.right + 8;
+  let top = br.top + (br.height - mh) / 2;
+  top = Math.max(8, Math.min(top, window.innerHeight - mh - 8));
+  menu.style.left = left + "px";
+  menu.style.top = top + "px";
+  setTimeout(() => {
+    const closer = (e) => {
+      if (!menu.contains(e.target)) {
+        menu.remove();
+        document.removeEventListener("click", closer, true);
+        document.removeEventListener("touchstart", closer, true);
+      }
+    };
+    document.addEventListener("click", closer, true);
+    document.addEventListener("touchstart", closer, true);
+  }, 80);
 }
 
 function renderCoupleRoom(body) {
   const reload = () => renderCoupleRoom(clearBody(body));
   const r = curRole();
   const c = inkOf();
+  const accent = daysT().accent;
 
   const compose = el("div", "feed-card");
   compose.style.background = "rgba(255,255,255,0.55)";
@@ -4628,7 +4742,7 @@ function renderCoupleRoom(body) {
   postBtn.onclick = async () => {
     const t = ta.value.trim();
     if (!t && !composeImg) { toast("写点什么吧"); return; }
-    const post = { id: uid(), who: "me", time: Date.now(), text: t, img: composeImg, comments: [] };
+    const post = { id: uid(), who: "me", time: Date.now(), text: t, img: composeImg, likes: [], comments: [] };
     state.home.feed.push(post);
     saveState();
     reload();
@@ -4677,65 +4791,77 @@ function renderCoupleRoom(body) {
     body.appendChild(e);
   }
   list.forEach(post => {
+    if (!post.likes) post.likes = [];
     const card = el("div", "feed-card");
     card.style.background = "rgba(255,255,255,0.5)";
+
     const head = el("div", "feed-head");
     const av = el("img", "feed-avatar");
     avatarSrc(post.who === "me" ? "user" : "ai").then(src => { av.src = src; });
     const nm = el("div", "");
-    nm.appendChild(el("div", "feed-name", post.who === "me" ? r.userName : r.aiName));
-    nm.appendChild(el("div", "feed-time", fmtTime(post.time)));
+    const nmName = el("div", "feed-name", post.who === "me" ? r.userName : r.aiName);
+    nmName.style.color = accent;
+    nm.appendChild(nmName);
     head.appendChild(av);
     head.appendChild(nm);
     card.appendChild(head);
+
     if (post.text) card.appendChild(el("div", "feed-text", post.text));
     if (post.img) {
       const im = el("img", "feed-img");
       im.src = post.img;
       card.appendChild(im);
     }
-    if (post.comments && post.comments.length) {
-      const cbox = el("div", "feed-comments");
-      post.comments.forEach(cm2 => {
-        cbox.appendChild(el("div", "feed-comment", (cm2.who === "me" ? r.userName : r.aiName) + "：" + cm2.text));
-      });
-      card.appendChild(cbox);
-    }
-    const ops = el("div", "feed-ops");
-    const cm = el("span", "", "评论");
-    cm.onclick = () => {
-      inputDialog("评论", "", async v => {
-        if (!v.trim()) return;
-        post.comments.push({ who: "me", text: v.trim(), time: Date.now() });
-        saveState();
-        reload();
-        if (post.who === "ai") {
-          await aiReplyComment(post, v.trim());
-          reload();
-        }
-      }, false);
-    };
-    const dl = el("span", "", "删除");
-    dl.onclick = () => confirmDialog("删除这条动态？", () => {
-      state.home.feed = state.home.feed.filter(x => x.id !== post.id);
-      saveState();
-      reload();
-    });
-        ops.appendChild(cm);
-    if (post.who === "ai") {
-      const rr = el("span", "", "重roll");
-      rr.onclick = async () => {
-        rr.textContent = "重发中...";
-        const sys2 = HOME_PERSONA + " 你想把刚发的动态「" + post.text.slice(0, 60) + "」删了重发一条完全不同的，50字以内，随手发的感觉。";
-        const txt = await homeAsk(sys2, "重发一条。");
-        if (txt) { post.text = txt.trim(); saveState(); }
-        reload();
-      };
-      ops.appendChild(rr);
-    }
-    ops.appendChild(dl);
 
-    card.appendChild(ops);
+    const footRow = el("div", "");
+    footRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;margin-top:8px;";
+    footRow.appendChild(el("div", "feed-time", fmtTime(post.time)));
+    const dotsBtn = el("button", "");
+    dotsBtn.style.cssText = "border:none;background:rgba(0,0,0,0.05);border-radius:6px;padding:3px 11px;cursor:pointer;line-height:0;";
+    dotsBtn.innerHTML = feedDotsIcon();
+    dotsBtn.onclick = (e) => { e.stopPropagation(); showFeedMenu(dotsBtn, post, reload); };
+    footRow.appendChild(dotsBtn);
+    card.appendChild(footRow);
+
+    const hasLike = post.likes.length > 0;
+    const hasCmt = post.comments && post.comments.length > 0;
+    if (hasLike || hasCmt) {
+      const block = el("div", "");
+      block.style.cssText = "background:rgba(0,0,0,0.035);border-radius:8px;margin-top:8px;overflow:hidden;";
+      if (hasLike) {
+        const likeRow = el("div", "");
+        likeRow.style.cssText = "display:flex;align-items:center;gap:6px;padding:8px 12px;font-size:13px;";
+        const hi = el("span", "");
+        hi.style.cssText = "display:inline-flex;flex-shrink:0;";
+        hi.innerHTML = feedHeartIcon(true, accent);
+        likeRow.appendChild(hi);
+        const names = post.likes.map(w => w === "me" ? r.userName : r.aiName).join("，");
+        const ns = el("span", "", names);
+        ns.style.cssText = "color:" + accent + ";font-weight:600;";
+        likeRow.appendChild(ns);
+        block.appendChild(likeRow);
+      }
+      if (hasLike && hasCmt) {
+        const dv = el("div", "");
+        dv.style.cssText = "height:1px;background:rgba(0,0,0,0.06);";
+        block.appendChild(dv);
+      }
+      (post.comments || []).forEach(cm => {
+        const cRow2 = el("div", "");
+        cRow2.style.cssText = "padding:6px 12px;font-size:13px;line-height:1.6;word-break:break-word;cursor:pointer;";
+        const author = cm.who === "me" ? r.userName : r.aiName;
+        cRow2.appendChild(feedName(author));
+        if (cm.replyTo) {
+          cRow2.appendChild(document.createTextNode(" 回复 "));
+          cRow2.appendChild(feedName(cm.replyTo === "me" ? r.userName : r.aiName));
+        }
+        cRow2.appendChild(document.createTextNode("：" + cm.text));
+        cRow2.onclick = () => addMyComment(post, cm.who, reload);
+        block.appendChild(cRow2);
+      });
+      card.appendChild(block);
+    }
+
     body.appendChild(card);
   });
 }
