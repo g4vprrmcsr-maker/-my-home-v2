@@ -2037,6 +2037,21 @@ function newSession() {
   renderAll();
   closeSidebar();
 }
+/* ---------- 创建分支:把当前会话整份复制一份 ---------- */
+function branchSession() {
+  const r = curRole();
+  const s = curSession();
+  const copy = JSON.parse(JSON.stringify(s));
+  copy.id = uid();
+  copy.name = s.name + " · 分支";
+  const idx = r.sessions.indexOf(s);
+  r.sessions.splice(idx + 1, 0, copy);
+  r.currentSessionId = copy.id;
+  saveState();
+  renderAll();
+  closeSidebar();
+  toast("已创建分支，可以在这条里继续聊");
+}
 
 /* ---------- 面板开关 ---------- */
 function openPanel(id) { $(id).classList.add("open"); }
@@ -2169,12 +2184,12 @@ async function fetchModels() {
 function renderModelSelect() {
   const sel = $("#set-model");
   let search = document.getElementById("model-search");
-  if (!search) {
+    if (!search) {
     search = document.createElement("input");
     search.id = "model-search";
-    search.className = "form-input";
+    search.type = "text";
     search.placeholder = "搜索模型名（列表太多时用）";
-    search.style.marginBottom = "8px";
+    search.style.cssText = "width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;outline:none;background:var(--bg);color:var(--text-main);font-family:inherit;margin-bottom:10px;";
     sel.parentNode.insertBefore(search, sel);
     search.addEventListener("input", () => drawModelOptions(search.value));
   }
@@ -4967,22 +4982,41 @@ function openSearch() {
 }
 
 /* ---------- 小菜单 ---------- */
+function miniIcon(kind) {
+  const s = 'fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"';
+  const P = {
+    search: '<circle cx="10.5" cy="10.5" r="6" ' + s + '/><path d="M15 15 L20 20" ' + s + '/>',
+    mem: '<path d="M12 6.3 C10 5 7 4.7 4.5 5.5 V18.3 C7 17.5 10 17.8 12 19.2 c2 -1.4 5 -1.7 7.5 -0.9 V5.5 C17 4.7 14 5 12 6.3 Z" ' + s + '/><path d="M12 6.3 V19.2" ' + s + '/>',
+    trash: '<path d="M5 7h14M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M7 7l1 12a1.5 1.5 0 0 0 1.5 1.4h5a1.5 1.5 0 0 0 1.5-1.4L17 7" ' + s + '/>',
+    branch: '<circle cx="7" cy="6" r="2.3" ' + s + '/><circle cx="7" cy="18" r="2.3" ' + s + '/><circle cx="17" cy="8.5" r="2.3" ' + s + '/><path d="M7 8.3 V15.7" ' + s + '/><path d="M17 10.8 c0 3.4 -3 4.5 -6.6 4.95" ' + s + '/>'
+  };
+  return '<svg viewBox="0 0 24 24" width="19" height="19">' + (P[kind] || "") + '</svg>';
+}
+
 function toggleMiniMenu() {
   const old = document.getElementById("mini-menu");
   if (old) { old.remove(); return; }
+  const night = state.settings.skin === "night";
   const m = el("div", "");
   m.id = "mini-menu";
-  m.style.cssText = "position:fixed;right:14px;bottom:96px;background:rgba(255,255,255,0.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,0.12);z-index:180;overflow:hidden;min-width:150px;";
-  if (state.settings.skin === "night") m.style.background = "rgba(50,48,52,0.95)";
+  m.style.cssText = "position:fixed;right:14px;bottom:96px;background:rgba(255,255,255,0.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,0.12);z-index:180;overflow:hidden;min-width:184px;";
+  if (night) m.style.background = "rgba(50,48,52,0.95)";
   const items = [
-    { t: "搜索聊天 🔍", f: () => { m.remove(); openSearch(); } },
-    { t: "记忆手册 ✨", f: () => { m.remove(); openMemoryBook(); } },
-    { t: "多选删除 🗑", f: () => { m.remove(); enterMultiMode(null); } },
-    { t: "备份导出 " + HEART, f: () => { m.remove(); exportData(); } }
+    { t: "搜索聊天", ic: "search", f: () => { m.remove(); openSearch(); } },
+    { t: "记忆手册", ic: "mem", f: () => { m.remove(); openMemoryBook(); } },
+    { t: "多选删除", ic: "trash", f: () => { m.remove(); enterMultiMode(null); } },
+    { t: "创建分支", ic: "branch", f: () => { m.remove(); branchSession(); } }
   ];
   items.forEach((it, i) => {
-    const r = el("div", "", it.t);
-    r.style.cssText = "padding:13px 16px;font-size:14px;" + (i ? "border-top:1px solid rgba(0,0,0,0.05);" : "");
+    const r = el("div", "");
+    r.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 16px;font-size:14px;color:var(--text-main);" +
+      (i ? ("border-top:1px solid " + (night ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)") + ";") : "");
+    const lab = el("span", "", it.t);
+    const icn = el("span", "");
+    icn.style.cssText = "display:inline-flex;opacity:0.82;";
+    icn.innerHTML = miniIcon(it.ic);
+    r.appendChild(lab);
+    r.appendChild(icn);
     r.onclick = it.f;
     m.appendChild(r);
   });
