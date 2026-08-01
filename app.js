@@ -4939,7 +4939,7 @@ function renderCoupleRoom(container) {
     e.style.cssText = "text-align:center;color:#bbb;font-size:13px;padding:40px 0;";
     feedWrap.appendChild(e);
   }
-  list.forEach(post => {
+    list.forEach((post, idx) => {
     if (!post.likes) post.likes = [];
     const card = el("div", "feed-card");
     card.style.background = cardBg;
@@ -5016,6 +5016,11 @@ function renderCoupleRoom(container) {
     }
 
     feedWrap.appendChild(card);
+    if (idx < list.length - 1) {
+      const line = el("div", "");
+      line.style.cssText = "height:0.5px;background:" + (night ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)") + ";margin:0 8px 18px;";
+      feedWrap.appendChild(line);
+    }
   });
 }
 
