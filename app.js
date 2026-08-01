@@ -4651,7 +4651,7 @@ function feedTrashIcon(color) {
   return '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M7 7l1 12a1.5 1.5 0 0 0 1.5 1.4h5a1.5 1.5 0 0 0 1.5-1.4L17 7M10 11v5M14 11v5"/></svg>';
 }
 function feedDotsIcon() {
-  return '<svg viewBox="0 0 24 12" width="18" height="9"><circle cx="7" cy="6" r="1.7" fill="#8a929a"/><circle cx="17" cy="6" r="1.7" fill="#8a929a"/></svg>';
+  return '<svg viewBox="0 0 24 24" width="18" height="18"><circle cx="9" cy="12" r="1.7" fill="#8a929a"/><circle cx="15" cy="12" r="1.7" fill="#8a929a"/></svg>';
 }
 function coupleHamIcon() {
   return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>';
@@ -4965,7 +4965,7 @@ function renderCoupleRoom(container) {
     footRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;margin-top:8px;";
     const tm = el("div", "feed-time", coupleTimeStr(post.time));
     const dotsBtn = el("button", "");
-    dotsBtn.style.cssText = "border:none;background:" + dotsBg + ";border-radius:5px;padding:3px 7px;cursor:pointer;line-height:0;flex-shrink:0;";
+    dotsBtn.style.cssText = "border:none;background:" + dotsBg + ";border-radius:6px;padding:3px 11px;cursor:pointer;line-height:0;flex-shrink:0;";
     dotsBtn.innerHTML = feedDotsIcon();
     dotsBtn.onclick = (e) => { e.stopPropagation(); showFeedMenu(dotsBtn, post, reload); };
     footRow.appendChild(tm);
