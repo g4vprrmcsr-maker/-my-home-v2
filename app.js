@@ -4593,7 +4593,7 @@ async function aiReplyComment(post, myComment) {
   if (txt) { post.comments.push({ who: "ai", text: txt.trim(), time: Date.now(), replyTo: "me" }); saveState(); }
 }
 
-/* ---------- 时间：实时/时间戳 ---------- */
+/* ---------- 时间：实时 / 时间戳(跟随主题) ---------- */
 function relTime(ts) {
   const diff = Date.now() - ts;
   const m = Math.floor(diff / 60000);
@@ -4603,15 +4603,10 @@ function relTime(ts) {
   if (h < 24) return h + "小时前";
   const d = Math.floor(h / 24);
   if (d < 30) return d + "天前";
-  return coupleAbsTime(ts);
-}
-function coupleAbsTime(ts) {
-  const d = new Date(ts);
-  const p = n => String(n).padStart(2, "0");
-  return d.getFullYear() + "." + p(d.getMonth() + 1) + "." + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+  return fmtTime(ts);
 }
 function coupleTimeStr(ts) {
-  return state.settings.coupleTimeMode === "abs" ? coupleAbsTime(ts) : relTime(ts);
+  return state.settings.coupleTimeMode === "abs" ? fmtTime(ts) : relTime(ts);
 }
 
 /* ---------- 情侣空间头像/换图 ---------- */
@@ -4638,7 +4633,7 @@ function pickCoupleImg(key, reload) {
   file.click();
 }
 
-/* ---------- 朋友圈手绘图标 ---------- */
+/* ---------- 朋友圈手绘图标（爱心空心） ---------- */
 function feedHeartIcon(color) {
   const c = color || "currentColor";
   return '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linejoin="round"><path d="M12 20C7 16.5 4 13.5 4 9.8 4 7.3 6 5.5 8.3 5.5c1.6 0 3 .9 3.7 2.3.7-1.4 2.1-2.3 3.7-2.3C18 5.5 20 7.3 20 9.8c0 3.7-3 6.7-8 10.2Z"/></svg>';
@@ -4656,7 +4651,7 @@ function feedTrashIcon(color) {
   return '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M7 7l1 12a1.5 1.5 0 0 0 1.5 1.4h5a1.5 1.5 0 0 0 1.5-1.4L17 7M10 11v5M14 11v5"/></svg>';
 }
 function feedDotsIcon() {
-  return '<svg viewBox="0 0 22 12" width="16" height="9"><circle cx="7" cy="6" r="1.8" fill="#8a929a"/><circle cx="15" cy="6" r="1.8" fill="#8a929a"/></svg>';
+  return '<svg viewBox="0 0 24 12" width="18" height="9"><circle cx="7" cy="6" r="1.7" fill="#8a929a"/><circle cx="17" cy="6" r="1.7" fill="#8a929a"/></svg>';
 }
 function coupleHamIcon() {
   return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>';
@@ -4772,7 +4767,7 @@ let coupleFold = false;
 
 function showCoupleMenu(btn, reload) {
   document.querySelectorAll(".couple-menu").forEach(x => x.remove());
-  const night = state.settings.skin === "night";
+  const night = document.body.classList.contains("dark");
   const accent = daysT().accent;
   const mode = state.settings.coupleTimeMode || "rel";
   const m = el("div", "couple-menu");
@@ -4874,9 +4869,10 @@ function renderCoupleRoom(container) {
   const reload = () => renderCoupleRoom(container);
   const r = curRole();
   const accent = daysT().accent;
-  const night = state.settings.skin === "night";
+  const night = document.body.classList.contains("dark");
   const blockBg = night ? "rgba(255,255,255,0.06)" : "#F7F7F7";
   const dotsBg = night ? "rgba(255,255,255,0.1)" : "#F3F3F5";
+  const cardBg = night ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.5)";
 
   getImg("couple_bg").then(blob => {
     if (blob) {
@@ -4903,7 +4899,7 @@ function renderCoupleRoom(container) {
   container.appendChild(topBar);
 
   const cover = el("div", "");
-  cover.style.cssText = "position:relative;width:100%;aspect-ratio:3/2;background:linear-gradient(135deg,#aebfd0,#c9d6e3);background-size:cover;background-position:center;flex-shrink:0;";
+  cover.style.cssText = "position:relative;width:100%;aspect-ratio:1/1;background:linear-gradient(135deg,#aebfd0,#c9d6e3);background-size:cover;background-position:center;flex-shrink:0;";
   getImg("couple_cover").then(blob => {
     if (blob) {
       if (!urlCache.couple_cover) urlCache.couple_cover = URL.createObjectURL(blob);
@@ -4915,7 +4911,7 @@ function renderCoupleRoom(container) {
   const nick = el("div", "", r.userName);
   nick.style.cssText = "color:#ffffff;font-size:17px;font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,0.4);margin-bottom:40px;";
   const avWrap = el("div", "");
-  avWrap.style.cssText = "width:72px;height:72px;border-radius:14px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.2);border:2px solid rgba(255,255,255,0.85);flex-shrink:0;background:#e8e8e8;";
+  avWrap.style.cssText = "width:72px;height:72px;border-radius:50%;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.2);flex-shrink:0;background:#e8e8e8;";
   const av = el("img", "");
   av.style.cssText = "width:100%;height:100%;object-fit:cover;display:block;";
   coupleAvatarSrc().then(src => { av.src = src; });
@@ -4926,7 +4922,7 @@ function renderCoupleRoom(container) {
   scroll.appendChild(cover);
 
   const feedWrap = el("div", "");
-  feedWrap.style.cssText = "padding-top:46px;padding-bottom:calc(40px + env(safe-area-inset-bottom));";
+  feedWrap.style.cssText = "padding:46px 16px calc(40px + env(safe-area-inset-bottom));";
   scroll.appendChild(feedWrap);
 
   if (coupleFold) {
@@ -4943,54 +4939,47 @@ function renderCoupleRoom(container) {
     e.style.cssText = "text-align:center;color:#bbb;font-size:13px;padding:40px 0;";
     feedWrap.appendChild(e);
   }
-  list.forEach((post, li) => {
+  list.forEach(post => {
     if (!post.likes) post.likes = [];
-    const item = el("div", "");
-    item.style.cssText = "padding:16px 16px 6px;" + (li < list.length - 1 ? "border-bottom:0.5px solid rgba(0,0,0,0.05);" : "");
+    const card = el("div", "feed-card");
+    card.style.background = cardBg;
+    card.style.marginBottom = "18px";
 
-    const head = el("div", "");
-    head.style.cssText = "display:flex;align-items:center;gap:10px;";
-    const av2 = el("img", "");
-    av2.style.cssText = "width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--press);";
+    const head = el("div", "feed-head");
+    const av2 = el("img", "feed-avatar");
     avatarSrc(post.who === "me" ? "user" : "ai").then(src => { av2.src = src; });
-    const nm = el("div", "", post.who === "me" ? r.userName : r.aiName);
-    nm.style.cssText = "color:" + accent + ";font-weight:600;font-size:13px;";
+    const nm = el("div", "feed-name", post.who === "me" ? r.userName : r.aiName);
+    nm.style.color = accent;
     head.appendChild(av2);
     head.appendChild(nm);
-    item.appendChild(head);
+    card.appendChild(head);
 
-    if (post.text) {
-      const tx = el("div", "", post.text);
-      tx.style.cssText = "font-size:14px;line-height:1.7;margin-top:9px;white-space:pre-wrap;word-break:break-word;color:var(--text-main);";
-      item.appendChild(tx);
-    }
+    if (post.text) card.appendChild(el("div", "feed-text", post.text));
     if (post.img) {
-      const im = el("img", "");
+      const im = el("img", "feed-img");
       im.src = post.img;
-      im.style.cssText = "max-width:66%;border-radius:8px;margin-top:8px;display:block;";
-      item.appendChild(im);
+      card.appendChild(im);
     }
 
-    const foot = el("div", "");
-    foot.style.cssText = "display:flex;align-items:center;justify-content:space-between;margin-top:8px;";
-    const tm = el("div", "", coupleTimeStr(post.time));
-    tm.style.cssText = "font-size:12px;color:#b0b0b0;";
-    const dots = el("button", "");
-    dots.style.cssText = "border:none;background:" + dotsBg + ";border-radius:8px;padding:2px 7px;cursor:pointer;line-height:0;flex-shrink:0;";
-    dots.innerHTML = feedDotsIcon();
-    dots.onclick = (e) => { e.stopPropagation(); showFeedMenu(dots, post, reload); };
-    foot.appendChild(tm);
-    foot.appendChild(dots);
-    item.appendChild(foot);
+    const footRow = el("div", "");
+    footRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;margin-top:8px;";
+    const tm = el("div", "feed-time", coupleTimeStr(post.time));
+    const dotsBtn = el("button", "");
+    dotsBtn.style.cssText = "border:none;background:" + dotsBg + ";border-radius:8px;padding:5px 9px;cursor:pointer;line-height:0;flex-shrink:0;";
+    dotsBtn.innerHTML = feedDotsIcon();
+    dotsBtn.onclick = (e) => { e.stopPropagation(); showFeedMenu(dotsBtn, post, reload); };
+    footRow.appendChild(tm);
+    footRow.appendChild(dotsBtn);
+    card.appendChild(footRow);
 
     const hasLike = post.likes.length > 0;
     const hasCmt = post.comments && post.comments.length > 0;
     if (hasLike || hasCmt) {
       const block = el("div", "");
-      block.style.cssText = "background:" + blockBg + ";border-radius:8px;margin-top:9px;overflow:hidden;";
+      block.style.cssText = "background:" + blockBg + ";border-radius:8px;margin-top:8px;overflow:hidden;";
       if (hasLike) {
         const likeRow = el("div", "");
-        likeRow.style.cssText = "display:flex;align-items:center;gap:6px;padding:7px 12px;font-size:13.5px;flex-wrap:wrap;";
+        likeRow.style.cssText = "display:flex;align-items:center;gap:6px;padding:8px 12px;font-size:13px;flex-wrap:wrap;";
         const hi = el("span", "");
         hi.style.cssText = "display:inline-flex;flex-shrink:0;";
         hi.innerHTML = feedHeartIcon(accent);
@@ -5003,33 +4992,30 @@ function renderCoupleRoom(container) {
       }
       if (hasLike && hasCmt) {
         const dv = el("div", "");
-        dv.style.cssText = "height:0.5px;background:rgba(0,0,0,0.07);";
+        dv.style.cssText = "height:1px;background:rgba(0,0,0,0.06);";
         block.appendChild(dv);
       }
       if (hasCmt) {
-        const cmWrap = el("div", "");
-        cmWrap.style.cssText = "padding:6px 12px;";
         post.comments.forEach((cm, ci) => {
-          const cRow = el("div", "");
-          cRow.style.cssText = "font-size:13.5px;line-height:1.6;padding:3px 0;word-break:break-word;cursor:pointer;";
-          cRow.appendChild(feedName(cm.who === "me" ? r.userName : r.aiName, accent));
+          const cRow2 = el("div", "");
+          cRow2.style.cssText = "padding:5px 12px;font-size:13px;line-height:1.6;word-break:break-word;cursor:pointer;";
+          cRow2.appendChild(feedName(cm.who === "me" ? r.userName : r.aiName, accent));
           if (cm.replyTo) {
-            cRow.appendChild(document.createTextNode(" 回复 "));
-            cRow.appendChild(feedName(cm.replyTo === "me" ? r.userName : r.aiName, accent));
+            cRow2.appendChild(document.createTextNode(" 回复 "));
+            cRow2.appendChild(feedName(cm.replyTo === "me" ? r.userName : r.aiName, accent));
           }
-          cRow.appendChild(document.createTextNode("：" + cm.text));
-          cRow.onclick = () => addMyComment(post, cm.who, reload);
-          bindLongPress(cRow, () => {
+          cRow2.appendChild(document.createTextNode("：" + cm.text));
+          cRow2.onclick = () => addMyComment(post, cm.who, reload);
+          bindLongPress(cRow2, () => {
             confirmDialog("删除这条评论？", () => { post.comments.splice(ci, 1); saveState(); reload(); });
           });
-          cmWrap.appendChild(cRow);
+          block.appendChild(cRow2);
         });
-        block.appendChild(cmWrap);
       }
-      item.appendChild(block);
+      card.appendChild(block);
     }
 
-    feedWrap.appendChild(item);
+    feedWrap.appendChild(card);
   });
 }
 
