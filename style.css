@@ -588,8 +588,8 @@ body.dark .msg-actions { background: #2c2c2e; }
   gap: 16px;
   white-space: nowrap;
 }
-.act-btn + .act-btn { border-top: 0.5px solid rgba(0,0,0,0.10); }
-body.dark .act-btn + .act-btn { border-top-color: rgba(255,255,255,0.10); }
+.act-btn + .act-btn { border-top: 1px solid rgba(0,0,0,0.14); }
+body.dark .act-btn + .act-btn { border-top-color: rgba(255,255,255,0.14); }
 .act-btn:active { background: rgba(0,0,0,0.05); }
 .act-btn.danger { color: #e5484d; }
 .act-ic { display: inline-flex; opacity: 0.85; flex-shrink: 0; }
