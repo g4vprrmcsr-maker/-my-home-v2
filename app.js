@@ -4065,6 +4065,7 @@ async function openHomeRoom(k) {
   if (isLiquid && urlCache.days_wp) {
     panel.style.backgroundImage = "url(" + urlCache.days_wp + ")";
   }
+  if (k === "couple") { renderCoupleRoom(panel); return; }
 
   const header = el("div", "panel-header");
   header.style.cssText = "background:transparent;border-bottom:none;box-shadow:none;padding-top:calc(10px + env(safe-area-inset-top));";
@@ -4583,44 +4584,93 @@ async function aiCommentOn(post) {
   saveState();
   const sys = HOME_PERSONA + " 她刚在我们的私密朋友圈发了动态：「" + post.text.slice(0, 100) + "」。你去评论一句，25字以内，像刷到恋人动态时的自然反应。";
   const txt = await homeAsk(sys, "评论她。");
-  if (txt) {
-    post.comments.push({ who: "ai", text: txt.trim(), time: Date.now() });
-    saveState();
-  }
+  if (txt) { post.comments.push({ who: "ai", text: txt.trim(), time: Date.now() }); saveState(); }
 }
 
 async function aiReplyComment(post, myComment) {
   const sys = HOME_PERSONA + " 你们的私密朋友圈动态「" + post.text.slice(0, 80) + "」下面，她说：「" + myComment.slice(0, 80) + "」。你回她一句，25字以内。";
   const txt = await homeAsk(sys, "回她。");
-  if (txt) {
-    post.comments.push({ who: "ai", text: txt.trim(), time: Date.now(), replyTo: "me" });
-    saveState();
+  if (txt) { post.comments.push({ who: "ai", text: txt.trim(), time: Date.now(), replyTo: "me" }); saveState(); }
+}
+
+/* ---------- 相对时间 ---------- */
+function relTime(ts) {
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "刚刚";
+  if (m < 60) return m + "分钟前";
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + "小时前";
+  const d = Math.floor(h / 24);
+  if (d < 30) return d + "天前";
+  return fmtTime(ts);
+}
+
+/* ---------- 情侣空间头像/图片 ---------- */
+async function coupleAvatarSrc() {
+  const blob = await getImg("couple_avatar");
+  if (blob) {
+    if (!urlCache.couple_avatar) urlCache.couple_avatar = URL.createObjectURL(blob);
+    return urlCache.couple_avatar;
   }
+  return await avatarSrc("user");
+}
+
+function pickCoupleImg(key, reload) {
+  const file = document.createElement("input");
+  file.type = "file";
+  file.accept = "image/*";
+  file.onchange = async (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    await putImg(key, f);
+    if (urlCache[key]) { URL.revokeObjectURL(urlCache[key]); delete urlCache[key]; }
+    reload();
+    toast("换好了");
+  };
+  file.click();
 }
 
 /* ---------- 朋友圈手绘图标 ---------- */
-function feedHeartIcon(filled, color) {
+function feedHeartIcon(color) {
   const c = color || "currentColor";
-  const d = "M12 20 C7 16.5 4 13.5 4 9.8 C4 7.3 6 5.5 8.3 5.5 c1.6 0 3 0.9 3.7 2.3 c0.7 -1.4 2.1 -2.3 3.7 -2.3 C18 5.5 20 7.3 20 9.8 C20 13.5 17 16.5 12 20 Z";
-  return '<svg viewBox="0 0 24 24" width="16" height="16" fill="' + (filled ? c : "none") + '" stroke="' + c + '" stroke-width="1.6" stroke-linejoin="round"><path d="' + d + '"/></svg>';
+  return '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linejoin="round"><path d="M12 20C7 16.5 4 13.5 4 9.8 4 7.3 6 5.5 8.3 5.5c1.6 0 3 .9 3.7 2.3.7-1.4 2.1-2.3 3.7-2.3C18 5.5 20 7.3 20 9.8c0 3.7-3 6.7-8 10.2Z"/></svg>';
 }
 function feedCommentIcon(color) {
   const c = color || "currentColor";
-  return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="' + c + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5 h16 a1.5 1.5 0 0 1 1.5 1.5 v8 a1.5 1.5 0 0 1 -1.5 1.5 H9 l-4 3.5 v-3.5 H4 a1.5 1.5 0 0 1 -1.5 -1.5 V7 A1.5 1.5 0 0 1 4 5.5 Z"/></svg>';
+  return '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5H9l-4 3.3V16.5H4A1.5 1.5 0 0 1 2.5 15V7A1.5 1.5 0 0 1 4 5.5Z"/></svg>';
 }
 function feedRollIcon(color) {
   const c = color || "currentColor";
-  return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="' + c + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 3.5v3.7h-3.7"/></svg>';
+  return '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 3.5v3.7h-3.7"/></svg>';
 }
-function feedDotsIcon(color) {
-  const c = color || "#5b6b7d";
-  return '<svg viewBox="0 0 24 24" width="18" height="18"><circle cx="9" cy="12" r="1.7" fill="' + c + '"/><circle cx="15" cy="12" r="1.7" fill="' + c + '"/></svg>';
+function feedTrashIcon(color) {
+  const c = color || "currentColor";
+  return '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M7 7l1 12a1.5 1.5 0 0 0 1.5 1.4h5a1.5 1.5 0 0 0 1.5-1.4L17 7M10 11v5M14 11v5"/></svg>';
+}
+function feedDotsIcon() {
+  return '<svg viewBox="0 0 28 16" width="20" height="12"><circle cx="9" cy="8" r="2" fill="#7a8794"/><circle cx="19" cy="8" r="2" fill="#7a8794"/></svg>';
+}
+function coupleHamIcon() {
+  return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>';
+}
+function coupleMenuIcon(kind) {
+  const s = 'fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"';
+  const P = {
+    edit: '<path d="M15.5 5.5l3 3M4 20l1-4L16 5a1.4 1.4 0 0 1 2 0l1 1a1.4 1.4 0 0 1 0 2L8 19l-4 1Z" ' + s + '/>',
+    image: '<rect x="4" y="5" width="16" height="14" rx="2" ' + s + '/><circle cx="9" cy="10" r="1.5" ' + s + '/><path d="M5 17l4-3.6 3.6 3 2.4-2 4 3.4" ' + s + '/>',
+    refresh: '<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3" ' + s + '/><path d="M19.5 3.5v3.7h-3.7" ' + s + '/>',
+    cover: '<rect x="3.5" y="6" width="17" height="12" rx="2" ' + s + '/><path d="M3.5 15l5-4 3 2.3 4-3.3 5 4.5" ' + s + '/>',
+    avatar: '<circle cx="12" cy="9" r="3.5" ' + s + '/><path d="M5.5 19.5c1-3.5 3.5-5.2 6.5-5.2s5.5 1.7 6.5 5.2" ' + s + '/>',
+    space: '<rect x="4" y="4" width="16" height="16" rx="3" ' + s + '/><path d="M4 14l4-3 3 2 5-4 4 3" ' + s + '/>',
+    close: '<path d="M6 6l12 12M18 6L6 18" ' + s + '/>'
+  };
+  return '<svg viewBox="0 0 24 24" width="18" height="18">' + (P[kind] || "") + '</svg>';
 }
 
-function feedName(name) {
-  const accent = daysT().accent;
+function feedName(name, color) {
   const s = el("span", "", name);
-  s.style.cssText = "color:" + accent + ";font-weight:600;";
+  s.style.cssText = "color:" + (color || daysT().accent) + ";font-weight:600;";
   return s;
 }
 
@@ -4643,10 +4693,8 @@ function addMyComment(post, replyTo, reload) {
     post.comments.push(c);
     saveState();
     reload();
-    if (post.who === "ai" || replyTo === "ai") {
-      await aiReplyComment(post, v.trim());
-      reload();
-    }
+    const shouldAiReply = (!replyTo && post.who === "ai") || replyTo === "ai";
+    if (shouldAiReply) { await aiReplyComment(post, v.trim()); reload(); }
   }, false);
 }
 
@@ -4657,27 +4705,127 @@ async function rerollFeed(post, reload) {
   reload();
 }
 
+function openCoupleCompose(pickNow, reload) {
+  const mask = el("div", "dialog-mask");
+  const dlg = el("div", "dialog");
+  dlg.appendChild(el("div", "dialog-title", "发条动态"));
+  const ta = document.createElement("textarea");
+  ta.className = "dialog-textarea";
+  ta.placeholder = "这一刻的想法...";
+  dlg.appendChild(ta);
+  let img = null;
+  const prev = el("div", "");
+  prev.style.marginTop = "8px";
+  const file = document.createElement("input");
+  file.type = "file";
+  file.accept = "image/*";
+  file.style.display = "none";
+  file.onchange = async (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    img = await compressImage(f, 800, 0.75);
+    prev.innerHTML = "";
+    const im = el("img", "");
+    im.src = img;
+    im.style.cssText = "max-width:120px;border-radius:10px;display:block;";
+    prev.appendChild(im);
+    e.target.value = "";
+  };
+  dlg.appendChild(prev);
+  dlg.appendChild(file);
+  const btns = el("div", "dialog-btns");
+  const pic = el("button", "btn secondary", "配图");
+  pic.onclick = () => file.click();
+  const cancel = el("button", "btn secondary", "取消");
+  cancel.onclick = () => mask.remove();
+  const ok = el("button", "btn", "发布");
+  ok.onclick = () => {
+    const t = ta.value.trim();
+    if (!t && !img) { toast("写点什么吧"); return; }
+    const post = { id: uid(), who: "me", time: Date.now(), text: t, img: img, likes: [], comments: [] };
+    state.home.feed.push(post);
+    saveState();
+    mask.remove();
+    reload();
+    aiCommentOn(post).then(() => reload());
+  };
+  btns.appendChild(pic);
+  btns.appendChild(cancel);
+  btns.appendChild(ok);
+  dlg.appendChild(btns);
+  mask.appendChild(dlg);
+  document.body.appendChild(mask);
+  ta.focus();
+  if (pickNow) file.click();
+}
+
+function showCoupleMenu(btn, reload) {
+  document.querySelectorAll(".couple-menu").forEach(x => x.remove());
+  const night = state.settings.skin === "night";
+  const m = el("div", "couple-menu");
+  m.style.cssText = "position:fixed;background:rgba(255,255,255,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,0.16);z-index:478;overflow:hidden;min-width:186px;";
+  if (night) m.style.background = "rgba(52,50,54,0.97)";
+  const items = [
+    { t: "发动态", ic: "edit", f: () => openCoupleCompose(false, reload) },
+    { t: "配图", ic: "image", f: () => openCoupleCompose(true, reload) },
+    { t: "看他动态", ic: "refresh", f: async () => {
+        if (state.home.lastFeedDay === todayKey()) { toast("他今天发过了，往下翻"); return; }
+        toast("翻他主页中...");
+        const ok = await aiFeedPost();
+        if (ok) { praise("他发了新动态 👀"); reload(); }
+      } },
+    { t: "换背景图", ic: "cover", f: () => pickCoupleImg("couple_cover", reload) },
+    { t: "换头像", ic: "avatar", f: () => pickCoupleImg("couple_avatar", reload) },
+    { t: "换空间图", ic: "space", f: () => pickCoupleImg("couple_bg", reload) },
+    { t: "收起", ic: "close", f: () => {} }
+  ];
+  items.forEach((it, i) => {
+    const row = el("div", "");
+    row.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 16px;font-size:14px;color:var(--text-main);" + (i ? ("border-top:1px solid " + (night ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)") + ";") : "");
+    row.appendChild(el("span", "", it.t));
+    const icn = el("span", "");
+    icn.style.cssText = "display:inline-flex;opacity:0.8;";
+    icn.innerHTML = coupleMenuIcon(it.ic);
+    row.appendChild(icn);
+    row.onclick = (e) => { e.stopPropagation(); m.remove(); it.f(); };
+    m.appendChild(row);
+  });
+  document.body.appendChild(m);
+  const br = btn.getBoundingClientRect();
+  const mw = m.offsetWidth, mh = m.offsetHeight;
+  let left = br.right - mw;
+  left = Math.max(8, Math.min(left, window.innerWidth - mw - 8));
+  let top = br.bottom + 6;
+  if (top + mh > window.innerHeight - 8) top = br.top - mh - 6;
+  m.style.left = left + "px";
+  m.style.top = top + "px";
+  setTimeout(() => {
+    const closer = (e) => { if (!m.contains(e.target) && e.target !== btn) { m.remove(); document.removeEventListener("click", closer, true); document.removeEventListener("touchstart", closer, true); } };
+    document.addEventListener("click", closer, true);
+    document.addEventListener("touchstart", closer, true);
+  }, 80);
+}
+
 function showFeedMenu(btn, post, reload) {
   document.querySelectorAll(".feed-menu").forEach(x => x.remove());
   if (!post.likes) post.likes = [];
   const menu = el("div", "feed-menu");
-  menu.style.cssText = "position:fixed;display:flex;align-items:center;background:#4c4c4c;border-radius:9px;box-shadow:0 4px 16px rgba(0,0,0,0.25);z-index:470;overflow:hidden;";
+  menu.style.cssText = "position:fixed;display:flex;align-items:center;background:#4c4c4c;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.25);z-index:472;overflow:hidden;";
   const liked = post.likes.indexOf("me") >= 0;
   const items = [
-    { ic: feedHeartIcon(liked, "#fff"), label: liked ? "取消" : "赞", fn: () => toggleMyLike(post, reload) },
+    { ic: feedHeartIcon("#fff"), label: liked ? "取消" : "赞", fn: () => toggleMyLike(post, reload) },
     { ic: feedCommentIcon("#fff"), label: "评论", fn: () => addMyComment(post, null, reload) }
   ];
-  if (post.who === "ai") {
-    items.push({ ic: feedRollIcon("#fff"), label: "重发", fn: () => rerollFeed(post, reload) });
-  }
+  if (post.who === "ai") items.push({ ic: feedRollIcon("#fff"), label: "重发", fn: () => rerollFeed(post, reload) });
+  items.push({ ic: feedTrashIcon("#fff"), label: "删除", fn: () => confirmDialog("删除这条动态？", () => { state.home.feed = state.home.feed.filter(x => x.id !== post.id); saveState(); reload(); }) });
   items.forEach((it, idx) => {
     if (idx) {
       const dv = el("div", "");
-      dv.style.cssText = "width:1px;height:18px;background:rgba(255,255,255,0.22);";
+      dv.style.cssText = "width:1px;height:16px;background:rgba(255,255,255,0.22);";
       menu.appendChild(dv);
     }
     const b = el("div", "");
-    b.style.cssText = "display:flex;align-items:center;gap:5px;padding:8px 15px;color:#fff;font-size:13px;cursor:pointer;white-space:nowrap;";
+    b.style.cssText = "display:flex;align-items:center;gap:4px;padding:7px 13px;color:#fff;font-size:13px;cursor:pointer;white-space:nowrap;";
     const ics = el("span", "");
     ics.style.cssText = "display:inline-flex;";
     ics.innerHTML = it.ic;
@@ -4690,155 +4838,139 @@ function showFeedMenu(btn, post, reload) {
   const br = btn.getBoundingClientRect();
   const mw = menu.offsetWidth, mh = menu.offsetHeight;
   let left = br.left - mw - 8;
-  if (left < 8) left = br.right + 8;
+  if (left < 8) left = Math.max(8, br.right - mw);
   let top = br.top + (br.height - mh) / 2;
   top = Math.max(8, Math.min(top, window.innerHeight - mh - 8));
   menu.style.left = left + "px";
   menu.style.top = top + "px";
   setTimeout(() => {
-    const closer = (e) => {
-      if (!menu.contains(e.target)) {
-        menu.remove();
-        document.removeEventListener("click", closer, true);
-        document.removeEventListener("touchstart", closer, true);
-      }
-    };
+    const closer = (e) => { if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener("click", closer, true); document.removeEventListener("touchstart", closer, true); } };
     document.addEventListener("click", closer, true);
     document.addEventListener("touchstart", closer, true);
   }, 80);
 }
 
-function renderCoupleRoom(body) {
-  const reload = () => renderCoupleRoom(clearBody(body));
+function renderCoupleRoom(container) {
+  container.innerHTML = "";
+  const reload = () => renderCoupleRoom(container);
   const r = curRole();
-  const c = inkOf();
   const accent = daysT().accent;
+  const night = state.settings.skin === "night";
 
-  const compose = el("div", "feed-card");
-  compose.style.background = "rgba(255,255,255,0.55)";
-  const ta = document.createElement("textarea");
-  ta.className = "form-textarea";
-  ta.placeholder = "发条动态...";
-  ta.style.minHeight = "60px";
-  compose.appendChild(ta);
-  const cRow = el("div", "");
-  cRow.style.cssText = "display:flex;gap:8px;margin-top:8px;align-items:center;";
-  let composeImg = null;
-  const imgBtn = el("button", "seg-btn", "配图");
-  const imgFile = document.createElement("input");
-  imgFile.type = "file";
-  imgFile.accept = "image/*";
-  imgFile.style.display = "none";
-  imgFile.onchange = async (e) => {
-    const f = e.target.files[0];
-    if (!f) return;
-    composeImg = await compressImage(f, 800, 0.75);
-    imgBtn.textContent = "已配图 ✓";
-    e.target.value = "";
-  };
-  imgBtn.onclick = () => imgFile.click();
-  const postBtn = el("button", "btn", "发布");
-  postBtn.style.cssText = "background:" + c.bg + ";color:" + c.ink + ";border:none;";
-  postBtn.onclick = async () => {
-    const t = ta.value.trim();
-    if (!t && !composeImg) { toast("写点什么吧"); return; }
-    const post = { id: uid(), who: "me", time: Date.now(), text: t, img: composeImg, likes: [], comments: [] };
-    state.home.feed.push(post);
-    saveState();
-    reload();
-    aiCommentOn(post).then(() => reload());
-  };
-  cRow.appendChild(imgBtn);
-  cRow.appendChild(imgFile);
-  cRow.appendChild(postBtn);
-  compose.appendChild(cRow);
-  body.appendChild(compose);
+  getImg("couple_bg").then(blob => {
+    if (blob) {
+      if (!urlCache.couple_bg) urlCache.couple_bg = URL.createObjectURL(blob);
+      container.style.backgroundImage = "url(" + urlCache.couple_bg + ")";
+      container.style.backgroundSize = "cover";
+      container.style.backgroundPosition = "center";
+    }
+  });
 
-  const opRow = el("div", "");
-  opRow.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:10px;";
-  const seeBtn = el("button", "btn secondary", "看看他有没有发新的");
-  seeBtn.style.flex = "1";
-  seeBtn.onclick = async () => {
-    if (state.home.lastFeedDay === todayKey()) { toast("他今天发过了，往下翻"); return; }
-    seeBtn.textContent = "翻他主页中...";
-    seeBtn.disabled = true;
-    const ok = await aiFeedPost();
-    if (ok) { praise("他发了新动态 👀"); reload(); }
-    else { seeBtn.textContent = "看看他有没有发新的"; seeBtn.disabled = false; }
-  };
-  const autoSw = el("button", "seg-btn", state.settings.coupleAuto ? "自动:开" : "自动:关");
-  autoSw.classList.toggle("on", state.settings.coupleAuto);
-  autoSw.onclick = () => {
-    state.settings.coupleAuto = !state.settings.coupleAuto;
-    saveState();
-    reload();
-  };
-  opRow.appendChild(seeBtn);
-  opRow.appendChild(autoSw);
-  body.appendChild(opRow);
+  const scroll = el("div", "");
+  scroll.style.cssText = "flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;";
+  container.appendChild(scroll);
 
-  if (state.settings.coupleAuto && state.home.lastFeedDay !== todayKey()) {
-    aiFeedPost().then(ok => { if (ok) reload(); });
-  }
+  const topBar = el("div", "");
+  topBar.style.cssText = "position:absolute;top:0;left:0;right:0;z-index:6;display:flex;align-items:center;justify-content:space-between;padding:calc(8px + env(safe-area-inset-top)) 14px 8px;";
+  const back = el("button", "topbar-btn", "‹");
+  back.onclick = () => buildDaysPanel();
+  const ham = el("button", "topbar-btn", "");
+  ham.innerHTML = coupleHamIcon();
+  ham.onclick = (e) => { e.stopPropagation(); showCoupleMenu(ham, reload); };
+  topBar.appendChild(back);
+  topBar.appendChild(ham);
+  container.appendChild(topBar);
 
-  mkCountFold(body, state.home.feed.length + " 篇说说", "feed", reload);
-  if (roomFold.feed) return;
+  const cover = el("div", "");
+  cover.style.cssText = "position:relative;width:100%;height:228px;background:linear-gradient(135deg,#aebfd0,#c9d6e3);background-size:cover;background-position:center;flex-shrink:0;";
+  getImg("couple_cover").then(blob => {
+    if (blob) {
+      if (!urlCache.couple_cover) urlCache.couple_cover = URL.createObjectURL(blob);
+      cover.style.backgroundImage = "url(" + urlCache.couple_cover + ")";
+    }
+  });
+  const idRow = el("div", "");
+  idRow.style.cssText = "position:absolute;right:16px;bottom:-30px;display:flex;align-items:center;gap:12px;z-index:2;";
+  const nick = el("div", "", r.userName);
+  nick.style.cssText = "color:#ffffff;font-size:17px;font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,0.4);margin-bottom:26px;";
+  const avWrap = el("div", "");
+  avWrap.style.cssText = "width:62px;height:62px;border-radius:50%;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.2);border:2px solid rgba(255,255,255,0.85);flex-shrink:0;background:#e8e8e8;";
+  const av = el("img", "");
+  av.style.cssText = "width:100%;height:100%;object-fit:cover;display:block;";
+  coupleAvatarSrc().then(src => { av.src = src; });
+  avWrap.appendChild(av);
+  idRow.appendChild(nick);
+  idRow.appendChild(avWrap);
+  cover.appendChild(idRow);
+  scroll.appendChild(cover);
+
+  const feedWrap = el("div", "");
+  feedWrap.style.cssText = "padding-top:42px;padding-bottom:calc(40px + env(safe-area-inset-bottom));";
+  scroll.appendChild(feedWrap);
 
   const list = state.home.feed.slice().reverse();
   if (!list.length) {
-    const e = el("div", "", "空间还空着，发第一条动态吧");
-    e.style.cssText = "text-align:center;color:#bbb;font-size:13px;padding:30px 0;";
-    body.appendChild(e);
+    const e = el("div", "", "空间还空着，点右上角发第一条动态吧");
+    e.style.cssText = "text-align:center;color:#bbb;font-size:13px;padding:40px 0;";
+    feedWrap.appendChild(e);
   }
-  list.forEach(post => {
+  list.forEach((post, li) => {
     if (!post.likes) post.likes = [];
-    const card = el("div", "feed-card");
-    card.style.background = "rgba(255,255,255,0.5)";
+    const item = el("div", "");
+    item.style.cssText = "display:flex;gap:11px;padding:15px 16px;" + (li < list.length - 1 ? "border-bottom:1px solid rgba(0,0,0,0.05);" : "");
 
-    const head = el("div", "feed-head");
-    const av = el("img", "feed-avatar");
-    avatarSrc(post.who === "me" ? "user" : "ai").then(src => { av.src = src; });
-    const nm = el("div", "");
-    const nmName = el("div", "feed-name", post.who === "me" ? r.userName : r.aiName);
-    nmName.style.color = accent;
-    nm.appendChild(nmName);
-    head.appendChild(av);
-    head.appendChild(nm);
-    card.appendChild(head);
+    const av2 = el("img", "");
+    av2.style.cssText = "width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--press);";
+    avatarSrc(post.who === "me" ? "user" : "ai").then(src => { av2.src = src; });
+    item.appendChild(av2);
 
-    if (post.text) card.appendChild(el("div", "feed-text", post.text));
+    const right = el("div", "");
+    right.style.cssText = "flex:1;min-width:0;";
+    const nm = el("div", "", post.who === "me" ? r.userName : r.aiName);
+    nm.style.cssText = "color:" + accent + ";font-weight:600;font-size:15px;";
+    right.appendChild(nm);
+
+    if (post.text) {
+      const tx = el("div", "", post.text);
+      tx.style.cssText = "font-size:14.5px;line-height:1.6;margin-top:3px;white-space:pre-wrap;word-break:break-word;color:var(--text-main);";
+      right.appendChild(tx);
+    }
     if (post.img) {
-      const im = el("img", "feed-img");
+      const im = el("img", "");
       im.src = post.img;
-      card.appendChild(im);
+      im.style.cssText = "max-width:62%;border-radius:8px;margin-top:7px;display:block;";
+      right.appendChild(im);
     }
 
     const footRow = el("div", "");
-    footRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;margin-top:8px;";
-    footRow.appendChild(el("div", "feed-time", fmtTime(post.time)));
-    const dotsBtn = el("button", "");
-    dotsBtn.style.cssText = "border:none;background:rgba(0,0,0,0.05);border-radius:6px;padding:3px 11px;cursor:pointer;line-height:0;";
-    dotsBtn.innerHTML = feedDotsIcon();
-    dotsBtn.onclick = (e) => { e.stopPropagation(); showFeedMenu(dotsBtn, post, reload); };
-    footRow.appendChild(dotsBtn);
-    card.appendChild(footRow);
+    footRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;margin-top:7px;";
+    const tm = el("div", "", relTime(post.time));
+    tm.style.cssText = "font-size:12px;color:#b0b0b0;";
+    const dots = el("button", "");
+    dots.style.cssText = "border:none;background:rgba(0,0,0,0.05);border-radius:5px;padding:3px 9px;cursor:pointer;line-height:0;flex-shrink:0;";
+    dots.innerHTML = feedDotsIcon();
+    dots.onclick = (e) => { e.stopPropagation(); showFeedMenu(dots, post, reload); };
+    footRow.appendChild(tm);
+    footRow.appendChild(dots);
+    right.appendChild(footRow);
 
     const hasLike = post.likes.length > 0;
     const hasCmt = post.comments && post.comments.length > 0;
     if (hasLike || hasCmt) {
       const block = el("div", "");
-      block.style.cssText = "background:rgba(0,0,0,0.035);border-radius:8px;margin-top:8px;overflow:hidden;";
+      block.style.cssText = "background:rgba(0,0,0,0.035);border-radius:6px;margin-top:8px;overflow:hidden;";
+      if (night) block.style.background = "rgba(255,255,255,0.06)";
       if (hasLike) {
         const likeRow = el("div", "");
-        likeRow.style.cssText = "display:flex;align-items:center;gap:6px;padding:8px 12px;font-size:13px;";
+        likeRow.style.cssText = "display:flex;align-items:center;gap:6px;padding:6px 11px;font-size:13.5px;flex-wrap:wrap;";
         const hi = el("span", "");
         hi.style.cssText = "display:inline-flex;flex-shrink:0;";
-        hi.innerHTML = feedHeartIcon(true, accent);
+        hi.innerHTML = feedHeartIcon(accent);
         likeRow.appendChild(hi);
-        const names = post.likes.map(w => w === "me" ? r.userName : r.aiName).join("，");
-        const ns = el("span", "", names);
-        ns.style.cssText = "color:" + accent + ";font-weight:600;";
-        likeRow.appendChild(ns);
+        post.likes.forEach((w, wi) => {
+          likeRow.appendChild(feedName(w === "me" ? r.userName : r.aiName, accent));
+          if (wi < post.likes.length - 1) likeRow.appendChild(document.createTextNode("，"));
+        });
         block.appendChild(likeRow);
       }
       if (hasLike && hasCmt) {
@@ -4846,23 +4978,31 @@ function renderCoupleRoom(body) {
         dv.style.cssText = "height:1px;background:rgba(0,0,0,0.06);";
         block.appendChild(dv);
       }
-      (post.comments || []).forEach(cm => {
-        const cRow2 = el("div", "");
-        cRow2.style.cssText = "padding:6px 12px;font-size:13px;line-height:1.6;word-break:break-word;cursor:pointer;";
-        const author = cm.who === "me" ? r.userName : r.aiName;
-        cRow2.appendChild(feedName(author));
-        if (cm.replyTo) {
-          cRow2.appendChild(document.createTextNode(" 回复 "));
-          cRow2.appendChild(feedName(cm.replyTo === "me" ? r.userName : r.aiName));
-        }
-        cRow2.appendChild(document.createTextNode("：" + cm.text));
-        cRow2.onclick = () => addMyComment(post, cm.who, reload);
-        block.appendChild(cRow2);
-      });
-      card.appendChild(block);
+      if (hasCmt) {
+        const cmWrap = el("div", "");
+        cmWrap.style.cssText = "padding:5px 11px;";
+        post.comments.forEach((cm, ci) => {
+          const cRow = el("div", "");
+          cRow.style.cssText = "font-size:13.5px;line-height:1.5;padding:2px 0;word-break:break-word;cursor:pointer;";
+          cRow.appendChild(feedName(cm.who === "me" ? r.userName : r.aiName, accent));
+          if (cm.replyTo) {
+            cRow.appendChild(document.createTextNode(" 回复 "));
+            cRow.appendChild(feedName(cm.replyTo === "me" ? r.userName : r.aiName, accent));
+          }
+          cRow.appendChild(document.createTextNode("：" + cm.text));
+          cRow.onclick = () => addMyComment(post, cm.who, reload);
+          bindLongPress(cRow, () => {
+            confirmDialog("删除这条评论？", () => { post.comments.splice(ci, 1); saveState(); reload(); });
+          });
+          cmWrap.appendChild(cRow);
+        });
+        block.appendChild(cmWrap);
+      }
+      right.appendChild(block);
     }
 
-    body.appendChild(card);
+    item.appendChild(right);
+    feedWrap.appendChild(item);
   });
 }
 
