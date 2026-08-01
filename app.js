@@ -4593,7 +4593,7 @@ async function aiReplyComment(post, myComment) {
   if (txt) { post.comments.push({ who: "ai", text: txt.trim(), time: Date.now(), replyTo: "me" }); saveState(); }
 }
 
-/* ---------- 相对时间 ---------- */
+/* ---------- 时间：实时/时间戳 ---------- */
 function relTime(ts) {
   const diff = Date.now() - ts;
   const m = Math.floor(diff / 60000);
@@ -4603,10 +4603,18 @@ function relTime(ts) {
   if (h < 24) return h + "小时前";
   const d = Math.floor(h / 24);
   if (d < 30) return d + "天前";
-  return fmtTime(ts);
+  return coupleAbsTime(ts);
+}
+function coupleAbsTime(ts) {
+  const d = new Date(ts);
+  const p = n => String(n).padStart(2, "0");
+  return d.getFullYear() + "." + p(d.getMonth() + 1) + "." + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+}
+function coupleTimeStr(ts) {
+  return state.settings.coupleTimeMode === "abs" ? coupleAbsTime(ts) : relTime(ts);
 }
 
-/* ---------- 情侣空间头像/图片 ---------- */
+/* ---------- 情侣空间头像/换图 ---------- */
 async function coupleAvatarSrc() {
   const blob = await getImg("couple_avatar");
   if (blob) {
@@ -4615,7 +4623,6 @@ async function coupleAvatarSrc() {
   }
   return await avatarSrc("user");
 }
-
 function pickCoupleImg(key, reload) {
   const file = document.createElement("input");
   file.type = "file";
@@ -4649,7 +4656,7 @@ function feedTrashIcon(color) {
   return '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M7 7l1 12a1.5 1.5 0 0 0 1.5 1.4h5a1.5 1.5 0 0 0 1.5-1.4L17 7M10 11v5M14 11v5"/></svg>';
 }
 function feedDotsIcon() {
-  return '<svg viewBox="0 0 28 16" width="20" height="12"><circle cx="9" cy="8" r="2" fill="#7a8794"/><circle cx="19" cy="8" r="2" fill="#7a8794"/></svg>';
+  return '<svg viewBox="0 0 22 12" width="16" height="9"><circle cx="7" cy="6" r="1.8" fill="#8a929a"/><circle cx="15" cy="6" r="1.8" fill="#8a929a"/></svg>';
 }
 function coupleHamIcon() {
   return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>';
@@ -4658,12 +4665,15 @@ function coupleMenuIcon(kind) {
   const s = 'fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"';
   const P = {
     edit: '<path d="M15.5 5.5l3 3M4 20l1-4L16 5a1.4 1.4 0 0 1 2 0l1 1a1.4 1.4 0 0 1 0 2L8 19l-4 1Z" ' + s + '/>',
-    image: '<rect x="4" y="5" width="16" height="14" rx="2" ' + s + '/><circle cx="9" cy="10" r="1.5" ' + s + '/><path d="M5 17l4-3.6 3.6 3 2.4-2 4 3.4" ' + s + '/>',
     refresh: '<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3" ' + s + '/><path d="M19.5 3.5v3.7h-3.7" ' + s + '/>',
     cover: '<rect x="3.5" y="6" width="17" height="12" rx="2" ' + s + '/><path d="M3.5 15l5-4 3 2.3 4-3.3 5 4.5" ' + s + '/>',
-    avatar: '<circle cx="12" cy="9" r="3.5" ' + s + '/><path d="M5.5 19.5c1-3.5 3.5-5.2 6.5-5.2s5.5 1.7 6.5 5.2" ' + s + '/>',
     space: '<rect x="4" y="4" width="16" height="16" rx="3" ' + s + '/><path d="M4 14l4-3 3 2 5-4 4 3" ' + s + '/>',
-    close: '<path d="M6 6l12 12M18 6L6 18" ' + s + '/>'
+    avatar: '<circle cx="12" cy="9" r="3.5" ' + s + '/><path d="M5.5 19.5c1-3.5 3.5-5.2 6.5-5.2s5.5 1.7 6.5 5.2" ' + s + '/>',
+    stats: '<path d="M4 20h16" ' + s + '/><path d="M6 20V12M11 20V6M16 20V14" ' + s + '/>',
+    clock: '<circle cx="12" cy="12" r="8" ' + s + '/><path d="M12 7.5V12l3 2" ' + s + '/>',
+    calendar: '<rect x="4.5" y="6" width="15" height="13" rx="2" ' + s + '/><path d="M4.5 10.2h15M9 4.5v3M15 4.5v3" ' + s + '/>',
+    foldUp: '<path d="M6 14.5l6-6 6 6" ' + s + '/>',
+    foldDown: '<path d="M6 9.5l6 6 6-6" ' + s + '/>'
   };
   return '<svg viewBox="0 0 24 24" width="18" height="18">' + (P[kind] || "") + '</svg>';
 }
@@ -4705,7 +4715,7 @@ async function rerollFeed(post, reload) {
   reload();
 }
 
-function openCoupleCompose(pickNow, reload) {
+function openCoupleCompose(reload) {
   const mask = el("div", "dialog-mask");
   const dlg = el("div", "dialog");
   dlg.appendChild(el("div", "dialog-title", "发条动态"));
@@ -4756,18 +4766,20 @@ function openCoupleCompose(pickNow, reload) {
   mask.appendChild(dlg);
   document.body.appendChild(mask);
   ta.focus();
-  if (pickNow) file.click();
 }
+
+let coupleFold = false;
 
 function showCoupleMenu(btn, reload) {
   document.querySelectorAll(".couple-menu").forEach(x => x.remove());
   const night = state.settings.skin === "night";
+  const accent = daysT().accent;
+  const mode = state.settings.coupleTimeMode || "rel";
   const m = el("div", "couple-menu");
-  m.style.cssText = "position:fixed;background:rgba(255,255,255,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,0.16);z-index:478;overflow:hidden;min-width:186px;";
+  m.style.cssText = "position:fixed;background:rgba(255,255,255,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,0.16);z-index:478;overflow:hidden;min-width:188px;";
   if (night) m.style.background = "rgba(52,50,54,0.97)";
   const items = [
-    { t: "发动态", ic: "edit", f: () => openCoupleCompose(false, reload) },
-    { t: "配图", ic: "image", f: () => openCoupleCompose(true, reload) },
+    { t: "发动态", ic: "edit", f: () => openCoupleCompose(reload) },
     { t: "看他动态", ic: "refresh", f: async () => {
         if (state.home.lastFeedDay === todayKey()) { toast("他今天发过了，往下翻"); return; }
         toast("翻他主页中...");
@@ -4775,16 +4787,23 @@ function showCoupleMenu(btn, reload) {
         if (ok) { praise("他发了新动态 👀"); reload(); }
       } },
     { t: "换背景图", ic: "cover", f: () => pickCoupleImg("couple_cover", reload) },
-    { t: "换头像", ic: "avatar", f: () => pickCoupleImg("couple_avatar", reload) },
     { t: "换空间图", ic: "space", f: () => pickCoupleImg("couple_bg", reload) },
-    { t: "收起", ic: "close", f: () => {} }
+    { t: "换头像", ic: "avatar", f: () => pickCoupleImg("couple_avatar", reload) },
+    { t: "统计动态", ic: "stats", f: () => {
+        const total = state.home.feed.length;
+        const mine = state.home.feed.filter(p => p.who === "me").length;
+        toast("共 " + total + " 条动态 · 你 " + mine + " 条 · 他 " + (total - mine) + " 条", 4000);
+      } },
+    { t: "实时时间", ic: "clock", active: mode === "rel", f: () => { state.settings.coupleTimeMode = "rel"; saveState(); reload(); } },
+    { t: "时间戳", ic: "calendar", active: mode === "abs", f: () => { state.settings.coupleTimeMode = "abs"; saveState(); reload(); } },
+    { t: coupleFold ? "展开" : "收起", ic: coupleFold ? "foldDown" : "foldUp", f: () => { coupleFold = !coupleFold; reload(); } }
   ];
   items.forEach((it, i) => {
     const row = el("div", "");
-    row.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 16px;font-size:14px;color:var(--text-main);" + (i ? ("border-top:1px solid " + (night ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)") + ";") : "");
+    row.style.cssText = "display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 16px;font-size:14px;color:" + (it.active ? accent : "var(--text-main)") + ";font-weight:" + (it.active ? "600" : "400") + ";" + (i ? ("border-top:1px solid " + (night ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)") + ";") : "");
     row.appendChild(el("span", "", it.t));
     const icn = el("span", "");
-    icn.style.cssText = "display:inline-flex;opacity:0.8;";
+    icn.style.cssText = "display:inline-flex;opacity:0.82;";
     icn.innerHTML = coupleMenuIcon(it.ic);
     row.appendChild(icn);
     row.onclick = (e) => { e.stopPropagation(); m.remove(); it.f(); };
@@ -4856,6 +4875,8 @@ function renderCoupleRoom(container) {
   const r = curRole();
   const accent = daysT().accent;
   const night = state.settings.skin === "night";
+  const blockBg = night ? "rgba(255,255,255,0.06)" : "#F7F7F7";
+  const dotsBg = night ? "rgba(255,255,255,0.1)" : "#F3F3F5";
 
   getImg("couple_bg").then(blob => {
     if (blob) {
@@ -4882,7 +4903,7 @@ function renderCoupleRoom(container) {
   container.appendChild(topBar);
 
   const cover = el("div", "");
-  cover.style.cssText = "position:relative;width:100%;height:228px;background:linear-gradient(135deg,#aebfd0,#c9d6e3);background-size:cover;background-position:center;flex-shrink:0;";
+  cover.style.cssText = "position:relative;width:100%;aspect-ratio:3/2;background:linear-gradient(135deg,#aebfd0,#c9d6e3);background-size:cover;background-position:center;flex-shrink:0;";
   getImg("couple_cover").then(blob => {
     if (blob) {
       if (!urlCache.couple_cover) urlCache.couple_cover = URL.createObjectURL(blob);
@@ -4890,11 +4911,11 @@ function renderCoupleRoom(container) {
     }
   });
   const idRow = el("div", "");
-  idRow.style.cssText = "position:absolute;right:16px;bottom:-30px;display:flex;align-items:center;gap:12px;z-index:2;";
+  idRow.style.cssText = "position:absolute;right:16px;bottom:-34px;display:flex;align-items:flex-end;gap:12px;z-index:2;";
   const nick = el("div", "", r.userName);
-  nick.style.cssText = "color:#ffffff;font-size:17px;font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,0.4);margin-bottom:26px;";
+  nick.style.cssText = "color:#ffffff;font-size:17px;font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,0.4);margin-bottom:40px;";
   const avWrap = el("div", "");
-  avWrap.style.cssText = "width:62px;height:62px;border-radius:50%;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.2);border:2px solid rgba(255,255,255,0.85);flex-shrink:0;background:#e8e8e8;";
+  avWrap.style.cssText = "width:72px;height:72px;border-radius:14px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.2);border:2px solid rgba(255,255,255,0.85);flex-shrink:0;background:#e8e8e8;";
   const av = el("img", "");
   av.style.cssText = "width:100%;height:100%;object-fit:cover;display:block;";
   coupleAvatarSrc().then(src => { av.src = src; });
@@ -4905,8 +4926,16 @@ function renderCoupleRoom(container) {
   scroll.appendChild(cover);
 
   const feedWrap = el("div", "");
-  feedWrap.style.cssText = "padding-top:42px;padding-bottom:calc(40px + env(safe-area-inset-bottom));";
+  feedWrap.style.cssText = "padding-top:46px;padding-bottom:calc(40px + env(safe-area-inset-bottom));";
   scroll.appendChild(feedWrap);
+
+  if (coupleFold) {
+    const hint = el("div", "", "动态已收起，点这里展开");
+    hint.style.cssText = "text-align:center;color:#a8a8ad;font-size:13px;padding:24px 0;cursor:pointer;";
+    hint.onclick = () => { coupleFold = false; reload(); };
+    feedWrap.appendChild(hint);
+    return;
+  }
 
   const list = state.home.feed.slice().reverse();
   if (!list.length) {
@@ -4917,52 +4946,51 @@ function renderCoupleRoom(container) {
   list.forEach((post, li) => {
     if (!post.likes) post.likes = [];
     const item = el("div", "");
-    item.style.cssText = "display:flex;gap:11px;padding:15px 16px;" + (li < list.length - 1 ? "border-bottom:1px solid rgba(0,0,0,0.05);" : "");
+    item.style.cssText = "padding:16px 16px 6px;" + (li < list.length - 1 ? "border-bottom:0.5px solid rgba(0,0,0,0.05);" : "");
 
+    const head = el("div", "");
+    head.style.cssText = "display:flex;align-items:center;gap:10px;";
     const av2 = el("img", "");
-    av2.style.cssText = "width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--press);";
+    av2.style.cssText = "width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--press);";
     avatarSrc(post.who === "me" ? "user" : "ai").then(src => { av2.src = src; });
-    item.appendChild(av2);
-
-    const right = el("div", "");
-    right.style.cssText = "flex:1;min-width:0;";
     const nm = el("div", "", post.who === "me" ? r.userName : r.aiName);
-    nm.style.cssText = "color:" + accent + ";font-weight:600;font-size:15px;";
-    right.appendChild(nm);
+    nm.style.cssText = "color:" + accent + ";font-weight:600;font-size:13px;";
+    head.appendChild(av2);
+    head.appendChild(nm);
+    item.appendChild(head);
 
     if (post.text) {
       const tx = el("div", "", post.text);
-      tx.style.cssText = "font-size:14.5px;line-height:1.6;margin-top:3px;white-space:pre-wrap;word-break:break-word;color:var(--text-main);";
-      right.appendChild(tx);
+      tx.style.cssText = "font-size:14px;line-height:1.7;margin-top:9px;white-space:pre-wrap;word-break:break-word;color:var(--text-main);";
+      item.appendChild(tx);
     }
     if (post.img) {
       const im = el("img", "");
       im.src = post.img;
-      im.style.cssText = "max-width:62%;border-radius:8px;margin-top:7px;display:block;";
-      right.appendChild(im);
+      im.style.cssText = "max-width:66%;border-radius:8px;margin-top:8px;display:block;";
+      item.appendChild(im);
     }
 
-    const footRow = el("div", "");
-    footRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;margin-top:7px;";
-    const tm = el("div", "", relTime(post.time));
+    const foot = el("div", "");
+    foot.style.cssText = "display:flex;align-items:center;justify-content:space-between;margin-top:8px;";
+    const tm = el("div", "", coupleTimeStr(post.time));
     tm.style.cssText = "font-size:12px;color:#b0b0b0;";
     const dots = el("button", "");
-    dots.style.cssText = "border:none;background:rgba(0,0,0,0.05);border-radius:5px;padding:3px 9px;cursor:pointer;line-height:0;flex-shrink:0;";
+    dots.style.cssText = "border:none;background:" + dotsBg + ";border-radius:8px;padding:2px 7px;cursor:pointer;line-height:0;flex-shrink:0;";
     dots.innerHTML = feedDotsIcon();
     dots.onclick = (e) => { e.stopPropagation(); showFeedMenu(dots, post, reload); };
-    footRow.appendChild(tm);
-    footRow.appendChild(dots);
-    right.appendChild(footRow);
+    foot.appendChild(tm);
+    foot.appendChild(dots);
+    item.appendChild(foot);
 
     const hasLike = post.likes.length > 0;
     const hasCmt = post.comments && post.comments.length > 0;
     if (hasLike || hasCmt) {
       const block = el("div", "");
-      block.style.cssText = "background:rgba(0,0,0,0.035);border-radius:6px;margin-top:8px;overflow:hidden;";
-      if (night) block.style.background = "rgba(255,255,255,0.06)";
+      block.style.cssText = "background:" + blockBg + ";border-radius:8px;margin-top:9px;overflow:hidden;";
       if (hasLike) {
         const likeRow = el("div", "");
-        likeRow.style.cssText = "display:flex;align-items:center;gap:6px;padding:6px 11px;font-size:13.5px;flex-wrap:wrap;";
+        likeRow.style.cssText = "display:flex;align-items:center;gap:6px;padding:7px 12px;font-size:13.5px;flex-wrap:wrap;";
         const hi = el("span", "");
         hi.style.cssText = "display:inline-flex;flex-shrink:0;";
         hi.innerHTML = feedHeartIcon(accent);
@@ -4975,15 +5003,15 @@ function renderCoupleRoom(container) {
       }
       if (hasLike && hasCmt) {
         const dv = el("div", "");
-        dv.style.cssText = "height:1px;background:rgba(0,0,0,0.06);";
+        dv.style.cssText = "height:0.5px;background:rgba(0,0,0,0.07);";
         block.appendChild(dv);
       }
       if (hasCmt) {
         const cmWrap = el("div", "");
-        cmWrap.style.cssText = "padding:5px 11px;";
+        cmWrap.style.cssText = "padding:6px 12px;";
         post.comments.forEach((cm, ci) => {
           const cRow = el("div", "");
-          cRow.style.cssText = "font-size:13.5px;line-height:1.5;padding:2px 0;word-break:break-word;cursor:pointer;";
+          cRow.style.cssText = "font-size:13.5px;line-height:1.6;padding:3px 0;word-break:break-word;cursor:pointer;";
           cRow.appendChild(feedName(cm.who === "me" ? r.userName : r.aiName, accent));
           if (cm.replyTo) {
             cRow.appendChild(document.createTextNode(" 回复 "));
@@ -4998,10 +5026,9 @@ function renderCoupleRoom(container) {
         });
         block.appendChild(cmWrap);
       }
-      right.appendChild(block);
+      item.appendChild(block);
     }
 
-    item.appendChild(right);
     feedWrap.appendChild(item);
   });
 }
