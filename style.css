@@ -839,9 +839,15 @@ button:active { transform: scale(0.96); opacity: 0.7; }
   gap: 10px;
   padding: 12px;
   border-radius: 16px;
-  border: 1px solid var(--line);
+  border: 1.5px solid var(--btn-main);
   cursor: pointer;
 }
+/* 展开列表里的当前项不再重复黑框,只留浅底 */
+#provider-fold-list .list-item.active {
+  border-color: var(--line);
+  background: var(--press);
+}
+
 #provider-bar .pb-name { font-size: 15px; font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #provider-bar .pb-arrow { color: var(--text-faint); font-size: 14px; }
 
@@ -1417,12 +1423,12 @@ body.dark .tgl { background: rgba(120, 120, 128, 0.4); }
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 10px;
+  padding: 11px 14px;
   border: 1px solid var(--line);
-  border-radius: 11px;
-  margin-bottom: 6px;
-  max-width: 300px;
+  border-radius: 14px;
+  margin-bottom: 8px;
 }
+
 .preset-name {
   flex: 1;
   font-size: 13px;
@@ -1802,4 +1808,23 @@ body.gpt-ui #send-btn {
   color: var(--btn-main-text);
 }
 
+/* API Key 睁闭眼 */
+.input-eye-wrap { position: relative; }
+.input-eye-wrap .form-input { padding-right: 46px; }
+.input-eye-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.input-eye-btn:active { opacity: 0.6; }
 
