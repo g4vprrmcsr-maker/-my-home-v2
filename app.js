@@ -1287,21 +1287,20 @@ async function buildMsgRow(m, gi, aiSrc, userSrc) {
           saveState();
           renderMessages();
         }) });
-      showActions(items, 0, 0);
+            showActions(items, 0, 0);
       const mn = document.querySelector(".msg-actions");
       if (mn) {
         const br = ev.currentTarget.getBoundingClientRect();
-        const r2 = mn.getBoundingClientRect();
+        const mw = mn.offsetWidth;
+        const mh = mn.offsetHeight;
         const gap = 8;
-        // 用户消息:菜单右缘对齐按钮;AI消息:左缘对齐按钮
-        let left = isUser ? (br.right - r2.width) : br.left;
-        left = Math.max(gap, Math.min(left, window.innerWidth - r2.width - gap));
-        // 默认贴按钮下方弹出;下方放不下就翻到上方
+        let left = isUser ? (br.right - mw) : br.left;
+        left = Math.max(gap, Math.min(left, window.innerWidth - mw - gap));
         let top = br.bottom + 6;
-        if (top + r2.height > window.innerHeight - gap) {
-          top = br.top - r2.height - 6;
+        if (top + mh > window.innerHeight - gap) {
+          top = br.top - mh - 6;
         }
-        top = Math.max(gap, Math.min(top, window.innerHeight - r2.height - gap));
+        top = Math.max(gap, Math.min(top, window.innerHeight - mh - gap));
         mn.style.left = left + "px";
         mn.style.top = top + "px";
       }
@@ -1388,6 +1387,19 @@ function closeActions() {
     m.remove();
   });
 }
+/* 操作卡片行内图标:按文字关键词认领 */
+function actIcon(label) {
+  const s = 'fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';
+  let p;
+  if (/删除|丢掉|移除/.test(label)) p = '<path d="M5 7h14M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M7 7l1 12a1.5 1.5 0 0 0 1.5 1.4h5a1.5 1.5 0 0 0 1.5-1.4L17 7" ' + s + '/>';
+  else if (/编辑|重命名|改名/.test(label)) p = '<path d="M15.5 5.5l3 3M4 20l1-4L16 5a1.4 1.4 0 0 1 2 0l1 1a1.4 1.4 0 0 1 0 2L8 19l-4 1Z" ' + s + '/>';
+  else if (/复制|拷贝/.test(label)) p = '<rect x="9" y="9" width="11" height="11" rx="2.5" ' + s + '/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H16" ' + s + '/>';
+  else if (/生成|重roll|重写|重答|重发/.test(label)) p = '<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3" ' + s + '/><path d="M19.5 3.5v3.7h-3.7" ' + s + '/>';
+  else if (/多选|多条/.test(label)) p = '<path d="M4 7l2 2 3-3M4 16l2 2 3-3M12 8h8M12 17h8" ' + s + '/>';
+  else if (/换图|传图|图片|背景|壁纸/.test(label)) p = '<rect x="4" y="5" width="16" height="14" rx="2" ' + s + '/><circle cx="9" cy="10" r="1.5" ' + s + '/><path d="M5 17l4-3.6 3.6 3 2.4-2 4 3.4" ' + s + '/>';
+  else p = '<circle cx="12" cy="12" r="7.5" ' + s + '/>';
+  return '<svg viewBox="0 0 24 24" width="18" height="18">' + p + '</svg>';
+}
 
 function showActions(items, x, y) {
   closeActions();
@@ -1396,7 +1408,14 @@ function showActions(items, x, y) {
   items.forEach(it => {
     const b = document.createElement("button");
     b.className = "act-btn" + (it.danger ? " danger" : "");
-    b.textContent = it.label;
+    const lab = document.createElement("span");
+    lab.className = "act-label";
+    lab.textContent = it.label;
+    const ic = document.createElement("span");
+    ic.className = "act-ic";
+    ic.innerHTML = actIcon(it.label);
+    b.appendChild(lab);
+    b.appendChild(ic);
     const run = (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -1408,9 +1427,10 @@ function showActions(items, x, y) {
     menu.appendChild(b);
   });
   document.body.appendChild(menu);
-  const rect = menu.getBoundingClientRect();
-  menu.style.left = Math.max(8, Math.min(x, window.innerWidth - rect.width - 8)) + "px";
-  menu.style.top = Math.max(8, Math.min(y, window.innerHeight - rect.height - 8)) + "px";
+  const w = menu.offsetWidth;
+  const h = menu.offsetHeight;
+  menu.style.left = Math.max(8, Math.min(x, window.innerWidth - w - 8)) + "px";
+  menu.style.top = Math.max(8, Math.min(y, window.innerHeight - h - 8)) + "px";
   setTimeout(() => {
     menu._closer = (e) => {
       if (!menu.contains(e.target)) closeActions();
