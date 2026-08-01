@@ -5163,6 +5163,24 @@ function bindEvents() {
 
   $("#save-settings-btn").onclick = saveSettingsForm;
   $("#fetch-models-btn").onclick = fetchModels;
+     (function () {
+    const eyeBtn = $("#apikey-eye");
+    const keyInput = $("#set-apikey");
+    if (!eyeBtn || !keyInput) return;
+    const EYE_OPEN = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+    const EYE_SHUT = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l16 16"/><path d="M9.6 5.8A9.4 9.4 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a15.3 15.3 0 0 1-2.6 3.2M6.3 7.4A15.2 15.2 0 0 0 2.5 12S6 18.5 12 18.5c1.2 0 2.3-.2 3.3-.6"/></svg>';
+    eyeBtn.innerHTML = EYE_SHUT;
+    eyeBtn.onclick = () => {
+      if (keyInput.type === "password") {
+        keyInput.type = "text";
+        eyeBtn.innerHTML = EYE_OPEN;
+      } else {
+        keyInput.type = "password";
+        eyeBtn.innerHTML = EYE_SHUT;
+      }
+    };
+  })();
+
   $("#new-role-btn").onclick = newRole;
 
   $("#export-json-btn").onclick = exportData;
