@@ -4870,8 +4870,8 @@ function renderCoupleRoom(container) {
   const r = curRole();
   const accent = daysT().accent;
   const night = document.body.classList.contains("dark");
-  const blockBg = night ? "rgba(255,255,255,0.06)" : "#F7F7F7";
-  const dotsBg = night ? "rgba(255,255,255,0.1)" : "#F3F3F5";
+    const blockBg = night ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.035)";
+  const dotsBg = night ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)";
   const cardBg = night ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.5)";
 
   getImg("couple_bg").then(blob => {
@@ -4965,7 +4965,7 @@ function renderCoupleRoom(container) {
     footRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;margin-top:8px;";
     const tm = el("div", "feed-time", coupleTimeStr(post.time));
     const dotsBtn = el("button", "");
-    dotsBtn.style.cssText = "border:none;background:" + dotsBg + ";border-radius:8px;padding:5px 9px;cursor:pointer;line-height:0;flex-shrink:0;";
+    dotsBtn.style.cssText = "border:none;background:" + dotsBg + ";border-radius:5px;padding:3px 7px;cursor:pointer;line-height:0;flex-shrink:0;";
     dotsBtn.innerHTML = feedDotsIcon();
     dotsBtn.onclick = (e) => { e.stopPropagation(); showFeedMenu(dotsBtn, post, reload); };
     footRow.appendChild(tm);
