@@ -2197,16 +2197,39 @@ function toggleModelPopup() {
   const p = curProvider();
   if (!p.models.length) { toast("先去设置里拉取模型列表"); return; }
   pop.innerHTML = "";
-  p.models.forEach(id => {
-    const div = el("div", "model-item" + (id === p.model ? " selected" : ""), id);
-    div.onclick = () => {
-      p.model = id;
-      saveState();
-      renderModelBtn();
-      pop.classList.remove("show");
-    };
-    pop.appendChild(div);
-  });
+
+  const search = document.createElement("input");
+  search.placeholder = "搜索模型名...";
+  search.style.cssText = "width:100%;box-sizing:border-box;border:none;border-bottom:1px solid rgba(0,0,0,0.08);padding:10px 14px;font-size:14px;outline:none;background:transparent;position:sticky;top:0;";
+  pop.appendChild(search);
+
+  const listWrap = document.createElement("div");
+  pop.appendChild(listWrap);
+
+  function draw(filter) {
+    listWrap.innerHTML = "";
+    const f = (filter || "").trim().toLowerCase();
+    const arr = f ? p.models.filter(id => id.toLowerCase().indexOf(f) >= 0) : p.models;
+    if (!arr.length) {
+      const e = el("div", "model-item", "没找到匹配的模型");
+      e.style.color = "#aaa";
+      listWrap.appendChild(e);
+      return;
+    }
+    arr.forEach(id => {
+      const div = el("div", "model-item" + (id === p.model ? " selected" : ""), id);
+      div.onclick = () => {
+        p.model = id;
+        saveState();
+        renderModelBtn();
+        pop.classList.remove("show");
+      };
+      listWrap.appendChild(div);
+    });
+  }
+  search.addEventListener("input", () => draw(search.value));
+  draw("");
+
   pop.classList.add("show");
 }
 
@@ -3145,7 +3168,8 @@ function buildTabBubble(body) {
     () => state.settings.bubbleShape,
     (v) => { state.settings.bubbleShape = v; saveState(); renderMessages(); }
   );
-    const szBtn = el("button", "fold-btn", bubbleSizeFold ? "尺寸（点开细捏） ▼" : "尺寸（收起） ▲");
+   const szBtn = el("button", "fold-btn");
+   szBtn.innerHTML = (bubbleSizeFold ? "尺寸（点开细捏）" : "尺寸（收起）") + '<span style="font-size:0.7em;opacity:0.65;margin-left:3px;">' + (bubbleSizeFold ? "▼" : "▲") + '</span>';
   szBtn.style.margin = "8px 0 6px";
   szBtn.onclick = () => { bubbleSizeFold = !bubbleSizeFold; buildThemePanel(); };
   sec.appendChild(szBtn);
