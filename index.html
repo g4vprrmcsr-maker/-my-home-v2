@@ -13,7 +13,7 @@
 
 
   <title>my home</title>
-  <link rel="stylesheet" href="style.css?v=355">
+  <link rel="stylesheet" href="style.css?v=358">
 </head>
 <body>
   <div id="app">
@@ -128,7 +128,10 @@
       </div>
       <div class="form-row">
         <label class="form-label">API Key（只存在本机）</label>
-        <input class="form-input" type="password" id="set-apikey" placeholder="sk-...">
+        <div class="input-eye-wrap">
+          <input class="form-input" type="password" id="set-apikey" placeholder="sk-...">
+          <button type="button" class="input-eye-btn" id="apikey-eye"></button>
+        </div>
       </div>
       <div class="btn-group">
         <button class="btn secondary" id="fetch-models-btn">拉取模型列表</button>
@@ -203,6 +206,6 @@
   })();
   </script>
 
-  <script src="app.js?v=355"></script>
+  <script src="app.js?v=358"></script>
 </body>
 </html>
