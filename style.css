@@ -588,7 +588,7 @@ body.dark .msg-actions { background: #2c2c2e; }
   gap: 16px;
   white-space: nowrap;
 }
-.act-btn + .act-btn { border-top: 1px solid rgba(0,0,0,0.14); }
+.act-btn + .act-btn { border-top: 0.6px solid rgba(0,0,0,0.14); }
 body.dark .act-btn + .act-btn { border-top-color: rgba(255,255,255,0.14); }
 .act-btn:active { background: rgba(0,0,0,0.05); }
 .act-btn.danger { color: #e5484d; }
@@ -1423,7 +1423,7 @@ body.dark .tgl { background: rgba(120, 120, 128, 0.4); }
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
+  padding: 7px 14px;
   border: 1px solid var(--line);
   border-radius: 14px;
   margin-bottom: 8px;
