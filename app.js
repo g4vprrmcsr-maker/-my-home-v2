@@ -2167,10 +2167,33 @@ async function fetchModels() {
 }
 
 function renderModelSelect() {
+  const sel = $("#set-model");
+  let search = document.getElementById("model-search");
+  if (!search) {
+    search = document.createElement("input");
+    search.id = "model-search";
+    search.className = "form-input";
+    search.placeholder = "搜索模型名（列表太多时用）";
+    search.style.marginBottom = "8px";
+    sel.parentNode.insertBefore(search, sel);
+    search.addEventListener("input", () => drawModelOptions(search.value));
+  }
+  drawModelOptions(search.value);
+}
+
+function drawModelOptions(filter) {
   const p = curProvider();
   const sel = $("#set-model");
+  const f = (filter || "").trim().toLowerCase();
+  const arr = f ? p.models.filter(id => id.toLowerCase().indexOf(f) >= 0) : p.models;
   sel.innerHTML = "";
-  p.models.forEach(id => {
+  if (!arr.length) {
+    const o = document.createElement("option");
+    o.textContent = "没找到匹配的模型";
+    sel.appendChild(o);
+    return;
+  }
+  arr.forEach(id => {
     const o = document.createElement("option");
     o.value = id;
     o.textContent = id;
