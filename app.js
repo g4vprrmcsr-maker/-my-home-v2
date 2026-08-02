@@ -5036,7 +5036,7 @@ function renderCoupleRoom(container) {
 }
 
 /* ==========================================
-   记事本 v4（备忘录 slot A）
+   记事本 v5（备忘录 slot A）
    ========================================== */
 
 const NOTE_META_INK = "#B2B2B2";
@@ -5099,17 +5099,19 @@ function noteDateParts(ts) {
   };
 }
 
-function noteThreeDots(color) {
-  const c = color || "currentColor";
-  return '<svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="5" r="1.7" fill="' + c + '"/><circle cx="12" cy="12" r="1.7" fill="' + c + '"/><circle cx="12" cy="19" r="1.7" fill="' + c + '"/></svg>';
+function noteThreeDots(color, size) {
+  const c = color || "currentColor"; const z = size || 20;
+  const r = size ? 2 : 1.7;
+  return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '"><circle cx="12" cy="5" r="' + r + '" fill="' + c + '"/><circle cx="12" cy="12" r="' + r + '" fill="' + c + '"/><circle cx="12" cy="19" r="' + r + '" fill="' + c + '"/></svg>';
 }
-function noteSearchIcon(color) {
-  const c = color || "currentColor";
-  return '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="' + c + '" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.6 4.6"/></svg>';
+function noteSearchIcon(color, size) {
+  const c = color || "currentColor"; const z = size || 19;
+  const w = size ? 2 : 1.8;
+  return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '" fill="none" stroke="' + c + '" stroke-width="' + w + '" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.6 4.6"/></svg>';
 }
-function noteBackArrow(color) {
-  const c = color || "#333";
-  return '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="' + c + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H5M11 6l-6 6 6 6"/></svg>';
+function noteBackArrow(color, size) {
+  const c = color || "#333"; const z = size || 24;
+  return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '" fill="none" stroke="' + c + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H5M11 6l-6 6 6 6"/></svg>';
 }
 
 /* ---------- 记事本主页 ---------- */
@@ -5135,12 +5137,18 @@ function openNotebook() {
     }
   });
 
-  /* 顶部主题色带 */
+  /* 顶部主题色带（可换横幅背景图） */
   const header = el("div", "panel-header");
-  header.style.cssText = "background:" + accent + ";border-bottom:none;box-shadow:none;padding-top:calc(10px + env(safe-area-inset-top));";
+  header.style.cssText = "background:" + accent + ";border-bottom:none;box-shadow:none;padding-top:calc(10px + env(safe-area-inset-top));background-size:cover;background-position:center;";
+  getImg("note_banner_bg").then(blob => {
+    if (blob) {
+      if (!urlCache.note_banner_bg) urlCache.note_banner_bg = URL.createObjectURL(blob);
+      header.style.backgroundImage = "url(" + urlCache.note_banner_bg + ")";
+    }
+  });
   const back = el("button", "");
   back.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
-  back.innerHTML = noteBackArrow("#fff");
+  back.innerHTML = noteBackArrow("#fff", 26);
   back.onclick = () => buildDaysPanel();
   header.appendChild(back);
   const pt = el("div", "panel-title", state.home.slotNameA || "备忘录");
@@ -5148,33 +5156,37 @@ function openNotebook() {
   header.appendChild(pt);
 
   const tools = el("div", "");
-  tools.style.cssText = "margin-left:auto;display:flex;align-items:center;gap:12px;";
+  tools.style.cssText = "margin-left:auto;display:flex;align-items:center;gap:14px;";
   const searchBtn = el("button", "");
   searchBtn.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
-  searchBtn.innerHTML = noteSearchIcon("#fff");
+  searchBtn.innerHTML = noteSearchIcon("#fff", 24);
   searchBtn.onclick = () => openNoteSearch();
   const dotsBtn = el("button", "");
   dotsBtn.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
-  dotsBtn.innerHTML = noteThreeDots("#fff");
+  dotsBtn.innerHTML = noteThreeDots("#fff", 24);
   dotsBtn.onclick = (e) => {
     const showing = state.home.noteShowMeta !== false;
+    const pickBg = (key) => {
+      const f = document.createElement("input");
+      f.type = "file"; f.accept = "image/*";
+      f.onchange = async (ev) => {
+        const fl = ev.target.files[0]; if (!fl) return;
+        await putImg(key, fl);
+        if (urlCache[key]) { URL.revokeObjectURL(urlCache[key]); delete urlCache[key]; }
+        openNotebook();
+      };
+      f.click();
+    };
+    const delBg = async (key) => {
+      await delImg(key);
+      if (urlCache[key]) { URL.revokeObjectURL(urlCache[key]); delete urlCache[key]; }
+      openNotebook();
+    };
     showActions([
-      { label: "换背景图", fn: () => {
-          const f = document.createElement("input");
-          f.type = "file"; f.accept = "image/*";
-          f.onchange = async (ev) => {
-            const fl = ev.target.files[0]; if (!fl) return;
-            await putImg("note_bg", fl);
-            if (urlCache.note_bg) { URL.revokeObjectURL(urlCache.note_bg); delete urlCache.note_bg; }
-            openNotebook();
-          };
-          f.click();
-        } },
-      { label: "移除背景图", danger: true, fn: async () => {
-          await delImg("note_bg");
-          if (urlCache.note_bg) { URL.revokeObjectURL(urlCache.note_bg); delete urlCache.note_bg; }
-          openNotebook();
-        } },
+      { label: "换背景图", fn: () => pickBg("note_bg") },
+      { label: "移除背景图", danger: true, fn: () => delBg("note_bg") },
+      { label: "换横幅背景", fn: () => pickBg("note_banner_bg") },
+      { label: "移除横幅背景", danger: true, fn: () => delBg("note_banner_bg") },
       { label: "统计数据", fn: () => {
           const notes = state.home.notes || [];
           const days = new Set(notes.map(n => noteDateParts(n.time).dayKey)).size;
@@ -5221,13 +5233,11 @@ function openNotebook() {
 
     const row = el("div", "");
     row.style.cssText = "position:relative;padding-left:20px;margin-bottom:14px;";
-    /* 连续时间轴线：一根线，顶到底并桥接卡片间距 */
     const line = el("div", "");
     line.style.cssText = "position:absolute;left:8px;top:0;bottom:-14px;width:1px;background:" + lineCol + ";";
     row.appendChild(line);
-    /* 圆点：用页面底色的外圈把线干净切断 */
     const dot = el("div", "");
-    dot.style.cssText = "position:absolute;left:3px;bottom:24px;width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid " + accent + ";box-sizing:border-box;box-shadow:0 0 0 4px " + pageBg + ";z-index:1;";
+    dot.style.cssText = "position:absolute;left:3px;bottom:28px;width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid " + accent + ";box-sizing:border-box;box-shadow:0 0 0 4px " + pageBg + ";z-index:1;";
     row.appendChild(dot);
 
     const swipe = el("div", "");
@@ -5244,7 +5254,7 @@ function openNotebook() {
     swipe.appendChild(delBtn);
 
     const card = el("div", "");
-    card.style.cssText = "position:relative;background:" + cardBg + ";border:1px solid rgba(255,255,255,0.9);border-radius:12px;padding:13px 12px 11px;min-height:65px;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 12px rgba(0,0,0,0.05);transition:transform 0.22s;transform:translateX(0);z-index:1;";
+    card.style.cssText = "position:relative;background:" + cardBg + ";border:1px solid rgba(255,255,255,0.9);border-radius:12px;padding:18px 12px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 12px rgba(0,0,0,0.05);transition:transform 0.22s;transform:translateX(0);z-index:1;";
     if (note.text) {
       const tx = el("div", "", note.text);
       tx.style.cssText = "font-size:15px;line-height:1.7;color:" + NOTE_TEXT_INK + ";white-space:pre-wrap;word-break:break-word;";
@@ -5268,7 +5278,6 @@ function openNotebook() {
     if (showMeta && note.location) tm.appendChild(el("span", "", "· " + note.location));
     card.appendChild(tm);
 
-    /* 左滑：方向锁定 + 红键默认隐藏 */
     let startX = 0, startY = 0, dragging = false, opened = false, moved = false, dir = null, curT = 0;
     card.addEventListener("touchstart", (ev) => {
       startX = ev.touches[0].clientX; startY = ev.touches[0].clientY;
@@ -5312,7 +5321,7 @@ function openNotebook() {
   });
 
   const fab = el("div", "");
-  fab.style.cssText = "position:absolute;right:20px;bottom:calc(30px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:50%;background:" + accent + ";color:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:300;box-shadow:0 4px 16px rgba(0,0,0,0.22);cursor:pointer;z-index:6;";
+  fab.style.cssText = "position:absolute;right:20px;bottom:calc(30px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;background:" + accent + ";color:#fff;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:300;box-shadow:0 4px 16px rgba(0,0,0,0.22);cursor:pointer;z-index:6;";
   fab.textContent = "+";
   fab.onclick = () => openNoteCompose(null);
   panel.appendChild(fab);
@@ -5338,7 +5347,7 @@ function openNoteDetail(note) {
   });
 
   const head = el("div", "");
-  head.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top)) 21px 10px;position:relative;z-index:1;";
+  head.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top)) 23px 10px;position:relative;z-index:1;";
   const back = el("button", "");
   back.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
   back.innerHTML = noteBackArrow("#333");
@@ -5371,33 +5380,33 @@ function openNoteDetail(note) {
   ov.appendChild(head);
 
   const body = el("div", "overlay-body");
-  body.style.cssText = "flex:1;overflow-y:auto;padding:28px 21px calc(60px + env(safe-area-inset-bottom));position:relative;z-index:1;";
+  body.style.cssText = "flex:1;overflow-y:auto;padding:28px 23px calc(60px + env(safe-area-inset-bottom));position:relative;z-index:1;";
   const p = noteDateParts(note.time);
 
   const dRow = el("div", "");
   dRow.style.cssText = "display:flex;align-items:flex-end;gap:12px;margin:0;";
   const num = el("div", "", String(p.day).padStart(2, "0"));
-  num.style.cssText = "font-size:40px;font-weight:300;line-height:0.9;color:" + NOTE_TEXT_INK + ";";
+  num.style.cssText = "font-size:36px;font-weight:300;line-height:0.9;color:" + NOTE_TEXT_INK + ";";
   const dInfo = el("div", "");
-  dInfo.style.cssText = "font-size:13px;color:#b6b6b6;line-height:1.5;";
+  dInfo.style.cssText = "font-size:12px;color:#b6b6b6;line-height:1.5;";
   dInfo.innerHTML = p.month + " / " + p.wk + "<br>" + p.hm;
   dRow.appendChild(num);
   dRow.appendChild(dInfo);
   body.appendChild(dRow);
 
   const hr = el("div", "");
-  hr.style.cssText = "height:1px;background:" + accent + ";opacity:0.6;margin:14px 0 18px;";
+  hr.style.cssText = "height:1px;background:" + accent + ";opacity:0.6;margin:14px 0 20px;";
   body.appendChild(hr);
 
   if (note.text) {
     const tx = el("div", "", note.text);
-    tx.style.cssText = "font-size:16px;line-height:1.9;color:" + NOTE_TEXT_INK + ";white-space:pre-wrap;word-break:break-word;margin-bottom:18px;";
+    tx.style.cssText = "font-size:16px;line-height:1.9;color:" + NOTE_TEXT_INK + ";white-space:pre-wrap;word-break:break-word;margin-bottom:20px;";
     body.appendChild(tx);
   }
   if (note.img) {
     const im = el("img", "");
     im.src = note.img;
-    im.style.cssText = "max-width:60%;border-radius:12px;display:block;margin-bottom:18px;";
+    im.style.cssText = "max-width:60%;border-radius:12px;display:block;margin-bottom:20px;";
     body.appendChild(im);
   }
 
@@ -5486,7 +5495,7 @@ function openNoteCompose(note) {
     e.target.value = ""; renderImg();
   };
   const imgWrap = el("div", "");
-  imgWrap.style.cssText = "margin:40px 0 40px;";
+  imgWrap.style.cssText = "margin:69px 0 39px;";
   function renderImg() {
     imgWrap.innerHTML = "";
     imgWrap.appendChild(file);
@@ -5514,7 +5523,7 @@ function openNoteCompose(note) {
 
   function optRow(iconHtml, text, onClick) {
     const row = el("div", "");
-    row.style.cssText = "display:flex;align-items:center;gap:10px;padding:13px 2px;font-size:13px;color:" + NOTE_META_INK + ";" + (onClick ? "cursor:pointer;" : "");
+    row.style.cssText = "display:flex;align-items:center;gap:10px;padding:12px 2px;font-size:13px;color:" + NOTE_META_INK + ";" + (onClick ? "cursor:pointer;" : "");
     const ic = el("span", "");
     ic.style.cssText = "display:inline-flex;align-items:center;flex-shrink:0;width:20px;";
     ic.innerHTML = iconHtml;
