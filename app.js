@@ -5036,10 +5036,11 @@ function renderCoupleRoom(container) {
 }
 
 /* ==========================================
-   记事本 v3（备忘录 slot A）
+   记事本 v4（备忘录 slot A）
    ========================================== */
 
 const NOTE_META_INK = "#B2B2B2";
+const NOTE_TEXT_INK = "#313131";
 
 const NOTE_WEATHER = [
   { k: "sunny", name: "晴" }, { k: "cloudy", name: "多云" }, { k: "overcast", name: "阴" },
@@ -5066,7 +5067,7 @@ function weatherIcon(k, color, size) {
   return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '">' + (P[k] || "") + '</svg>';
 }
 
-/* 选项图标：定位=实心水滴 / 手机=空心圆角 / 字数=文A用文字 */
+/* 状态图标（本轮先不重画，占位保持） */
 function noteOptIcon(kind, color) {
   const c = color || NOTE_META_INK;
   if (kind === "count") {
@@ -5115,12 +5116,10 @@ function noteBackArrow(color) {
 function openNotebook() {
   const panel = $("#days-panel");
   panel.innerHTML = "";
-  const INK = daysInk();
   const accent = daysT().accent;
 
   const pageBg = "#F4F5F7";
   const cardBg = "#FFFFFF";
-  const mainInk = "#1a1a1a";
   const subInk = "#b0b0b0";
   const timeInk = "#3C3C43";
   const lineCol = "rgba(0,0,0,0.09)";
@@ -5136,25 +5135,27 @@ function openNotebook() {
     }
   });
 
+  /* 顶部主题色带 */
   const header = el("div", "panel-header");
-  header.style.cssText = "background:transparent;border-bottom:none;box-shadow:none;padding-top:calc(10px + env(safe-area-inset-top));";
-  const back = el("button", "topbar-btn", "‹");
-  back.style.color = mainInk;
+  header.style.cssText = "background:" + accent + ";border-bottom:none;box-shadow:none;padding-top:calc(10px + env(safe-area-inset-top));";
+  const back = el("button", "");
+  back.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
+  back.innerHTML = noteBackArrow("#fff");
   back.onclick = () => buildDaysPanel();
   header.appendChild(back);
   const pt = el("div", "panel-title", state.home.slotNameA || "备忘录");
-  pt.style.color = mainInk;
+  pt.style.color = "#fff";
   header.appendChild(pt);
 
   const tools = el("div", "");
-  tools.style.cssText = "margin-left:auto;display:flex;align-items:center;gap:6px;";
-  const searchBtn = el("button", "topbar-btn", "");
-  searchBtn.style.color = mainInk;
-  searchBtn.innerHTML = noteSearchIcon(mainInk);
+  tools.style.cssText = "margin-left:auto;display:flex;align-items:center;gap:12px;";
+  const searchBtn = el("button", "");
+  searchBtn.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
+  searchBtn.innerHTML = noteSearchIcon("#fff");
   searchBtn.onclick = () => openNoteSearch();
-  const dotsBtn = el("button", "topbar-btn", "");
-  dotsBtn.style.color = mainInk;
-  dotsBtn.innerHTML = noteThreeDots(mainInk);
+  const dotsBtn = el("button", "");
+  dotsBtn.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
+  dotsBtn.innerHTML = noteThreeDots("#fff");
   dotsBtn.onclick = (e) => {
     const showing = state.home.noteShowMeta !== false;
     showActions([
@@ -5190,7 +5191,7 @@ function openNotebook() {
   panel.appendChild(header);
 
   const scroll = el("div", "");
-  scroll.style.cssText = "flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 16px calc(96px + env(safe-area-inset-bottom)) 21px;position:relative;";
+  scroll.style.cssText = "flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 16px calc(96px + env(safe-area-inset-bottom)) 24px;position:relative;";
   panel.appendChild(scroll);
 
   const notes = (state.home.notes || []).slice().sort((a, b) => b.time - a.time);
@@ -5211,7 +5212,7 @@ function openNotebook() {
       const dh = el("div", "");
       dh.style.cssText = "display:flex;align-items:baseline;gap:8px;margin:18px 2px 8px;";
       const num = el("div", "", String(p.day).padStart(2, "0"));
-      num.style.cssText = "font-size:26px;font-weight:700;line-height:1;color:" + mainInk + ";";
+      num.style.cssText = "font-size:26px;font-weight:700;line-height:1;color:" + NOTE_TEXT_INK + ";";
       const sub = el("div", "", p.wk + " / " + p.month);
       sub.style.cssText = "font-size:12px;color:" + subInk + ";";
       dh.appendChild(num); dh.appendChild(sub);
@@ -5220,22 +5221,19 @@ function openNotebook() {
 
     const row = el("div", "");
     row.style.cssText = "position:relative;padding-left:20px;margin-bottom:14px;";
-    if (!isFirstOfDay) {
-      const lineTop = el("div", "");
-      lineTop.style.cssText = "position:absolute;left:8px;top:-14px;bottom:36px;width:1px;background:" + lineCol + ";";
-      row.appendChild(lineTop);
-    }
-    const lineBottom = el("div", "");
-    lineBottom.style.cssText = "position:absolute;left:8px;bottom:-14px;height:32px;width:1px;background:" + lineCol + ";";
-    row.appendChild(lineBottom);
+    /* 连续时间轴线：一根线，顶到底并桥接卡片间距 */
+    const line = el("div", "");
+    line.style.cssText = "position:absolute;left:8px;top:0;bottom:-14px;width:1px;background:" + lineCol + ";";
+    row.appendChild(line);
+    /* 圆点：用页面底色的外圈把线干净切断 */
     const dot = el("div", "");
-    dot.style.cssText = "position:absolute;left:3px;bottom:22px;width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid " + accent + ";box-sizing:border-box;z-index:1;";
+    dot.style.cssText = "position:absolute;left:3px;bottom:24px;width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid " + accent + ";box-sizing:border-box;box-shadow:0 0 0 4px " + pageBg + ";z-index:1;";
     row.appendChild(dot);
 
     const swipe = el("div", "");
-    swipe.style.cssText = "position:relative;border-radius:12px;overflow:hidden;";
+    swipe.style.cssText = "position:relative;border-radius:12px;overflow:hidden;background:" + pageBg + ";";
     const delBtn = el("div", "", "删除");
-    delBtn.style.cssText = "position:absolute;right:0;top:0;bottom:0;width:72px;background:#e5484d;color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;";
+    delBtn.style.cssText = "position:absolute;right:0;top:0;bottom:0;width:72px;background:#e5484d;color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.1s;";
     delBtn.onclick = (ev) => {
       ev.stopPropagation();
       confirmDialog("删除这条碎碎念？", () => {
@@ -5246,10 +5244,10 @@ function openNotebook() {
     swipe.appendChild(delBtn);
 
     const card = el("div", "");
-    card.style.cssText = "position:relative;background:" + cardBg + ";border:1px solid rgba(255,255,255,0.9);border-radius:12px;padding:13px 12px 11px;min-height:60px;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 12px rgba(0,0,0,0.05);transition:transform 0.22s;transform:translateX(0);";
+    card.style.cssText = "position:relative;background:" + cardBg + ";border:1px solid rgba(255,255,255,0.9);border-radius:12px;padding:13px 12px 11px;min-height:65px;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 12px rgba(0,0,0,0.05);transition:transform 0.22s;transform:translateX(0);z-index:1;";
     if (note.text) {
       const tx = el("div", "", note.text);
-      tx.style.cssText = "font-size:15px;line-height:1.7;color:" + mainInk + ";white-space:pre-wrap;word-break:break-word;";
+      tx.style.cssText = "font-size:15px;line-height:1.7;color:" + NOTE_TEXT_INK + ";white-space:pre-wrap;word-break:break-word;";
       card.appendChild(tx);
     }
     if (note.img) {
@@ -5270,29 +5268,41 @@ function openNotebook() {
     if (showMeta && note.location) tm.appendChild(el("span", "", "· " + note.location));
     card.appendChild(tm);
 
-    let startX = 0, curX = 0, dragging = false, opened = false, moved = false;
+    /* 左滑：方向锁定 + 红键默认隐藏 */
+    let startX = 0, startY = 0, dragging = false, opened = false, moved = false, dir = null, curT = 0;
     card.addEventListener("touchstart", (ev) => {
-      startX = ev.touches[0].clientX; curX = startX; dragging = true; moved = false;
+      startX = ev.touches[0].clientX; startY = ev.touches[0].clientY;
+      dragging = true; moved = false; dir = null;
       card.style.transition = "none";
     }, { passive: true });
     card.addEventListener("touchmove", (ev) => {
       if (!dragging) return;
-      curX = ev.touches[0].clientX;
-      if (Math.abs(curX - startX) > 6) moved = true;
-      let dx = curX - startX + (opened ? -72 : 0);
-      dx = Math.max(-72, Math.min(0, dx));
-      card.style.transform = "translateX(" + dx + "px)";
-    }, { passive: true });
+      const dx = ev.touches[0].clientX - startX;
+      const dy = ev.touches[0].clientY - startY;
+      if (dir === null) {
+        if (Math.abs(dx) > 8 || Math.abs(dy) > 8) dir = Math.abs(dx) > Math.abs(dy) ? "h" : "v";
+        else return;
+      }
+      if (dir === "v") return;
+      ev.preventDefault();
+      moved = true;
+      curT = Math.max(-72, Math.min(0, dx + (opened ? -72 : 0)));
+      card.style.transform = "translateX(" + curT + "px)";
+      delBtn.style.opacity = curT < -4 ? "1" : "0";
+    }, { passive: false });
     card.addEventListener("touchend", () => {
+      if (!dragging) return;
       dragging = false;
       card.style.transition = "transform 0.22s";
-      const dx = curX - startX + (opened ? -72 : 0);
-      opened = dx < -36;
-      card.style.transform = "translateX(" + (opened ? -72 : 0) + "px)";
+      if (dir === "h") {
+        opened = curT < -36;
+        card.style.transform = "translateX(" + (opened ? -72 : 0) + "px)";
+        delBtn.style.opacity = opened ? "1" : "0";
+      }
     });
     card.onclick = () => {
       if (moved) return;
-      if (opened) { opened = false; card.style.transform = "translateX(0)"; return; }
+      if (opened) { opened = false; card.style.transform = "translateX(0)"; delBtn.style.opacity = "0"; return; }
       openNoteDetail(note);
     };
 
@@ -5328,7 +5338,7 @@ function openNoteDetail(note) {
   });
 
   const head = el("div", "");
-  head.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top)) 18px 10px;position:relative;z-index:1;";
+  head.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top)) 21px 10px;position:relative;z-index:1;";
   const back = el("button", "");
   back.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
   back.innerHTML = noteBackArrow("#333");
@@ -5361,13 +5371,13 @@ function openNoteDetail(note) {
   ov.appendChild(head);
 
   const body = el("div", "overlay-body");
-  body.style.cssText = "flex:1;overflow-y:auto;padding:6px 18px calc(60px + env(safe-area-inset-bottom));position:relative;z-index:1;";
+  body.style.cssText = "flex:1;overflow-y:auto;padding:28px 21px calc(60px + env(safe-area-inset-bottom));position:relative;z-index:1;";
   const p = noteDateParts(note.time);
 
   const dRow = el("div", "");
-  dRow.style.cssText = "display:flex;align-items:flex-end;gap:12px;margin:6px 0 0;";
+  dRow.style.cssText = "display:flex;align-items:flex-end;gap:12px;margin:0;";
   const num = el("div", "", String(p.day).padStart(2, "0"));
-  num.style.cssText = "font-size:40px;font-weight:300;line-height:0.9;color:#131313;";
+  num.style.cssText = "font-size:40px;font-weight:300;line-height:0.9;color:" + NOTE_TEXT_INK + ";";
   const dInfo = el("div", "");
   dInfo.style.cssText = "font-size:13px;color:#b6b6b6;line-height:1.5;";
   dInfo.innerHTML = p.month + " / " + p.wk + "<br>" + p.hm;
@@ -5381,7 +5391,7 @@ function openNoteDetail(note) {
 
   if (note.text) {
     const tx = el("div", "", note.text);
-    tx.style.cssText = "font-size:16px;line-height:1.9;color:#131313;white-space:pre-wrap;word-break:break-word;margin-bottom:18px;";
+    tx.style.cssText = "font-size:16px;line-height:1.9;color:" + NOTE_TEXT_INK + ";white-space:pre-wrap;word-break:break-word;margin-bottom:18px;";
     body.appendChild(tx);
   }
   if (note.img) {
@@ -5437,8 +5447,9 @@ function openNoteCompose(note) {
   ov.style.background = "#ffffff";
 
   const head = el("div", "overlay-head");
-  const closeB = el("button", "topbar-btn", "✕");
-  closeB.style.fontSize = "17px";
+  const closeB = el("button", "");
+  closeB.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;font-size:24px;line-height:1;color:var(--text-main);";
+  closeB.textContent = "✕";
   closeB.onclick = () => ov.remove();
   const center = el("div", "");
   center.style.cssText = "flex:1;text-align:center;";
@@ -5449,12 +5460,14 @@ function openNoteCompose(note) {
   const c2 = el("div", "", dp.wk + " " + dp.hm + (isToday ? " 今天" : ""));
   c2.style.cssText = "font-size:12px;color:var(--text-faint);margin-top:2px;";
   center.appendChild(c1); center.appendChild(c2);
-  const okB = el("button", "topbar-btn", "✓");
-  okB.style.color = accent;
+  const okB = el("button", "");
+  okB.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;font-size:24px;line-height:1;color:" + accent + ";";
+  okB.textContent = "✓";
   head.appendChild(closeB); head.appendChild(center); head.appendChild(okB);
   ov.appendChild(head);
 
   const body = el("div", "overlay-body");
+  body.style.cssText = "flex:1;overflow-y:auto;padding:10px 21px calc(40px + env(safe-area-inset-bottom));";
   ov.appendChild(body);
 
   const ta = document.createElement("textarea");
@@ -5473,7 +5486,7 @@ function openNoteCompose(note) {
     e.target.value = ""; renderImg();
   };
   const imgWrap = el("div", "");
-  imgWrap.style.cssText = "margin:20px 0 24px;";
+  imgWrap.style.cssText = "margin:40px 0 40px;";
   function renderImg() {
     imgWrap.innerHTML = "";
     imgWrap.appendChild(file);
@@ -5501,7 +5514,7 @@ function openNoteCompose(note) {
 
   function optRow(iconHtml, text, onClick) {
     const row = el("div", "");
-    row.style.cssText = "display:flex;align-items:center;gap:10px;padding:13px 2px;border-top:0.5px solid var(--line);font-size:13px;color:" + NOTE_META_INK + ";" + (onClick ? "cursor:pointer;" : "");
+    row.style.cssText = "display:flex;align-items:center;gap:10px;padding:13px 2px;font-size:13px;color:" + NOTE_META_INK + ";" + (onClick ? "cursor:pointer;" : "");
     const ic = el("span", "");
     ic.style.cssText = "display:inline-flex;align-items:center;flex-shrink:0;width:20px;";
     ic.innerHTML = iconHtml;
