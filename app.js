@@ -5036,7 +5036,7 @@ function renderCoupleRoom(container) {
 }
 
 /* ==========================================
-   记事本 v5（备忘录 slot A）
+   记事本 v6（备忘录 slot A）
    ========================================== */
 
 const NOTE_META_INK = "#B2B2B2";
@@ -5237,7 +5237,7 @@ function openNotebook() {
     line.style.cssText = "position:absolute;left:8px;top:0;bottom:-14px;width:1px;background:" + lineCol + ";";
     row.appendChild(line);
     const dot = el("div", "");
-    dot.style.cssText = "position:absolute;left:3px;bottom:28px;width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid " + accent + ";box-sizing:border-box;box-shadow:0 0 0 4px " + pageBg + ";z-index:1;";
+    dot.style.cssText = "position:absolute;left:3px;bottom:30px;width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid " + accent + ";box-sizing:border-box;box-shadow:0 0 0 4px " + pageBg + ";z-index:1;";
     row.appendChild(dot);
 
     const swipe = el("div", "");
@@ -5254,10 +5254,10 @@ function openNotebook() {
     swipe.appendChild(delBtn);
 
     const card = el("div", "");
-    card.style.cssText = "position:relative;background:" + cardBg + ";border:1px solid rgba(255,255,255,0.9);border-radius:12px;padding:18px 12px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 12px rgba(0,0,0,0.05);transition:transform 0.22s;transform:translateX(0);z-index:1;";
+    card.style.cssText = "position:relative;background:" + cardBg + ";border:1px solid rgba(255,255,255,0.9);border-radius:12px;padding:17px 12px 15px;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 12px rgba(0,0,0,0.05);transition:transform 0.22s;transform:translateX(0);z-index:1;";
     if (note.text) {
       const tx = el("div", "", note.text);
-      tx.style.cssText = "font-size:15px;line-height:1.7;color:" + NOTE_TEXT_INK + ";white-space:pre-wrap;word-break:break-word;";
+      tx.style.cssText = "font-size:15px;line-height:1.7;color:" + NOTE_TEXT_INK + ";white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;";
       card.appendChild(tx);
     }
     if (note.img) {
@@ -5267,7 +5267,7 @@ function openNotebook() {
       card.appendChild(im);
     }
     const tm = el("div", "");
-    tm.style.cssText = "font-size:12px;color:" + timeInk + ";opacity:0.6;margin-top:10px;display:flex;align-items:center;gap:6px;";
+    tm.style.cssText = "font-size:12px;color:" + timeInk + ";opacity:0.6;margin-top:20px;display:flex;align-items:center;gap:6px;";
     if (showMeta && note.weather && noteWeatherObj(note.weather)) {
       const wi = el("span", "");
       wi.style.cssText = "display:inline-flex;";
@@ -5350,11 +5350,11 @@ function openNoteDetail(note) {
   head.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top)) 23px 10px;position:relative;z-index:1;";
   const back = el("button", "");
   back.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
-  back.innerHTML = noteBackArrow("#333");
+  back.innerHTML = noteBackArrow("#333", 26);
   back.onclick = () => ov.remove();
   const dots = el("button", "");
   dots.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
-  dots.innerHTML = noteThreeDots("#333");
+  dots.innerHTML = noteThreeDots("#333", 24);
   dots.onclick = (e) => {
     showActions([
       { label: "换背景图", fn: () => {
@@ -5395,18 +5395,18 @@ function openNoteDetail(note) {
   body.appendChild(dRow);
 
   const hr = el("div", "");
-  hr.style.cssText = "height:1px;background:" + accent + ";opacity:0.6;margin:14px 0 20px;";
+  hr.style.cssText = "height:1px;background:" + accent + ";opacity:0.6;margin:14px 0 21px;";
   body.appendChild(hr);
 
   if (note.text) {
     const tx = el("div", "", note.text);
-    tx.style.cssText = "font-size:16px;line-height:1.9;color:" + NOTE_TEXT_INK + ";white-space:pre-wrap;word-break:break-word;margin-bottom:20px;";
+    tx.style.cssText = "font-size:16px;line-height:1.9;color:" + NOTE_TEXT_INK + ";white-space:pre-wrap;word-break:break-word;margin-bottom:21px;";
     body.appendChild(tx);
   }
   if (note.img) {
     const im = el("img", "");
     im.src = note.img;
-    im.style.cssText = "max-width:60%;border-radius:12px;display:block;margin-bottom:20px;";
+    im.style.cssText = "max-width:60%;border-radius:12px;display:block;margin-bottom:21px;";
     body.appendChild(im);
   }
 
@@ -5483,9 +5483,11 @@ function openNoteCompose(note) {
   ta.className = "form-textarea";
   ta.placeholder = "记录此刻...";
   ta.value = draft.text;
-  ta.style.cssText = "min-height:150px;border:none;background:transparent;font-size:16px;line-height:1.9;padding:10px 2px;resize:none;";
-  ta.oninput = () => { draft.text = ta.value; countLab.textContent = draft.text.length + " 字"; };
+  ta.style.cssText = "min-height:150px;border:none;background:transparent;font-size:16px;line-height:1.9;padding:10px 2px;resize:none;overflow:hidden;display:block;width:100%;box-sizing:border-box;";
+  function autoGrow() { ta.style.height = "auto"; ta.style.height = Math.max(150, ta.scrollHeight) + "px"; }
+  ta.oninput = () => { draft.text = ta.value; countLab.textContent = draft.text.length + " 字"; autoGrow(); };
   body.appendChild(ta);
+  setTimeout(autoGrow, 0);
 
   const file = document.createElement("input");
   file.type = "file"; file.accept = "image/*"; file.style.display = "none";
@@ -5495,7 +5497,7 @@ function openNoteCompose(note) {
     e.target.value = ""; renderImg();
   };
   const imgWrap = el("div", "");
-  imgWrap.style.cssText = "margin:69px 0 39px;";
+  imgWrap.style.cssText = "margin:69px 0 35px;";
   function renderImg() {
     imgWrap.innerHTML = "";
     imgWrap.appendChild(file);
@@ -5509,8 +5511,8 @@ function openNoteCompose(note) {
       imgWrap.appendChild(im); imgWrap.appendChild(del);
     } else {
       const add = el("div", "");
-      add.style.cssText = "width:96px;height:96px;border-radius:16px;background:rgba(120,120,128,0.09);display:flex;align-items:center;justify-content:center;cursor:pointer;";
-      add.innerHTML = '<svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+      add.style.cssText = "width:94px;height:94px;border-radius:16px;background:#F6F6F6;display:flex;align-items:center;justify-content:center;cursor:pointer;";
+      add.innerHTML = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
       add.onclick = () => file.click();
       imgWrap.appendChild(add);
     }
@@ -5523,7 +5525,7 @@ function openNoteCompose(note) {
 
   function optRow(iconHtml, text, onClick) {
     const row = el("div", "");
-    row.style.cssText = "display:flex;align-items:center;gap:10px;padding:12px 2px;font-size:13px;color:" + NOTE_META_INK + ";" + (onClick ? "cursor:pointer;" : "");
+    row.style.cssText = "display:flex;align-items:center;gap:10px;padding:10.5px 2px;font-size:13px;color:" + NOTE_META_INK + ";" + (onClick ? "cursor:pointer;" : "");
     const ic = el("span", "");
     ic.style.cssText = "display:inline-flex;align-items:center;flex-shrink:0;width:20px;";
     ic.innerHTML = iconHtml;
@@ -5544,10 +5546,10 @@ function openNoteCompose(note) {
     })
   );
   optRow(noteOptIcon("pin"), draft.location || "自定义位置", (lab) => {
-    inputDialog("在哪儿", draft.location || "", v => {
-      draft.location = v.trim() || null;
+    openNoteLocationPicker(draft.location, v => {
+      draft.location = v || null;
       lab.textContent = draft.location || "自定义位置";
-    }, false);
+    });
   });
   optRow(noteOptIcon("phone"), "iPhone", null);
   const countLab = optRow(noteOptIcon("count"), draft.text.length + " 字", null);
@@ -5601,6 +5603,82 @@ function openNoteWeatherPicker(cur, cb) {
   dlg.appendChild(btns);
   mask.appendChild(dlg);
   document.body.appendChild(mask);
+}
+
+/* ---------- 位置标签选择/管理 ---------- */
+function openNoteLocationPicker(cur, cb) {
+  const accent = daysT().accent;
+  if (!Array.isArray(state.home.noteLocations)) state.home.noteLocations = [];
+  const old = document.getElementById("note-loc");
+  if (old) old.remove();
+  const ov = el("div", "overlay-page");
+  ov.id = "note-loc";
+  ov.style.zIndex = "365";
+  ov.style.background = "#F4F5F7";
+
+  const head = el("div", "");
+  head.style.cssText = "display:flex;align-items:center;gap:12px;padding:calc(14px + env(safe-area-inset-top)) 20px 10px;";
+  const back = el("button", "");
+  back.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
+  back.innerHTML = noteBackArrow("#333", 26);
+  back.onclick = () => ov.remove();
+  const title = el("div", "", "选择位置");
+  title.style.cssText = "font-size:17px;font-weight:600;color:" + NOTE_TEXT_INK + ";";
+  head.appendChild(back); head.appendChild(title);
+  ov.appendChild(head);
+
+  const scroll = el("div", "");
+  scroll.style.cssText = "flex:1;overflow-y:auto;padding:8px 16px calc(96px + env(safe-area-inset-bottom));";
+  ov.appendChild(scroll);
+
+  function render() {
+    scroll.innerHTML = "";
+    /* 无位置 */
+    const none = el("div", "");
+    none.style.cssText = "background:#fff;border-radius:12px;padding:16px 14px;margin-bottom:10px;font-size:15px;color:#999;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04);";
+    none.textContent = "无位置";
+    none.onclick = () => { cb(""); ov.remove(); };
+    scroll.appendChild(none);
+
+    (state.home.noteLocations || []).forEach((loc, idx) => {
+      const card = el("div", "");
+      card.style.cssText = "background:#fff;border-radius:12px;padding:16px 14px;margin-bottom:10px;display:flex;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,0.04);cursor:pointer;" + (cur === loc ? "outline:1.5px solid " + accent + ";" : "");
+      const name = el("div", "", loc);
+      name.style.cssText = "flex:1;font-size:15px;color:" + NOTE_TEXT_INK + ";";
+      const menu = el("button", "");
+      menu.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
+      menu.innerHTML = noteThreeDots("#c2c2c2");
+      menu.onclick = (e) => {
+        e.stopPropagation();
+        showActions([
+          { label: "删除", danger: true, fn: () => {
+              state.home.noteLocations.splice(idx, 1);
+              saveState(); render();
+            } }
+        ], e.clientX, e.clientY);
+      };
+      card.appendChild(name); card.appendChild(menu);
+      card.onclick = () => { cb(loc); ov.remove(); };
+      scroll.appendChild(card);
+    });
+  }
+  render();
+
+  const fab = el("div", "");
+  fab.style.cssText = "position:absolute;right:20px;bottom:calc(30px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:50%;background:" + accent + ";color:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:300;box-shadow:0 4px 16px rgba(0,0,0,0.22);cursor:pointer;z-index:6;";
+  fab.textContent = "+";
+  fab.onclick = () => {
+    inputDialog("新建位置", "", v => {
+      const t = (v || "").trim().slice(0, 50);
+      if (!t) return;
+      if (!state.home.noteLocations.includes(t)) state.home.noteLocations.push(t);
+      saveState();
+      cb(t); ov.remove();
+    }, false);
+  };
+  ov.appendChild(fab);
+
+  document.body.appendChild(ov);
 }
 
 /* ---------- 记事本搜索 ---------- */
