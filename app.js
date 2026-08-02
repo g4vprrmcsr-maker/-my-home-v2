@@ -5036,10 +5036,10 @@ function renderCoupleRoom(container) {
 }
 
 /* ==========================================
-   记事本 v2（备忘录 slot A）
+   记事本 v3（备忘录 slot A）
    ========================================== */
 
-const NOTE_META_INK = "rgba(60,60,67,0.6)";
+const NOTE_META_INK = "#B2B2B2";
 
 const NOTE_WEATHER = [
   { k: "sunny", name: "晴" }, { k: "cloudy", name: "多云" }, { k: "overcast", name: "阴" },
@@ -5066,16 +5066,24 @@ function weatherIcon(k, color, size) {
   return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '">' + (P[k] || "") + '</svg>';
 }
 
-/* iOS风选项图标：定位针 / 空心手机 / 文A字数 */
+/* 选项图标：定位=实心水滴 / 手机=空心圆角 / 字数=文A用文字 */
 function noteOptIcon(kind, color) {
   const c = color || NOTE_META_INK;
+  if (kind === "count") {
+    return '<span style="font-size:16px;font-weight:600;color:' + c + ';line-height:1;">文</span><span style="font-size:10px;font-weight:600;color:' + c + ';vertical-align:-2px;margin-left:1px;">A</span>';
+  }
   const s = 'fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';
-  const P = {
-    pin: '<path d="M12 21c4-4.5 6-7.7 6-10.2A6 6 0 0 0 6 10.8C6 13.3 8 16.5 12 21Z" ' + s + '/><circle cx="12" cy="10.6" r="2.2" ' + s + '/>',
-    phone: '<rect x="7" y="3" width="10" height="18" rx="2.6" ' + s + '/><path d="M10.5 18.4h3" ' + s + '/>',
-    count: '<path d="M4.5 8h6M7.5 8V6M5.5 8l2 6M9.5 8l-2 6" ' + s + '/><path d="M13 18l3-7 3 7M14.2 15.4h3.6" ' + s + '/>'
-  };
-  return '<svg viewBox="0 0 24 24" width="18" height="18">' + (P[kind] || "") + '</svg>';
+  if (kind === "pin") {
+    return '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 21c4-4.5 6-7.7 6-10.2A6 6 0 0 0 6 10.8C6 13.3 8 16.5 12 21Z" fill="' + c + '" stroke="none"/><circle cx="12" cy="10.6" r="2.1" fill="#fff"/></svg>';
+  }
+  if (kind === "phone") {
+    return '<svg viewBox="0 0 24 24" width="18" height="18"><rect x="7" y="3" width="10" height="18" rx="2.6" ' + s + '/><path d="M10.5 18.4h3" ' + s + '/></svg>';
+  }
+  return "";
+}
+function noteSunPlain(c) {
+  const col = c || NOTE_META_INK;
+  return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="' + col + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/></svg>';
 }
 
 function noteDateParts(ts) {
@@ -5098,51 +5106,55 @@ function noteSearchIcon(color) {
   const c = color || "currentColor";
   return '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="' + c + '" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.6 4.6"/></svg>';
 }
+function noteBackArrow(color) {
+  const c = color || "#333";
+  return '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="' + c + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H5M11 6l-6 6 6 6"/></svg>';
+}
 
 /* ---------- 记事本主页 ---------- */
 function openNotebook() {
   const panel = $("#days-panel");
   panel.innerHTML = "";
-  const T = daysT();
   const INK = daysInk();
-  const accent = T.accent;
-  const night = document.body.classList.contains("dark");
+  const accent = daysT().accent;
 
-  panel.style.background = T.pageBg;
+  const pageBg = "#F4F5F7";
+  const cardBg = "#FFFFFF";
+  const mainInk = "#1a1a1a";
+  const subInk = "#b0b0b0";
+  const timeInk = "#3C3C43";
+  const lineCol = "rgba(0,0,0,0.09)";
+
+  panel.style.background = pageBg;
   panel.style.backgroundSize = "cover";
   panel.style.backgroundPosition = "center";
   panel.style.padding = "0";
-  if (state.settings.daysTheme === "liquid" && urlCache.days_wp) {
-    panel.style.backgroundImage = "url(" + urlCache.days_wp + ")";
-  }
   getImg("note_bg").then(blob => {
     if (blob) {
       if (!urlCache.note_bg) urlCache.note_bg = URL.createObjectURL(blob);
       panel.style.backgroundImage = "url(" + urlCache.note_bg + ")";
-      panel.style.backgroundSize = "cover";
-      panel.style.backgroundPosition = "center";
     }
   });
 
   const header = el("div", "panel-header");
   header.style.cssText = "background:transparent;border-bottom:none;box-shadow:none;padding-top:calc(10px + env(safe-area-inset-top));";
   const back = el("button", "topbar-btn", "‹");
-  back.style.color = INK.main;
+  back.style.color = mainInk;
   back.onclick = () => buildDaysPanel();
   header.appendChild(back);
   const pt = el("div", "panel-title", state.home.slotNameA || "备忘录");
-  pt.style.color = INK.main;
+  pt.style.color = mainInk;
   header.appendChild(pt);
 
   const tools = el("div", "");
   tools.style.cssText = "margin-left:auto;display:flex;align-items:center;gap:6px;";
   const searchBtn = el("button", "topbar-btn", "");
-  searchBtn.style.color = INK.main;
-  searchBtn.innerHTML = noteSearchIcon(INK.main);
+  searchBtn.style.color = mainInk;
+  searchBtn.innerHTML = noteSearchIcon(mainInk);
   searchBtn.onclick = () => openNoteSearch();
   const dotsBtn = el("button", "topbar-btn", "");
-  dotsBtn.style.color = INK.main;
-  dotsBtn.innerHTML = noteThreeDots(INK.main);
+  dotsBtn.style.color = mainInk;
+  dotsBtn.innerHTML = noteThreeDots(mainInk);
   dotsBtn.onclick = (e) => {
     const showing = state.home.noteShowMeta !== false;
     showActions([
@@ -5168,9 +5180,7 @@ function openNotebook() {
           toast("共 " + notes.length + " 条 · 记录 " + days + " 天", 4000);
         } },
       { label: showing ? "隐藏天气位置" : "显示天气位置", fn: () => {
-          state.home.noteShowMeta = !showing;
-          saveState();
-          openNotebook();
+          state.home.noteShowMeta = !showing; saveState(); openNotebook();
         } }
     ], e.clientX, e.clientY);
   };
@@ -5180,64 +5190,66 @@ function openNotebook() {
   panel.appendChild(header);
 
   const scroll = el("div", "");
-  scroll.style.cssText = "flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 16px calc(96px + env(safe-area-inset-bottom));position:relative;";
+  scroll.style.cssText = "flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 16px calc(96px + env(safe-area-inset-bottom)) 21px;position:relative;";
   panel.appendChild(scroll);
 
   const notes = (state.home.notes || []).slice().sort((a, b) => b.time - a.time);
   if (!notes.length) {
     const e = el("div", "", "还没有碎碎念，点右下角写第一条吧");
-    e.style.cssText = "text-align:center;color:" + INK.sub + ";font-size:13px;padding:70px 0;";
+    e.style.cssText = "text-align:center;color:" + subInk + ";font-size:13px;padding:70px 0;";
     scroll.appendChild(e);
   }
 
-  const cardBg = night ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.78)";
-  const lineCol = night ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.1)";
   const showMeta = state.home.noteShowMeta !== false;
   let lastDay = null;
 
   notes.forEach(note => {
     const p = noteDateParts(note.time);
-    if (p.dayKey !== lastDay) {
+    const isFirstOfDay = p.dayKey !== lastDay;
+    if (isFirstOfDay) {
       lastDay = p.dayKey;
       const dh = el("div", "");
-      dh.style.cssText = "display:flex;align-items:baseline;gap:8px;margin:16px 2px 8px;";
+      dh.style.cssText = "display:flex;align-items:baseline;gap:8px;margin:18px 2px 8px;";
       const num = el("div", "", String(p.day).padStart(2, "0"));
-      num.style.cssText = "font-size:26px;font-weight:700;line-height:1;color:" + INK.main + ";";
+      num.style.cssText = "font-size:26px;font-weight:700;line-height:1;color:" + mainInk + ";";
       const sub = el("div", "", p.wk + " / " + p.month);
-      sub.style.cssText = "font-size:12px;color:" + INK.sub + ";";
+      sub.style.cssText = "font-size:12px;color:" + subInk + ";";
       dh.appendChild(num); dh.appendChild(sub);
       scroll.appendChild(dh);
     }
 
     const row = el("div", "");
     row.style.cssText = "position:relative;padding-left:20px;margin-bottom:14px;";
-    const line = el("div", "");
-    line.style.cssText = "position:absolute;left:8px;top:-14px;bottom:-14px;width:1px;background:" + lineCol + ";";
-    row.appendChild(line);
+    if (!isFirstOfDay) {
+      const lineTop = el("div", "");
+      lineTop.style.cssText = "position:absolute;left:8px;top:-14px;bottom:36px;width:1px;background:" + lineCol + ";";
+      row.appendChild(lineTop);
+    }
+    const lineBottom = el("div", "");
+    lineBottom.style.cssText = "position:absolute;left:8px;bottom:-14px;height:32px;width:1px;background:" + lineCol + ";";
+    row.appendChild(lineBottom);
     const dot = el("div", "");
-    dot.style.cssText = "position:absolute;left:3px;bottom:20px;width:10px;height:10px;border-radius:50%;background:" + (night ? "#2a2a2a" : "#fff") + ";border:2px solid " + accent + ";box-sizing:border-box;z-index:1;";
+    dot.style.cssText = "position:absolute;left:3px;bottom:22px;width:11px;height:11px;border-radius:50%;background:#fff;border:2px solid " + accent + ";box-sizing:border-box;z-index:1;";
     row.appendChild(dot);
 
-    /* 左滑删除容器 */
     const swipe = el("div", "");
-    swipe.style.cssText = "position:relative;border-radius:10px;overflow:hidden;";
+    swipe.style.cssText = "position:relative;border-radius:12px;overflow:hidden;";
     const delBtn = el("div", "", "删除");
     delBtn.style.cssText = "position:absolute;right:0;top:0;bottom:0;width:72px;background:#e5484d;color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;";
     delBtn.onclick = (ev) => {
       ev.stopPropagation();
       confirmDialog("删除这条碎碎念？", () => {
         state.home.notes = state.home.notes.filter(x => x.id !== note.id);
-        saveState();
-        openNotebook();
+        saveState(); openNotebook();
       });
     };
     swipe.appendChild(delBtn);
 
     const card = el("div", "");
-    card.style.cssText = "position:relative;background:" + cardBg + ";border-radius:10px;padding:13px 12px 11px;min-height:56px;box-shadow:0 1px 6px rgba(0,0,0,0.05);transition:transform 0.22s;transform:translateX(0);";
+    card.style.cssText = "position:relative;background:" + cardBg + ";border:1px solid rgba(255,255,255,0.9);border-radius:12px;padding:13px 12px 11px;min-height:60px;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 12px rgba(0,0,0,0.05);transition:transform 0.22s;transform:translateX(0);";
     if (note.text) {
       const tx = el("div", "", note.text);
-      tx.style.cssText = "font-size:15px;line-height:1.7;color:" + INK.main + ";white-space:pre-wrap;word-break:break-word;";
+      tx.style.cssText = "font-size:15px;line-height:1.7;color:" + mainInk + ";white-space:pre-wrap;word-break:break-word;";
       card.appendChild(tx);
     }
     if (note.img) {
@@ -5247,18 +5259,17 @@ function openNotebook() {
       card.appendChild(im);
     }
     const tm = el("div", "");
-    tm.style.cssText = "font-size:12px;color:#3C3C43;opacity:0.7;margin-top:10px;display:flex;align-items:center;gap:6px;";
+    tm.style.cssText = "font-size:12px;color:" + timeInk + ";opacity:0.6;margin-top:10px;display:flex;align-items:center;gap:6px;";
     if (showMeta && note.weather && noteWeatherObj(note.weather)) {
       const wi = el("span", "");
       wi.style.cssText = "display:inline-flex;";
-      wi.innerHTML = weatherIcon(note.weather, "#3C3C43", 15);
+      wi.innerHTML = weatherIcon(note.weather, timeInk, 15);
       tm.appendChild(wi);
     }
     tm.appendChild(el("span", "", p.hm));
     if (showMeta && note.location) tm.appendChild(el("span", "", "· " + note.location));
     card.appendChild(tm);
 
-    /* 滑动手势 */
     let startX = 0, curX = 0, dragging = false, opened = false, moved = false;
     card.addEventListener("touchstart", (ev) => {
       startX = ev.touches[0].clientX; curX = startX; dragging = true; moved = false;
@@ -5267,8 +5278,8 @@ function openNotebook() {
     card.addEventListener("touchmove", (ev) => {
       if (!dragging) return;
       curX = ev.touches[0].clientX;
-      let dx = curX - startX + (opened ? -72 : 0);
       if (Math.abs(curX - startX) > 6) moved = true;
+      let dx = curX - startX + (opened ? -72 : 0);
       dx = Math.max(-72, Math.min(0, dx));
       card.style.transform = "translateX(" + dx + "px)";
     }, { passive: true });
@@ -5305,34 +5316,72 @@ function openNoteDetail(note) {
   const ov = el("div", "overlay-page");
   ov.id = "note-detail";
   ov.style.zIndex = "350";
+  ov.style.background = "#ffffff";
 
-  const head = el("div", "overlay-head");
-  const back = el("button", "topbar-btn", "‹");
+  getImg("note_detail_bg").then(blob => {
+    if (blob) {
+      if (!urlCache.note_detail_bg) urlCache.note_detail_bg = URL.createObjectURL(blob);
+      const bg = el("div", "overlay-bg");
+      bg.style.backgroundImage = "url(" + urlCache.note_detail_bg + ")";
+      ov.insertBefore(bg, ov.firstChild);
+    }
+  });
+
+  const head = el("div", "");
+  head.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top)) 18px 10px;position:relative;z-index:1;";
+  const back = el("button", "");
+  back.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
+  back.innerHTML = noteBackArrow("#333");
   back.onclick = () => ov.remove();
+  const dots = el("button", "");
+  dots.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
+  dots.innerHTML = noteThreeDots("#333");
+  dots.onclick = (e) => {
+    showActions([
+      { label: "换背景图", fn: () => {
+          const f = document.createElement("input");
+          f.type = "file"; f.accept = "image/*";
+          f.onchange = async (ev) => {
+            const fl = ev.target.files[0]; if (!fl) return;
+            await putImg("note_detail_bg", fl);
+            if (urlCache.note_detail_bg) { URL.revokeObjectURL(urlCache.note_detail_bg); delete urlCache.note_detail_bg; }
+            openNoteDetail(note);
+          };
+          f.click();
+        } },
+      { label: "移除背景图", danger: true, fn: async () => {
+          await delImg("note_detail_bg");
+          if (urlCache.note_detail_bg) { URL.revokeObjectURL(urlCache.note_detail_bg); delete urlCache.note_detail_bg; }
+          openNoteDetail(note);
+        } }
+    ], e.clientX, e.clientY);
+  };
   head.appendChild(back);
+  head.appendChild(dots);
   ov.appendChild(head);
 
   const body = el("div", "overlay-body");
+  body.style.cssText = "flex:1;overflow-y:auto;padding:6px 18px calc(60px + env(safe-area-inset-bottom));position:relative;z-index:1;";
   const p = noteDateParts(note.time);
 
   const dRow = el("div", "");
-  dRow.style.cssText = "display:flex;align-items:baseline;gap:12px;margin:6px 2px 14px;";
+  dRow.style.cssText = "display:flex;align-items:flex-end;gap:12px;margin:6px 0 0;";
   const num = el("div", "", String(p.day).padStart(2, "0"));
-  num.style.cssText = "font-size:40px;font-weight:300;line-height:1;color:var(--text-main);";
+  num.style.cssText = "font-size:40px;font-weight:300;line-height:0.9;color:#131313;";
   const dInfo = el("div", "");
-  dInfo.style.cssText = "font-size:13px;color:var(--text-faint);line-height:1.5;";
+  dInfo.style.cssText = "font-size:13px;color:#b6b6b6;line-height:1.5;";
   dInfo.innerHTML = p.month + " / " + p.wk + "<br>" + p.hm;
   dRow.appendChild(num);
   dRow.appendChild(dInfo);
   body.appendChild(dRow);
 
   const hr = el("div", "");
-  hr.style.cssText = "height:1px;background:" + accent + ";opacity:0.6;margin-bottom:18px;";
+  hr.style.cssText = "height:1px;background:" + accent + ";opacity:0.6;margin:14px 0 18px;";
   body.appendChild(hr);
 
   if (note.text) {
     const tx = el("div", "", note.text);
-    tx.style.cssText = "font-size:16px;line-height:1.9;color:var(--text-main);white-space:pre-wrap;word-break:break-word;margin-bottom:16px;";
+    tx.style.cssText = "font-size:16px;line-height:1.9;color:#131313;white-space:pre-wrap;word-break:break-word;margin-bottom:18px;";
     body.appendChild(tx);
   }
   if (note.img) {
@@ -5344,9 +5393,9 @@ function openNoteDetail(note) {
 
   function meta(iconHtml, text) {
     const row = el("div", "");
-    row.style.cssText = "display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14px;color:" + NOTE_META_INK + ";";
+    row.style.cssText = "display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px;color:" + NOTE_META_INK + ";";
     const ic = el("span", "");
-    ic.style.cssText = "display:inline-flex;flex-shrink:0;";
+    ic.style.cssText = "display:inline-flex;align-items:center;flex-shrink:0;width:20px;";
     ic.innerHTML = iconHtml;
     row.appendChild(ic);
     row.appendChild(el("span", "", text));
@@ -5385,6 +5434,7 @@ function openNoteCompose(note) {
   const ov = el("div", "overlay-page");
   ov.id = "note-compose";
   ov.style.zIndex = "360";
+  ov.style.background = "#ffffff";
 
   const head = el("div", "overlay-head");
   const closeB = el("button", "topbar-btn", "✕");
@@ -5405,14 +5455,13 @@ function openNoteCompose(note) {
   ov.appendChild(head);
 
   const body = el("div", "overlay-body");
-  body.style.cssText += "display:flex;flex-direction:column;";
   ov.appendChild(body);
 
   const ta = document.createElement("textarea");
   ta.className = "form-textarea";
   ta.placeholder = "记录此刻...";
   ta.value = draft.text;
-  ta.style.cssText = "min-height:210px;border:none;background:transparent;font-size:16px;line-height:1.9;padding:10px 2px;resize:none;";
+  ta.style.cssText = "min-height:150px;border:none;background:transparent;font-size:16px;line-height:1.9;padding:10px 2px;resize:none;";
   ta.oninput = () => { draft.text = ta.value; countLab.textContent = draft.text.length + " 字"; };
   body.appendChild(ta);
 
@@ -5424,7 +5473,7 @@ function openNoteCompose(note) {
     e.target.value = ""; renderImg();
   };
   const imgWrap = el("div", "");
-  imgWrap.style.cssText = "margin:14px 0 8px;";
+  imgWrap.style.cssText = "margin:20px 0 24px;";
   function renderImg() {
     imgWrap.innerHTML = "";
     imgWrap.appendChild(file);
@@ -5438,8 +5487,8 @@ function openNoteCompose(note) {
       imgWrap.appendChild(im); imgWrap.appendChild(del);
     } else {
       const add = el("div", "");
-      add.style.cssText = "width:92px;height:92px;border-radius:14px;background:rgba(120,120,128,0.16);display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:200;color:#fff;cursor:pointer;text-shadow:0 1px 3px rgba(0,0,0,0.15);";
-      add.textContent = "+";
+      add.style.cssText = "width:96px;height:96px;border-radius:16px;background:rgba(120,120,128,0.09);display:flex;align-items:center;justify-content:center;cursor:pointer;";
+      add.innerHTML = '<svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
       add.onclick = () => file.click();
       imgWrap.appendChild(add);
     }
@@ -5448,17 +5497,13 @@ function openNoteCompose(note) {
   body.appendChild(imgWrap);
 
   const opts = el("div", "");
-  opts.style.cssText = "margin-top:auto;padding-top:20px;";
   body.appendChild(opts);
 
-  function sunPlain() {
-    return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="' + NOTE_META_INK + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/></svg>';
-  }
   function optRow(iconHtml, text, onClick) {
     const row = el("div", "");
-    row.style.cssText = "display:flex;align-items:center;gap:10px;padding:13px 2px;border-top:0.5px solid var(--line);font-size:14px;color:" + NOTE_META_INK + ";" + (onClick ? "cursor:pointer;" : "");
+    row.style.cssText = "display:flex;align-items:center;gap:10px;padding:13px 2px;border-top:0.5px solid var(--line);font-size:13px;color:" + NOTE_META_INK + ";" + (onClick ? "cursor:pointer;" : "");
     const ic = el("span", "");
-    ic.style.cssText = "display:inline-flex;flex-shrink:0;";
+    ic.style.cssText = "display:inline-flex;align-items:center;flex-shrink:0;width:20px;";
     ic.innerHTML = iconHtml;
     const lab = el("span", "", text);
     row.appendChild(ic); row.appendChild(lab);
@@ -5468,11 +5513,11 @@ function openNoteCompose(note) {
   }
 
   optRow(
-    draft.weather ? weatherIcon(draft.weather, NOTE_META_INK, 18) : sunPlain(),
+    draft.weather ? weatherIcon(draft.weather, NOTE_META_INK, 18) : noteSunPlain(),
     draft.weather ? noteWeatherObj(draft.weather).name : "选择天气",
     (lab, ic) => openNoteWeatherPicker(draft.weather, k => {
       draft.weather = k;
-      ic.innerHTML = k ? weatherIcon(k, NOTE_META_INK, 18) : sunPlain();
+      ic.innerHTML = k ? weatherIcon(k, NOTE_META_INK, 18) : noteSunPlain();
       lab.textContent = k ? noteWeatherObj(k).name : "选择天气";
     })
   );
@@ -5561,8 +5606,7 @@ function openNoteSearch() {
     const q = inp.value.trim().toLowerCase();
     res.innerHTML = "";
     if (!q) return;
-    const hits = (state.home.notes || []).filter(n => (n.text || "").toLowerCase().indexOf(q) >= 0)
-      .sort((a, b) => b.time - a.time);
+    const hits = (state.home.notes || []).filter(n => (n.text || "").toLowerCase().indexOf(q) >= 0).sort((a, b) => b.time - a.time);
     if (!hits.length) {
       const e = el("div", "", "没搜到，换个词试试");
       e.style.cssText = "text-align:center;color:#bbb;padding:30px 0;font-size:13px;";
