@@ -5102,9 +5102,10 @@ function noteDecoIcon(kind, color, size) {
 /* 状态图标：字数(translate-2) / 位置 / 机型 */
 function noteOptIcon(kind, color) {
   const c = color || NOTE_META_INK;
-      if (kind === "count") {
-    return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2.4"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/></svg>';
+  if (kind === "count") {
+    return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6h14M12 6v12"/></svg>';
   }
+
   const s = 'fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';
   if (kind === "pin") {
     return '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 21c4-4.5 6-7.7 6-10.2A6 6 0 0 0 6 10.8C6 13.3 8 16.5 12 21Z" fill="' + c + '" stroke="none"/><circle cx="12" cy="10.6" r="2.1" fill="#fff"/></svg>';
