@@ -5091,6 +5091,8 @@ function noteDecoIcon(kind, color, size) {
   const s = 'fill="none" stroke="' + c + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"';
   if (kind === "heart") return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '"><path d="M12 20.2C6.5 16.3 4 13 4 9.8 4 7.4 5.9 5.6 8.2 5.6c1.5 0 2.9.8 3.8 2.1.9-1.3 2.3-2.1 3.8-2.1C18.1 5.6 20 7.4 20 9.8c0 3.2-2.5 6.5-8 10.4Z" ' + s + '/></svg>';
   if (kind === "moon") return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '"><path d="M18.5 15.5A7.5 7.5 0 1 1 13 4.2 6 6 0 0 0 18.5 15.5Z" ' + s + '/></svg>';
+  if (kind === "spark") return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '" fill="' + c + '"><path d="M5.92 15.3L9.86 13.1L9.92 12.9L9.86 12.8H9.66L9 12.76L6.76 12.7L4.8 12.6L2.9 12.5L2.42 12.4L2 11.8L2.04 11.5L2.44 11.24L3.02 11.28L4.28 11.38L6.18 11.5L7.56 11.58L9.6 11.82H9.92L9.96 11.68L9.86 11.6L9.78 11.52L7.8 10.2L5.68 8.8L4.56 7.98L3.96 7.58L3.66 7.18L3.54 6.34L4.08 5.74L4.82 5.8L5 5.84L5.74 6.42L7.34 7.64L9.4 9.2L9.7 9.44L9.82 9.36L9.84 9.3L9.7 9.08L8.6 7L7.4 4.92L6.86 4.06L6.72 3.54C6.66 3.34 6.64 3.14 6.64 2.94L7.24 2.1L7.6 2L8.44 2.12L8.76 2.4L9.28 3.6L10.1 5.46L11.4 7.98L11.8 8.74L12 9.42L12.06 9.62H12.2V9.52L12.3 8.08L12.5 6.34L12.7 4.1L12.76 3.46L13.08 2.7L13.68 2.3L14.2 2.52L14.6 3.1L14.54 3.46L14.32 5L13.8 7.42L13.5 9.06H13.68L13.88 8.84L14.7 7.76L16.08 6.04L16.68 5.34L17.4 4.6L17.86 4.24H18.72L19.34 5.18L19.06 6.16L18.18 7.28L17.44 8.22L16.38 9.64L15.74 10.78L15.8 10.86H15.94L18.34 10.34L19.62 10.12L21.14 9.86L21.84 10.18L21.92 10.5L21.64 11.18L20 11.58L18.08 11.98L15.22 12.64L15.18 12.66L15.22 12.72L16.5 12.84L17.06 12.88H18.42L20.94 13.08L21.6 13.48L21.98 14.02L21.92 14.42L20.9 14.94L19.54 14.62L16.34 13.86L15.26 13.6H15.1V13.68L16.02 14.58L17.68 16.08L19.8 18.02L19.9 18.5L19.64 18.9L19.36 18.86L17.52 17.46L16.8 16.86L15.2 15.5H15.1V15.64L15.46 16.18L17.42 19.12L17.52 20.02L17.38 20.3L16.86 20.5L16.32 20.38L15.16 18.78L13.96 16.98L13.02 15.34L12.92 15.42L12.34 21.46L12.08 21.76L11.48 22L10.98 21.6L10.7 21L10.98 19.76L11.3 18.16L11.56 16.88L11.8 15.3L11.94 14.78V14.74H11.8L10.6 16.4L8.8 18.86L7.36 20.38L7.02 20.52L6.42 20.22L6.48 19.66L6.8 19.2L8.8 16.64L10 15.06L10.8 14.14L10.78 14.04H10.72L5.44 17.48L4.5 17.6L4.1 17.2L4.14 16.6L4.34 16.4L5.94 15.3H5.92Z"/></svg>';
+
   return "";
 }
 
@@ -5599,7 +5601,7 @@ function openNoteCompose(note) {
   /* 底部装饰图标行：爱心 / 月亮 */
   const decoBar = el("div", "");
   decoBar.style.cssText = "border-top:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:24px;padding:14px 21px calc(14px + env(safe-area-inset-bottom));";
-  ["heart", "moon"].forEach(k => {
+    ["heart", "moon", "spark"].forEach(k => {
     const btn = el("button", "");
     btn.style.cssText = "border:none;background:transparent;padding:2px;cursor:pointer;display:inline-flex;";
     const paint = () => { btn.innerHTML = noteDecoIcon(k, draft.decos.includes(k) ? accent : "#c2c2c2", 26); };
