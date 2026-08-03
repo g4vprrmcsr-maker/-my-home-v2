@@ -5036,7 +5036,7 @@ function renderCoupleRoom(container) {
 }
 
 /* ==========================================
-   记事本 v6（备忘录 slot A）
+   记事本 v7（备忘录 slot A）
    ========================================== */
 
 const NOTE_META_INK = "#B2B2B2";
@@ -5048,6 +5048,17 @@ const NOTE_WEATHER = [
   { k: "wind", name: "大风" }, { k: "hail", name: "冰雹" }, { k: "night", name: "深夜" }
 ];
 function noteWeatherObj(k) { return NOTE_WEATHER.find(w => w.k === k); }
+
+/* 成品页正文样式：字体/字间距/行高/粗细 联动聊天，字号独立 */
+function noteTextStyle() {
+  const s = state.settings || {};
+  const fam = (typeof FONT_LIST !== "undefined" && FONT_LIST[s.chatFont]) ? FONT_LIST[s.chatFont] : '-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif';
+  const spacing = s.chatSpacing != null ? s.chatSpacing : 0;
+  const lineH = s.chatLineH != null ? s.chatLineH : 1.9;
+  const weight = s.chatWeight != null ? s.chatWeight : 400;
+  const size = state.home.noteFontSize != null ? state.home.noteFontSize : 16;
+  return "font-family:" + fam + ";letter-spacing:" + spacing + "px;line-height:" + lineH + ";font-weight:" + weight + ";font-size:" + size + "px;";
+}
 
 function weatherIcon(k, color, size) {
   const c = color || "currentColor";
@@ -5065,6 +5076,15 @@ function weatherIcon(k, color, size) {
     night: '<path d="M18.5 15.5A7.5 7.5 0 1 1 13 4.2 6 6 0 0 0 18.5 15.5Z" ' + s + '/>'
   };
   return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '">' + (P[k] || "") + '</svg>';
+}
+
+/* 装饰图标：爱心 / 月亮（空心手绘） */
+function noteDecoIcon(kind, color, size) {
+  const c = color || "#333"; const z = size || 22;
+  const s = 'fill="none" stroke="' + c + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"';
+  if (kind === "heart") return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '"><path d="M12 20.2C6.5 16.3 4 13 4 9.8 4 7.4 5.9 5.6 8.2 5.6c1.5 0 2.9.8 3.8 2.1.9-1.3 2.3-2.1 3.8-2.1C18.1 5.6 20 7.4 20 9.8c0 3.2-2.5 6.5-8 10.4Z" ' + s + '/></svg>';
+  if (kind === "moon") return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '"><path d="M18.5 15.5A7.5 7.5 0 1 1 13 4.2 6 6 0 0 0 18.5 15.5Z" ' + s + '/></svg>';
+  return "";
 }
 
 /* 状态图标（本轮先不重画，占位保持） */
@@ -5113,6 +5133,10 @@ function noteBackArrow(color, size) {
   const c = color || "#333"; const z = size || 24;
   return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '" fill="none" stroke="' + c + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H5M11 6l-6 6 6 6"/></svg>';
 }
+function noteAaIcon(color) {
+  const c = color || "#333";
+  return '<svg viewBox="0 0 24 24" width="24" height="24" fill="' + c + '"><text x="2" y="17" font-size="13" font-weight="700" font-family="sans-serif">A</text><text x="12" y="18" font-size="17" font-weight="700" font-family="sans-serif">A</text></svg>';
+}
 
 /* ---------- 记事本主页 ---------- */
 function openNotebook() {
@@ -5137,7 +5161,6 @@ function openNotebook() {
     }
   });
 
-  /* 顶部主题色带（可换横幅背景图） */
   const header = el("div", "panel-header");
   header.style.cssText = "background:" + accent + ";border-bottom:none;box-shadow:none;padding-top:calc(10px + env(safe-area-inset-top));background-size:cover;background-position:center;";
   getImg("note_banner_bg").then(blob => {
@@ -5257,7 +5280,7 @@ function openNotebook() {
     card.style.cssText = "position:relative;background:" + cardBg + ";border:1px solid rgba(255,255,255,0.9);border-radius:12px;padding:17px 12px 15px;box-shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 12px rgba(0,0,0,0.05);transition:transform 0.22s;transform:translateX(0);z-index:1;";
     if (note.text) {
       const tx = el("div", "", note.text);
-      tx.style.cssText = "font-size:15px;line-height:1.7;color:" + NOTE_TEXT_INK + ";white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;";
+      tx.style.cssText = "font-size:15px;line-height:1.7;color:" + NOTE_TEXT_INK + ";white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;";
       card.appendChild(tx);
     }
     if (note.img) {
@@ -5267,7 +5290,7 @@ function openNotebook() {
       card.appendChild(im);
     }
     const tm = el("div", "");
-    tm.style.cssText = "font-size:12px;color:" + timeInk + ";opacity:0.6;margin-top:20px;display:flex;align-items:center;gap:6px;";
+    tm.style.cssText = "font-size:12px;color:" + timeInk + ";opacity:0.6;margin-top:25px;display:flex;align-items:center;gap:6px;";
     if (showMeta && note.weather && noteWeatherObj(note.weather)) {
       const wi = el("span", "");
       wi.style.cssText = "display:inline-flex;";
@@ -5352,6 +5375,11 @@ function openNoteDetail(note) {
   back.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
   back.innerHTML = noteBackArrow("#333", 26);
   back.onclick = () => ov.remove();
+  const rightGrp = el("div", "");
+  rightGrp.style.cssText = "display:flex;align-items:center;gap:14px;";
+  const aaBtn = el("button", "");
+  aaBtn.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
+  aaBtn.innerHTML = noteAaIcon("#333");
   const dots = el("button", "");
   dots.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
   dots.innerHTML = noteThreeDots("#333", 24);
@@ -5375,8 +5403,10 @@ function openNoteDetail(note) {
         } }
     ], e.clientX, e.clientY);
   };
+  rightGrp.appendChild(aaBtn);
+  rightGrp.appendChild(dots);
   head.appendChild(back);
-  head.appendChild(dots);
+  head.appendChild(rightGrp);
   ov.appendChild(head);
 
   const body = el("div", "overlay-body");
@@ -5392,16 +5422,30 @@ function openNoteDetail(note) {
   dInfo.innerHTML = p.month + " / " + p.wk + "<br>" + p.hm;
   dRow.appendChild(num);
   dRow.appendChild(dInfo);
+  /* 装饰图标：横线右上方 */
+  if (note.decos && note.decos.length) {
+    const deco = el("div", "");
+    deco.style.cssText = "margin-left:auto;display:flex;align-items:center;gap:8px;padding-bottom:2px;";
+    note.decos.forEach(k => {
+      const sp = el("span", "");
+      sp.style.cssText = "display:inline-flex;";
+      sp.innerHTML = noteDecoIcon(k, accent, 22);
+      deco.appendChild(sp);
+    });
+    dRow.appendChild(deco);
+  }
   body.appendChild(dRow);
 
   const hr = el("div", "");
   hr.style.cssText = "height:1px;background:" + accent + ";opacity:0.6;margin:14px 0 21px;";
   body.appendChild(hr);
 
+  let txEl = null;
   if (note.text) {
     const tx = el("div", "", note.text);
-    tx.style.cssText = "font-size:16px;line-height:1.9;color:" + NOTE_TEXT_INK + ";white-space:pre-wrap;word-break:break-word;margin-bottom:21px;";
+    tx.style.cssText = noteTextStyle() + "color:" + NOTE_TEXT_INK + ";white-space:pre-wrap;word-break:break-word;margin-bottom:21px;";
     body.appendChild(tx);
+    txEl = tx;
   }
   if (note.img) {
     const im = el("img", "");
@@ -5427,11 +5471,34 @@ function openNoteDetail(note) {
 
   ov.appendChild(body);
 
+  /* 字号拉条（默认隐藏，点 Aa 显示） */
+  const sizePill = el("div", "");
+  sizePill.style.cssText = "position:absolute;left:20px;right:20px;bottom:calc(30px + env(safe-area-inset-bottom));background:#fff;border-radius:30px;padding:12px 20px;display:none;align-items:center;gap:14px;box-shadow:0 6px 20px rgba(0,0,0,0.15);z-index:8;";
+  const sMin = el("span", "", "小"); sMin.style.cssText = "font-size:13px;color:#999;flex-shrink:0;";
+  const sMax = el("span", "", "大"); sMax.style.cssText = "font-size:19px;color:#333;flex-shrink:0;";
+  const rng = document.createElement("input");
+  rng.type = "range"; rng.min = "14"; rng.max = "22"; rng.step = "1";
+  rng.value = String(state.home.noteFontSize != null ? state.home.noteFontSize : 16);
+  rng.style.cssText = "flex:1;accent-color:" + accent + ";";
+  rng.oninput = () => {
+    state.home.noteFontSize = parseInt(rng.value, 10);
+    if (txEl) txEl.style.fontSize = state.home.noteFontSize + "px";
+  };
+  rng.onchange = () => saveState();
+  sizePill.appendChild(sMin); sizePill.appendChild(rng); sizePill.appendChild(sMax);
+  ov.appendChild(sizePill);
+
   const fab = el("div", "");
   fab.style.cssText = "position:absolute;right:20px;bottom:calc(30px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:50%;background:" + accent + ";color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.22);cursor:pointer;z-index:6;";
   fab.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 5.5l3 3M4 20l1-4L16 5a1.4 1.4 0 0 1 2 0l1 1a1.4 1.4 0 0 1 0 2L8 19l-4 1Z"/></svg>';
   fab.onclick = () => { ov.remove(); openNoteCompose(note); };
   ov.appendChild(fab);
+
+  aaBtn.onclick = () => {
+    const open = sizePill.style.display === "flex";
+    sizePill.style.display = open ? "none" : "flex";
+    fab.style.display = open ? "flex" : "none";
+  };
 
   document.body.appendChild(ov);
 }
@@ -5444,6 +5511,7 @@ function openNoteCompose(note) {
     img: note ? (note.img || null) : null,
     weather: note ? (note.weather || null) : null,
     location: note ? (note.location || null) : null,
+    decos: note && note.decos ? note.decos.slice() : [],
     time: note ? note.time : Date.now()
   };
   const accent = daysT().accent;
@@ -5476,7 +5544,7 @@ function openNoteCompose(note) {
   ov.appendChild(head);
 
   const body = el("div", "overlay-body");
-  body.style.cssText = "flex:1;overflow-y:auto;padding:10px 21px calc(40px + env(safe-area-inset-bottom));";
+  body.style.cssText = "flex:1;overflow-y:auto;padding:10px 21px calc(20px + env(safe-area-inset-bottom));";
   ov.appendChild(body);
 
   const ta = document.createElement("textarea");
@@ -5497,7 +5565,7 @@ function openNoteCompose(note) {
     e.target.value = ""; renderImg();
   };
   const imgWrap = el("div", "");
-  imgWrap.style.cssText = "margin:69px 0 35px;";
+  imgWrap.style.cssText = "margin:67px 0 33px;";
   function renderImg() {
     imgWrap.innerHTML = "";
     imgWrap.appendChild(file);
@@ -5525,7 +5593,7 @@ function openNoteCompose(note) {
 
   function optRow(iconHtml, text, onClick) {
     const row = el("div", "");
-    row.style.cssText = "display:flex;align-items:center;gap:10px;padding:10.5px 2px;font-size:13px;color:" + NOTE_META_INK + ";" + (onClick ? "cursor:pointer;" : "");
+    row.style.cssText = "display:flex;align-items:center;gap:10px;padding:9px 2px;font-size:13px;color:" + NOTE_META_INK + ";" + (onClick ? "cursor:pointer;" : "");
     const ic = el("span", "");
     ic.style.cssText = "display:inline-flex;align-items:center;flex-shrink:0;width:20px;";
     ic.innerHTML = iconHtml;
@@ -5554,13 +5622,30 @@ function openNoteCompose(note) {
   optRow(noteOptIcon("phone"), "iPhone", null);
   const countLab = optRow(noteOptIcon("count"), draft.text.length + " 字", null);
 
+  /* 底部装饰图标行：爱心 / 月亮 */
+  const decoBar = el("div", "");
+  decoBar.style.cssText = "border-top:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;gap:24px;padding:14px 21px calc(14px + env(safe-area-inset-bottom));";
+  ["heart", "moon"].forEach(k => {
+    const btn = el("button", "");
+    btn.style.cssText = "border:none;background:transparent;padding:2px;cursor:pointer;display:inline-flex;";
+    const paint = () => { btn.innerHTML = noteDecoIcon(k, draft.decos.includes(k) ? accent : "#c2c2c2", 26); };
+    paint();
+    btn.onclick = () => {
+      const i = draft.decos.indexOf(k);
+      if (i >= 0) draft.decos.splice(i, 1); else draft.decos.push(k);
+      paint();
+    };
+    decoBar.appendChild(btn);
+  });
+  ov.appendChild(decoBar);
+
   okB.onclick = () => {
     const t = draft.text.trim();
     if (!t && !draft.img) { toast("写点什么吧"); return; }
     if (isEdit) {
-      note.text = t; note.img = draft.img; note.weather = draft.weather; note.location = draft.location;
+      note.text = t; note.img = draft.img; note.weather = draft.weather; note.location = draft.location; note.decos = draft.decos;
     } else {
-      state.home.notes.push({ id: uid(), time: draft.time, text: t, img: draft.img, weather: draft.weather, location: draft.location });
+      state.home.notes.push({ id: uid(), time: draft.time, text: t, img: draft.img, weather: draft.weather, location: draft.location, decos: draft.decos });
     }
     saveState();
     ov.remove();
@@ -5633,16 +5718,15 @@ function openNoteLocationPicker(cur, cb) {
 
   function render() {
     scroll.innerHTML = "";
-    /* 无位置 */
     const none = el("div", "");
-    none.style.cssText = "background:#fff;border-radius:12px;padding:16px 14px;margin-bottom:10px;font-size:15px;color:#999;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04);";
+    none.style.cssText = "background:#fff;border-radius:12px;padding:14px 14px;margin-bottom:10px;font-size:15px;color:#999;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04);";
     none.textContent = "无位置";
     none.onclick = () => { cb(""); ov.remove(); };
     scroll.appendChild(none);
 
     (state.home.noteLocations || []).forEach((loc, idx) => {
       const card = el("div", "");
-      card.style.cssText = "background:#fff;border-radius:12px;padding:16px 14px;margin-bottom:10px;display:flex;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,0.04);cursor:pointer;" + (cur === loc ? "outline:1.5px solid " + accent + ";" : "");
+      card.style.cssText = "background:#fff;border-radius:12px;padding:14px 14px;margin-bottom:10px;display:flex;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,0.04);cursor:pointer;" + (cur === loc ? "outline:1.5px solid " + accent + ";" : "");
       const name = el("div", "", loc);
       name.style.cssText = "flex:1;font-size:15px;color:" + NOTE_TEXT_INK + ";";
       const menu = el("button", "");
