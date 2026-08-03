@@ -5072,34 +5072,29 @@ function weatherIcon(k, color, size) {
   const c = color || "currentColor";
   const z = size || 24;
   const s = 'fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';
-  const g = {
-    rain: '<path d="M7 15h9a3.5 3.5 0 0 0 .3-7 5 5 0 0 0-9.6-1A3.5 3.5 0 0 0 7 15Z"/><path d="M8 18l-1 2M12 18l-1 2M16 18l-1 2"/>',
-    hail: '<path d="M7 13h9a3.5 3.5 0 0 0 .3-7 5 5 0 0 0-9.6-1A3.5 3.5 0 0 0 7 13Z"/><circle cx="9" cy="18" r="1"/><circle cx="13" cy="19" r="1"/><circle cx="16" cy="18" r="1"/>',
-    sunny: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2.4M12 19.6v2.4M2 12h2.4M19.6 12h2.4M5 5l1.7 1.7M17.3 17.3 19 19M19 5l-1.7 1.7M6.7 17.3 5 19"/>',
-    cloudy: '<circle cx="8" cy="7" r="2.4"/><path d="M8 2.4v1.4M3.4 7h1.4M4.6 3.6l1 1M11.4 3.6l-1 1"/><path d="M8 18.5h8a3 3 0 0 0 .3-6 4.4 4.4 0 0 0-8.2-1A3 3 0 0 0 8 18.5Z"/>',
-    overcast: '<path d="M6.5 17.5h10a3.4 3.4 0 0 0 .3-6.8 5 5 0 0 0-9.5-1A3.4 3.4 0 0 0 6.5 17.5Z"/>',
-    thunder: '<path d="M7 14h9a3.3 3.3 0 0 0 .3-6.6 4.8 4.8 0 0 0-9.1-1A3.3 3.3 0 0 0 7 14Z"/><path d="M12.5 13.5 10 18h3l-2.5 4"/>',
-    snow: '<path d="M7 13.5h9a3.3 3.3 0 0 0 .3-6.6 4.8 4.8 0 0 0-9.1-1A3.3 3.3 0 0 0 7 13.5Z"/><path d="M9 17.5v.01M12.5 18.5v.01M16 17.5v.01M10.5 21v.01M14.5 21v.01"/>',
-    wind: '<path d="M3 9h9.5a2.5 2.5 0 1 0-2.4-3.2"/><path d="M2 13h13a2.5 2.5 0 1 1-2.4 3.2"/><path d="M3 17h6.5a2 2 0 1 1-1.9 2.6"/>',
-    night: '<path d="M20.5 14.3A8 8 0 1 1 9.7 3.5a6.2 6.2 0 0 0 10.8 10.8Z"/>'
+  const P = {
+    sunny: '<circle cx="12" cy="12" r="4" ' + s + '/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4" ' + s + '/>',
+    cloudy: '<circle cx="8" cy="8" r="3" ' + s + '/><path d="M6.5 18h9a3.5 3.5 0 0 0 0-7 4.5 4.5 0 0 0-8.7-1" ' + s + '/>',
+    overcast: '<path d="M7 18h9a3.5 3.5 0 0 0 .3-7 5 5 0 0 0-9.6-1A3.5 3.5 0 0 0 7 18Z" ' + s + '/>',
+    rain: '<path d="M7 15h9a3.5 3.5 0 0 0 .3-7 5 5 0 0 0-9.6-1A3.5 3.5 0 0 0 7 15Z" ' + s + '/><path d="M8 18l-1 2M12 18l-1 2M16 18l-1 2" ' + s + '/>',
+    thunder: '<path d="M7 14h9a3.5 3.5 0 0 0 .3-7 5 5 0 0 0-9.6-1A3.5 3.5 0 0 0 7 14Z" ' + s + '/><path d="M12 15l-2 3.5h3L11 22" ' + s + '/>',
+    snow: '<path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9" ' + s + '/><path d="M12 6l-1.6-1.6M12 6l1.6-1.6M12 18l-1.6 1.6M12 18l1.6 1.6M6.8 9.4L4.6 8.8M6.8 9.4L6.2 7.2M17.2 14.6l2.2.6M17.2 14.6l.6 2.2M6.8 14.6l-.6 2.2M6.8 14.6l-2.2.6M17.2 9.4l.6-2.2M17.2 9.4l2.2-.6" ' + s + '/>',
+    wind: '<path d="M3 9h11a2.5 2.5 0 1 0-2.5-2.5M3 14h15a2.5 2.5 0 1 1-2.5 2.5M3 12h7" ' + s + '/>',
+    hail: '<path d="M7 13h9a3.5 3.5 0 0 0 .3-7 5 5 0 0 0-9.6-1A3.5 3.5 0 0 0 7 13Z" ' + s + '/><circle cx="9" cy="18" r="1" ' + s + '/><circle cx="13" cy="19" r="1" ' + s + '/><circle cx="16" cy="18" r="1" ' + s + '/>',
+    night: '<path d="M18.5 15.5A7.5 7.5 0 1 1 13 4.2 6 6 0 0 0 18.5 15.5Z" ' + s + '/>'
   };
-  return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '" ' + s + '>' + (g[k] || "") + '</svg>';
+  return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '">' + (P[k] || "") + '</svg>';
 }
 
 /* 装饰图标：爱心(手绘线) / 星芒(实心) / 太阳 / 月亮 / 月亮带星星 / Zz / 音符 / 微信(空心) */
 function noteDecoIcon(kind, color, size) {
   const c = color || "#333"; const z = size || 22;
   const s = 'fill="none" stroke="' + c + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"';
-  const line = {
-    heart: '<path d="M12 20.2C6.5 16.3 4 13 4 9.8 4 7.4 5.9 5.6 8.2 5.6c1.5 0 2.9.8 3.8 2.1.9-1.3 2.3-2.1 3.8-2.1C18.1 5.6 20 7.4 20 9.8c0 3.2-2.5 6.5-8 10.4Z"/>',
-    sun: '<circle cx="12" cy="12" r="3.6"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"/>',
-    moon: '<path d="M20 14.3A8 8 0 1 1 9.7 3.5a6.2 6.2 0 0 0 10.3 10.8Z"/>',
-    moonstar: '<path d="M19.5 14.5A7.2 7.2 0 1 1 10 5 5.6 5.6 0 0 0 19.5 14.5Z"/><path d="M18.5 3l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7z"/>',
-    sleep: '<path d="M13 4.5h6l-6 7h6"/><path d="M4 13h6l-6 7h6"/>',
-    music: '<circle cx="7" cy="18" r="2.4"/><circle cx="17.5" cy="16" r="2.4"/><path d="M9.4 18V6.5l10.5-2.2V16"/>',
-    wechat: '<path d="M8.8 4.6C5.3 4.6 2.6 6.9 2.6 9.8c0 1.6.9 3 2.3 4l-.5 2.3 2.6-1.4c.6.2 1.2.3 1.8.3"/><path d="M21.4 15.2c0-2.5-2.4-4.5-5.5-4.5s-5.5 2-5.5 4.5 2.4 4.5 5.5 4.5c.6 0 1.2-.1 1.8-.3l2.2 1.1-.5-1.9c1.2-.8 2-2 2-3.4Z"/><path d="M6.2 9.2v.01M9.4 9.2v.01"/>'
-  };
-  if (line[kind]) return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '" ' + s + '>' + line[kind] + '</svg>';
+  if (kind === "heart") return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '"><path d="M12 20.2C6.5 16.3 4 13 4 9.8 4 7.4 5.9 5.6 8.2 5.6c1.5 0 2.9.8 3.8 2.1.9-1.3 2.3-2.1 3.8-2.1C18.1 5.6 20 7.4 20 9.8c0 3.2-2.5 6.5-8 10.4Z" ' + s + '/></svg>';
+  if (kind === "moon") return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '"><path d="M18.5 15.5A7.5 7.5 0 1 1 13 4.2 6 6 0 0 0 18.5 15.5Z" ' + s + '/></svg>';
+  if (kind === "sun") return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '"><circle cx="12" cy="12" r="3.6" ' + s + '/><path d="M12 2.8v2M12 19.2v2M2.8 12h2M19.2 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4" ' + s + '/></svg>';
+  if (kind === "sleep") return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '"><path d="M13 4.5h6l-6 7h6M4 13h6l-6 7h6" ' + s + '/></svg>';
+  if (kind === "music") return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '"><circle cx="7" cy="18" r="2.3" ' + s + '/><circle cx="17.3" cy="16" r="2.3" ' + s + '/><path d="M9.3 18V6.5l10.3-2.2V16" ' + s + '/></svg>';
   if (kind === "spark") return '<svg viewBox="0 0 24 24" width="' + z + '" height="' + z + '" fill="' + c + '"><path d="M5.92 15.3L9.86 13.1L9.92 12.9L9.86 12.8H9.66L9 12.76L6.76 12.7L4.8 12.6L2.9 12.5L2.42 12.4L2 11.8L2.04 11.5L2.44 11.24L3.02 11.28L4.28 11.38L6.18 11.5L7.56 11.58L9.6 11.82H9.92L9.96 11.68L9.86 11.6L9.78 11.52L7.8 10.2L5.68 8.8L4.56 7.98L3.96 7.58L3.66 7.18L3.54 6.34L4.08 5.74L4.82 5.8L5 5.84L5.74 6.42L7.34 7.64L9.4 9.2L9.7 9.44L9.82 9.36L9.84 9.3L9.7 9.08L8.6 7L7.4 4.92L6.86 4.06L6.72 3.54C6.66 3.34 6.64 3.14 6.64 2.94L7.24 2.1L7.6 2L8.44 2.12L8.76 2.4L9.28 3.6L10.1 5.46L11.4 7.98L11.8 8.74L12 9.42L12.06 9.62H12.2V9.52L12.3 8.08L12.5 6.34L12.7 4.1L12.76 3.46L13.08 2.7L13.68 2.3L14.2 2.52L14.6 3.1L14.54 3.46L14.32 5L13.8 7.42L13.5 9.06H13.68L13.88 8.84L14.7 7.76L16.08 6.04L16.68 5.34L17.4 4.6L17.86 4.24H18.72L19.34 5.18L19.06 6.16L18.18 7.28L17.44 8.22L16.38 9.64L15.74 10.78L15.8 10.86H15.94L18.34 10.34L19.62 10.12L21.14 9.86L21.84 10.18L21.92 10.5L21.64 11.18L20 11.58L18.08 11.98L15.22 12.64L15.18 12.66L15.22 12.72L16.5 12.84L17.06 12.88H18.42L20.94 13.08L21.6 13.48L21.98 14.02L21.92 14.42L20.9 14.94L19.54 14.62L16.34 13.86L15.26 13.6H15.1V13.68L16.02 14.58L17.68 16.08L19.8 18.02L19.9 18.5L19.64 18.9L19.36 18.86L17.52 17.46L16.8 16.86L15.2 15.5H15.1V15.64L15.46 16.18L17.42 19.12L17.52 20.02L17.38 20.3L16.86 20.5L16.32 20.38L15.16 18.78L13.96 16.98L13.02 15.34L12.92 15.42L12.34 21.46L12.08 21.76L11.48 22L10.98 21.6L10.7 21L10.98 19.76L11.3 18.16L11.56 16.88L11.8 15.3L11.94 14.78V14.74H11.8L10.6 16.4L8.8 18.86L7.36 20.38L7.02 20.52L6.42 20.22L6.48 19.66L6.8 19.2L8.8 16.64L10 15.06L10.8 14.14L10.78 14.04H10.72L5.44 17.48L4.5 17.6L4.1 17.2L4.14 16.6L4.34 16.4L5.94 15.3H5.92Z"/></svg>';
   return "";
 }
@@ -5107,8 +5102,8 @@ function noteDecoIcon(kind, color, size) {
 /* 状态图标：字数(translate-2) / 位置 / 机型 */
 function noteOptIcon(kind, color) {
   const c = color || NOTE_META_INK;
-    if (kind === "count") {
-    return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h7M6.5 5V3M9 5.2c0 3.6-2.4 6.3-6 7.8M5 8.2c.9 2 2.7 3.5 5.2 4.4"/><path d="M13 20.5l3.4-8 3.4 8M14.2 18h4.4"/></svg>';
+      if (kind === "count") {
+    return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2.4"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/></svg>';
   }
   const s = 'fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';
   if (kind === "pin") {
@@ -5625,7 +5620,7 @@ function openNoteCompose(note) {
   /* 底部装饰图标行：爱心 / 星芒 / 太阳 / 月亮 / 月亮带星星 / Zz / 音符 / 微信 */
   const decoBar = el("div", "");
   decoBar.style.cssText = "border-top:1px solid rgba(0,0,0,0.06);display:flex;flex-wrap:wrap;align-items:center;gap:18px;row-gap:14px;padding:14px 21px calc(14px + env(safe-area-inset-bottom));";
-  ["heart", "spark", "sun", "moon", "moonstar", "sleep", "music", "wechat"].forEach(k => {
+  ["heart", "spark", "sun", "moon", "sleep", "music"].forEach(k => {
     const btn = el("button", "");
     btn.style.cssText = "border:none;background:transparent;padding:2px;cursor:pointer;display:inline-flex;";
     const paint = () => { btn.innerHTML = noteDecoIcon(k, draft.decos.includes(k) ? accent : "#c2c2c2", 26); };
