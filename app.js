@@ -3805,10 +3805,11 @@ async function buildDockSlot(i) {
 async function buildDaysPanel() {
   const panel = $("#days-panel");
   panel.innerHTML = "";
+  curDaysRoom = "home";
   const st = state.settings;
   const T = daysT();
   const INK = daysInk();
-  const isLiquid = st.daysTheme === "liquid";
+  const isLiquid = curRoomThemeVal() === "liquid";
   const pure = daysPure();
 
   panel.style.background = T.pageBg;
@@ -4112,9 +4113,10 @@ const ROOM_TITLES = { mood: "心情", letter: "信封", diary: "小克日记", q
 async function openHomeRoom(k) {
   const panel = $("#days-panel");
   panel.innerHTML = "";
+  curDaysRoom = k;
   const T = daysT();
   const INK = daysInk();
-  const isLiquid = state.settings.daysTheme === "liquid";
+  const isLiquid = curRoomThemeVal() === "liquid";
 
   panel.style.background = T.pageBg;
   panel.style.backgroundSize = "cover";
@@ -4531,34 +4533,158 @@ function renderQaRoom(body) {
   });
 }
 
-/* ---------- 美化app:装饰组件已退役 ---------- */
+/* ---------- 美化app ---------- */
 let iconScope = "mood";
+let beautyScope = "home";
+
+const BEAUTY_ROOMS = [
+  { k: "home", label: "相识首页" },
+  { k: "notebook", label: "记事本" },
+  { k: "letter", label: "信封" },
+  { k: "diary", label: "小克日记" },
+  { k: "mood", label: "心情" },
+  { k: "qa", label: "秘密" },
+  { k: "couple", label: "情侣空间" }
+];
+
+/* 房间主题色控件：7个预设色块 + 4根自定义拉条，只读写 roomThemes[scope] */
+function mkRoomThemeArea(parent, getScope) {
+  parent.appendChild(el("label", "form-label", "预设主题（点一个，或用下面拉条自定义）"));
+  const presetDots = el("div", "color-dots");
+  Object.keys(DAYS_THEMES).forEach(k => {
+    const t = DAYS_THEMES[k];
+    const d = el("div", "color-dot");
+    d.style.background = t.pageBg;
+    d._preset = k;
+    if (t.pageBg.indexOf("#ffffff") >= 0) d.style.border = "1px solid rgba(0,0,0,0.12)";
+    d.onclick = () => {
+      state.settings.roomThemes[getScope()] = k;
+      saveState();
+      refreshDots(); refreshPreview();
+      toast("「" + BEAUTY_ROOMS.find(r => r.k === getScope()).label + "」换上「" + t.name + "」");
+    };
+    presetDots.appendChild(d);
+  });
+  parent.appendChild(presetDots);
+  const names = el("div", "", Object.keys(DAYS_THEMES).map(k => DAYS_THEMES[k].name).join(" · "));
+  names.style.cssText = "font-size:11px;color:#aaa;margin:2px 0 14px;";
+  parent.appendChild(names);
+
+  parent.appendChild(el("label", "form-label", "自定义主题色（拉出来只染这个房间）"));
+  const preview = el("div", "");
+  preview.style.cssText = "height:20px;border-radius:8px;margin-bottom:10px;border:1px solid var(--line);";
+  parent.appendChild(preview);
+
+  const dots = el("div", "color-dots");
+  QUICK_COLORS.forEach(c => {
+    const d = el("div", "color-dot");
+    d.style.background = "hsla(" + c.h + "," + c.s + "%," + c.l + "%,1)";
+    if (c.l >= 97) d.style.border = "1px solid rgba(0,0,0,0.12)";
+    d._c = c;
+    d.onclick = () => {
+      state.settings.roomThemes[getScope()] = { h: c.h, s: c.s, l: c.l, a: c.a };
+      saveState();
+      buildSl(); refreshDots(); refreshPreview();
+    };
+    dots.appendChild(d);
+  });
+  parent.appendChild(dots);
+
+  const slBox = el("div", "");
+  parent.appendChild(slBox);
+
+  function refreshPreview() {
+    const v = state.settings.roomThemes[getScope()];
+    if (typeof v === "string") {
+      preview.style.background = (DAYS_THEMES[v] || DAYS_THEMES.cream).pageBg;
+    } else if (v && typeof v === "object") {
+      preview.style.background = "hsla(" + v.h + "," + v.s + "%," + v.l + "%," + ((v.a === undefined ? 100 : v.a) / 100) + ")";
+    } else {
+      preview.style.background = "#fff";
+    }
+  }
+
+  function refreshDots() {
+    const v = state.settings.roomThemes[getScope()];
+    Array.from(presetDots.children).forEach(d => {
+      d.classList.toggle("on", typeof v === "string" && v === d._preset);
+    });
+    Array.from(dots.children).forEach(d => {
+      if (!d._c) return;
+      const c = d._c;
+      d.classList.toggle("on", v && typeof v === "object" && v.h === c.h && v.s === c.s && v.l === c.l);
+    });
+  }
+
+  function ensureCustom() {
+    let v = state.settings.roomThemes[getScope()];
+    if (!v || typeof v !== "object") {
+      v = { h: 210, s: 35, l: 82, a: 100 };
+      state.settings.roomThemes[getScope()] = v;
+    }
+    return v;
+  }
+
+  function mkOne(label, key, min, max, initVal, isHue) {
+    const row = el("div", "slider-row");
+    const head = el("div", "slider-head");
+    head.appendChild(el("span", "", label));
+    const val = el("span", "slider-val", initVal + (isHue ? "" : "%"));
+    head.appendChild(val);
+    const sl = document.createElement("input");
+    sl.type = "range"; sl.min = min; sl.max = max; sl.step = 1; sl.value = initVal;
+    if (isHue) {
+      sl.style.background = "linear-gradient(to right, hsl(0,80%,65%), hsl(60,80%,65%), hsl(120,80%,65%), hsl(180,80%,65%), hsl(240,80%,65%), hsl(300,80%,65%), hsl(360,80%,65%))";
+    }
+    sl.addEventListener("input", () => {
+      const cc = ensureCustom();
+      cc[key] = Number(sl.value);
+      val.textContent = sl.value + (isHue ? "" : "%");
+      saveState();
+      refreshDots(); refreshPreview();
+    });
+    row.appendChild(head);
+    row.appendChild(sl);
+    slBox.appendChild(row);
+  }
+
+  function buildSl() {
+    slBox.innerHTML = "";
+    const v0 = state.settings.roomThemes[getScope()];
+    const c = (v0 && typeof v0 === "object") ? v0 : { h: 210, s: 35, l: 82, a: 100 };
+    mkOne("色相", "h", 0, 360, c.h, true);
+    mkOne("鲜艳度", "s", 0, 100, c.s, false);
+    mkOne("深浅", "l", 0, 100, c.l, false);
+    mkOne("不透明度", "a", 0, 100, c.a === undefined ? 100 : c.a, false);
+  }
+
+  buildSl();
+  refreshDots();
+  refreshPreview();
+}
 
 function renderBeautifyRoom(body) {
   const st = state.settings;
   const reload = () => renderBeautifyRoom(clearBody(body));
 
-  body.appendChild(el("label", "form-label", "页面配色"));
-  const dots = el("div", "color-dots");
-  Object.keys(DAYS_THEMES).forEach(k => {
-    const t = DAYS_THEMES[k];
-    const d = el("div", "color-dot");
-    d.style.background = t.pageBg;
-    d.classList.toggle("on", st.daysTheme === k);
-    d.onclick = () => {
-      st.daysTheme = k;
-      saveState();
-      toast("换上「" + t.name + "」");
-      reload();
-    };
-    dots.appendChild(d);
+  /* 顶部：选一个房间来调它的主题色 */
+  body.appendChild(el("label", "form-label", "给哪个房间调主题色"));
+  const roomSeg = el("div", "seg-group");
+  BEAUTY_ROOMS.forEach(rm => {
+    const b = el("button", "seg-btn" + (beautyScope === rm.k ? " on" : ""), rm.label);
+    b.onclick = () => { beautyScope = rm.k; reload(); };
+    roomSeg.appendChild(b);
   });
-  body.appendChild(dots);
-  const names = el("div", "", Object.keys(DAYS_THEMES).map(k => DAYS_THEMES[k].name).join(" · "));
-  names.style.cssText = "font-size:11px;color:#aaa;margin-bottom:14px;";
-  body.appendChild(names);
+  body.appendChild(roomSeg);
+  const curRm = BEAUTY_ROOMS.find(r => r.k === beautyScope);
+  const rTip = el("div", "", "正在调：「" + curRm.label + "」，只影响这个房间。调完进那个房间就能看到。");
+  rTip.style.cssText = "font-size:12px;color:#aaa;margin:6px 2px 14px;";
+  body.appendChild(rTip);
 
-  if (st.daysTheme === "liquid") {
+  mkRoomThemeArea(body, () => beautyScope);
+
+  /* 液态玻璃细项：仅当这个房间选了液态预设时出现 */
+  if (st.roomThemes[beautyScope] === "liquid") {
     body.appendChild(el("label", "form-label", "液态玻璃模式"));
     mkSeg(body,
       [{ v: "frost", name: "磨砂" }, { v: "clear", name: "高透水感" }, { v: "pure", name: "全透（壁纸直出）" }],
@@ -4571,6 +4697,14 @@ function renderBeautifyRoom(body) {
       if (urlCache.days_wp) { URL.revokeObjectURL(urlCache.days_wp); delete urlCache.days_wp; }
     }, "移除壁纸");
   }
+
+  /* 分割线：以下全部是全局装修，统一作用于相识页首页 */
+  const hr = el("div", "");
+  hr.style.cssText = "height:1px;background:rgba(0,0,0,0.08);margin:22px 0 4px;";
+  body.appendChild(hr);
+  const gTip = el("div", "", "以下为全局装修，只作用于相识页首页");
+  gTip.style.cssText = "font-size:12px;color:#999;font-weight:600;margin:10px 2px 12px;";
+  body.appendChild(gTip);
 
   body.appendChild(el("label", "form-label", "天数数字颜色（只染那个大数字，选玻璃点=跟随主题）"));
   mkColorArea(body, "数字颜色", "daysInkHue", "daysInkSat", "daysInkLight", "daysInkAlphaX", () => {});
@@ -4604,7 +4738,7 @@ function renderBeautifyRoom(body) {
   dockTip.style.cssText = "font-size:11px;color:#aaa;margin:-4px 0 14px;";
   body.appendChild(dockTip);
 
-    body.appendChild(el("label", "form-label", "自定义app图标（先选一个，再传图）"));
+  body.appendChild(el("label", "form-label", "自定义app图标（先选一个，再传图）"));
   const iconSegG = el("div", "seg-group");
   HOME_APPS.forEach(a => {
     const b = el("button", "seg-btn" + (iconScope === a.k ? " on" : ""), a.label);
@@ -5194,6 +5328,7 @@ function noteAaIcon(color) {
 function openNotebook() {
   const panel = $("#days-panel");
   panel.innerHTML = "";
+  curDaysRoom = "notebook";
   const accent = daysT().accent;
 
   const pageBg = "#F4F5F7";
