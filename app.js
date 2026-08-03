@@ -3387,7 +3387,7 @@ function buildTabText(body) {
   const sec = mkSection(body, "文字");
   sec.appendChild(el("label", "form-label", "选一个区域来调"));
   mkSeg(sec,
-    [{ v: "chat", name: "聊天" }, { v: "ui", name: "界面" }, { v: "name", name: "昵称" }, { v: "meta", name: "小字" }, { v: "ai", name: "他的文字" }],
+    [{ v: "chat", name: "聊天" }, { v: "ui", name: "界面" }, { v: "name", name: "昵称" }, { v: "meta", name: "小字" }, { v: "ai", name: "他的文字" }, { v: "diary", name: "日记" }],
     () => typoScope,
     (v) => { typoScope = v; buildThemePanel(); }
   );
@@ -3442,6 +3442,13 @@ function buildTabText(body) {
       mkSlider(box, "他的字间距", -1, 3, 0.1, "aiSpacing2", "px", rT);
       mkSlider(box, "他的行高", 1.3, 2.2, 0.05, "aiLineH2", "", rT);
     }
+  }
+  if (typoScope === "diary") {
+    mkFontSelect(box, "日记字体", "diaryFont", () => {});
+    mkSlider(box, "字号大小", 12, 24, 1, "diarySize", "px", () => {});
+    mkSlider(box, "字间距", -1, 3, 0.1, "diarySpacing", "px", () => {});
+    mkSlider(box, "行高", 1.3, 2.2, 0.05, "diaryLineH", "", () => {});
+    mkSlider(box, "粗细", 300, 700, 50, "diaryWeight", "", () => {});
   }
 }
 
@@ -5049,14 +5056,14 @@ const NOTE_WEATHER = [
 ];
 function noteWeatherObj(k) { return NOTE_WEATHER.find(w => w.k === k); }
 
-/* 成品页正文样式：字体/字间距/行高/粗细 联动聊天，字号独立 */
+/* 成品页正文样式：日记专属，全部读 diary* */
 function noteTextStyle() {
   const s = state.settings || {};
-  const fam = (typeof FONT_LIST !== "undefined" && FONT_LIST[s.chatFont]) ? FONT_LIST[s.chatFont] : '-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif';
-  const spacing = s.chatSpacing != null ? s.chatSpacing : 0;
-  const lineH = s.chatLineH != null ? s.chatLineH : 1.9;
-  const weight = s.chatWeight != null ? s.chatWeight : 400;
-  const size = state.home.noteFontSize != null ? state.home.noteFontSize : 16;
+  const fam = (typeof FONT_LIST !== "undefined" && FONT_LIST[s.diaryFont]) ? FONT_LIST[s.diaryFont] : '-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif';
+  const spacing = s.diarySpacing != null ? s.diarySpacing : 0;
+  const lineH = s.diaryLineH != null ? s.diaryLineH : 1.9;
+  const weight = s.diaryWeight != null ? s.diaryWeight : 400;
+  const size = s.diarySize != null ? s.diarySize : 16;
   return "font-family:" + fam + ";letter-spacing:" + spacing + "px;line-height:" + lineH + ";font-weight:" + weight + ";font-size:" + size + "px;";
 }
 
@@ -5375,11 +5382,6 @@ function openNoteDetail(note) {
   back.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
   back.innerHTML = noteBackArrow("#333", 26);
   back.onclick = () => ov.remove();
-  const rightGrp = el("div", "");
-  rightGrp.style.cssText = "display:flex;align-items:center;gap:14px;";
-  const aaBtn = el("button", "");
-  aaBtn.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
-  aaBtn.innerHTML = noteAaIcon("#333");
   const dots = el("button", "");
   dots.style.cssText = "border:none;background:transparent;padding:4px;cursor:pointer;display:inline-flex;";
   dots.innerHTML = noteThreeDots("#333", 24);
@@ -5403,10 +5405,8 @@ function openNoteDetail(note) {
         } }
     ], e.clientX, e.clientY);
   };
-  rightGrp.appendChild(aaBtn);
-  rightGrp.appendChild(dots);
   head.appendChild(back);
-  head.appendChild(rightGrp);
+  head.appendChild(dots);
   ov.appendChild(head);
 
   const body = el("div", "overlay-body");
@@ -5422,7 +5422,6 @@ function openNoteDetail(note) {
   dInfo.innerHTML = p.month + " / " + p.wk + "<br>" + p.hm;
   dRow.appendChild(num);
   dRow.appendChild(dInfo);
-  /* 装饰图标：横线右上方 */
   if (note.decos && note.decos.length) {
     const deco = el("div", "");
     deco.style.cssText = "margin-left:auto;display:flex;align-items:center;gap:8px;padding-bottom:2px;";
@@ -5440,12 +5439,10 @@ function openNoteDetail(note) {
   hr.style.cssText = "height:1px;background:" + accent + ";opacity:0.6;margin:14px 0 21px;";
   body.appendChild(hr);
 
-  let txEl = null;
   if (note.text) {
     const tx = el("div", "", note.text);
     tx.style.cssText = noteTextStyle() + "color:" + NOTE_TEXT_INK + ";white-space:pre-wrap;word-break:break-word;margin-bottom:21px;";
     body.appendChild(tx);
-    txEl = tx;
   }
   if (note.img) {
     const im = el("img", "");
@@ -5471,34 +5468,11 @@ function openNoteDetail(note) {
 
   ov.appendChild(body);
 
-  /* 字号拉条（默认隐藏，点 Aa 显示） */
-  const sizePill = el("div", "");
-  sizePill.style.cssText = "position:absolute;left:20px;right:20px;bottom:calc(30px + env(safe-area-inset-bottom));background:#fff;border-radius:30px;padding:12px 20px;display:none;align-items:center;gap:14px;box-shadow:0 6px 20px rgba(0,0,0,0.15);z-index:8;";
-  const sMin = el("span", "", "小"); sMin.style.cssText = "font-size:13px;color:#999;flex-shrink:0;";
-  const sMax = el("span", "", "大"); sMax.style.cssText = "font-size:19px;color:#333;flex-shrink:0;";
-  const rng = document.createElement("input");
-  rng.type = "range"; rng.min = "14"; rng.max = "22"; rng.step = "1";
-  rng.value = String(state.home.noteFontSize != null ? state.home.noteFontSize : 16);
-  rng.style.cssText = "flex:1;accent-color:" + accent + ";";
-  rng.oninput = () => {
-    state.home.noteFontSize = parseInt(rng.value, 10);
-    if (txEl) txEl.style.fontSize = state.home.noteFontSize + "px";
-  };
-  rng.onchange = () => saveState();
-  sizePill.appendChild(sMin); sizePill.appendChild(rng); sizePill.appendChild(sMax);
-  ov.appendChild(sizePill);
-
   const fab = el("div", "");
   fab.style.cssText = "position:absolute;right:20px;bottom:calc(30px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:50%;background:" + accent + ";color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.22);cursor:pointer;z-index:6;";
   fab.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 5.5l3 3M4 20l1-4L16 5a1.4 1.4 0 0 1 2 0l1 1a1.4 1.4 0 0 1 0 2L8 19l-4 1Z"/></svg>';
   fab.onclick = () => { ov.remove(); openNoteCompose(note); };
   ov.appendChild(fab);
-
-  aaBtn.onclick = () => {
-    const open = sizePill.style.display === "flex";
-    sizePill.style.display = open ? "none" : "flex";
-    fab.style.display = open ? "flex" : "none";
-  };
 
   document.body.appendChild(ov);
 }
