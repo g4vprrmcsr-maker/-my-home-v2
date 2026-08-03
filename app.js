@@ -88,6 +88,7 @@ function defaultSettings() {
     daysFont: "georgia2",
     daysNumSize: 64,
     daysTheme: "cream",
+    roomThemes: {},
     daysGlassMode: "frost",
     daysGlassAlpha: 55,
     daysInkHue: -1, daysInkSat: 30, daysInkLight: 40,
@@ -114,9 +115,6 @@ function defaultSettings() {
     avBubbleGap: 6,
     chatUi: "home"
   };
-
-
-
 }
 
 function defaultHome() {
@@ -169,6 +167,17 @@ function fillDefaults() {
   }
   if (state.settings.bubbleShape === "iso-down" || state.settings.bubbleShape === "iso-up") {
     state.settings.bubbleShape = "pull";
+  }
+  if (!state.settings.roomThemes || typeof state.settings.roomThemes !== "object") {
+    state.settings.roomThemes = {};
+  }
+  {
+    const rt = state.settings.roomThemes;
+    ["home", "notebook", "letter", "diary", "mood", "qa", "couple"].forEach(rm => {
+      if (rt[rm] === undefined) {
+        rt[rm] = (rm === "home") ? (state.settings.daysTheme || "cream") : "cream";
+      }
+    });
   }
   if (!state.home) state.home = defaultHome();
   const h = defaultHome();
@@ -3462,11 +3471,12 @@ function buildTabMem(body) {
 }
 
 /* ---------- 相识页主题表 ---------- */
+/* ---------- 相识页主题表 ---------- */
 const DAYS_THEMES = {
   cream: {
-    name: "奶油白",
-    pageBg: "linear-gradient(180deg,#FFF9F2,#FFEEE8)",
-    inkMain: "#5a4a42", inkSub: "#b39a90", accent: "#E8A79B", cardInk: "#6b5248"
+    name: "纯白",
+    pageBg: "linear-gradient(180deg,#ffffff,#f4f4f5)",
+    inkMain: "#3a3634", inkSub: "#a8a8a8", accent: "#9a9a9a", cardInk: "#3a3634"
   },
   mist: {
     name: "雾蓝",
@@ -3500,17 +3510,47 @@ const DAYS_THEMES = {
   }
 };
 
+/* 当前打开的房间：决定 daysT 返回谁的色 */
+let curDaysRoom = "home";
+
+/* 取当前房间存的主题值：预设key字符串 或 自定义色对象 {h,s,l,a} */
+function curRoomThemeVal() {
+  const rt = state.settings.roomThemes || {};
+  let v = rt[curDaysRoom];
+  if (v === undefined || v === null) {
+    v = (curDaysRoom === "home") ? state.settings.daysTheme : "cream";
+  }
+  return v;
+}
+
+/* 方案甲：一个自定义色 → 一整套主题。色本身当accent，背景自动淡化同色系，字走深墨 */
+function themeFromColor(c) {
+  const h = c.h, s = c.s, l = c.l, a = (c.a === undefined ? 100 : c.a);
+  const bgS = Math.min(s, 55);
+  return {
+    name: "自定义",
+    pageBg: "linear-gradient(180deg,hsl(" + h + "," + bgS + "%,97%),hsl(" + h + "," + bgS + "%,92%))",
+    inkMain: "#3a3634", inkSub: "#a8a8a8",
+    accent: "hsla(" + h + "," + s + "%," + l + "%," + (a / 100) + ")",
+    cardInk: "#3a3634",
+    custom: true
+  };
+}
+
 function daysT() {
-  return DAYS_THEMES[state.settings.daysTheme] || DAYS_THEMES.cream;
+  const v = curRoomThemeVal();
+  if (typeof v === "string") return DAYS_THEMES[v] || DAYS_THEMES.cream;
+  if (v && typeof v === "object") return themeFromColor(v);
+  return DAYS_THEMES.cream;
 }
 
 function daysPure() {
-  return state.settings.daysTheme === "liquid" && state.settings.daysGlassMode === "pure";
+  return curRoomThemeVal() === "liquid" && state.settings.daysGlassMode === "pure";
 }
 
-/* 固定墨色:所有配色下文字统一,唯独墨夜用浅色保命 */
+/* 固定墨色:唯独墨夜用浅色保命,自定义色一律深墨(背景永远浅) */
 function daysInk() {
-  if (state.settings.daysTheme === "ink") {
+  if (curRoomThemeVal() === "ink") {
     return { main: "#f0e9e4", sub: "#c9c2bc" };
   }
   return { main: "#3a3634", sub: "#3a3634" };
