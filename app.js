@@ -5102,8 +5102,8 @@ function noteDecoIcon(kind, color, size) {
 /* 状态图标：字数(translate-2) / 位置 / 机型 */
 function noteOptIcon(kind, color) {
   const c = color || NOTE_META_INK;
-  if (kind === "count") {
-    return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6h14M12 6v12"/></svg>';
+    if (kind === "count") {
+    return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="' + c + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.3h6.5M8.2 4.3V6M10.3 6.3c0 3.4-2.2 6-5.6 7.4M6 8.9c.9 1.9 2.6 3.3 5 4.2"/><path d="M14.2 20l2.7-6.4 2.7 6.4M15.3 17.7h3.2"/></svg>';
   }
 
   const s = 'fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';
@@ -5218,18 +5218,18 @@ function openNotebook() {
       if (urlCache[key]) { URL.revokeObjectURL(urlCache[key]); delete urlCache[key]; }
       openNotebook();
     };
-    showActions([
+        showActions([
       { label: "换背景图", fn: () => pickBg("note_bg") },
-      { label: "移除背景图", danger: true, fn: () => delBg("note_bg") },
+      { label: "移除背景图", fn: () => delBg("note_bg") },
       { label: "换横幅背景", fn: () => pickBg("note_banner_bg") },
-      { label: "移除横幅背景", danger: true, fn: () => delBg("note_banner_bg") },
+      { label: "移除横幅背景", fn: () => delBg("note_banner_bg") },
       { label: "统计数据", fn: () => {
           const notes = state.home.notes || [];
           const days = new Set(notes.map(n => noteDateParts(n.time).dayKey)).size;
           toast("共 " + notes.length + " 条 · 记录 " + days + " 天", 4000);
         } },
-      { label: showing ? "隐藏天气位置" : "显示天气位置", fn: () => {
-          state.home.noteShowMeta = !showing; saveState(); openNotebook();
+      { label: (state.home.noteShowMeta !== false) ? "隐藏天气位置" : "显示天气位置", fn: () => {
+          state.home.noteShowMeta = !(state.home.noteShowMeta !== false); saveState(); openNotebook();
         } }
     ], e.clientX, e.clientY);
   };
