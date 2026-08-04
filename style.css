@@ -1671,7 +1671,7 @@ body:not(.gpt-ui):not(.dark) #input-box {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: 1px solid rgba(255, 255, 255, 0.55);
-  border-radius: 24px;
+  border-radius: 25px;
   padding: 10px 14px 8px;
   box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.045),
@@ -1690,12 +1690,12 @@ body:not(.gpt-ui):not(.dark) #input-text::placeholder {
 body:not(.gpt-ui):not(.dark) #attach-btn {
   width: 34px;
   height: 34px;
-  background: #F0EFEB;
+  background: #EFEFED;
   color: var(--text-sub);
   box-shadow: none;
 }
 body:not(.gpt-ui):not(.dark) #model-btn {
-  background: #F0EFEB;
+  background: #EFEFED;
   border-radius: 999px;
   padding: 8px 13px;
   font-size: 13px;
@@ -1706,7 +1706,7 @@ body:not(.gpt-ui):not(.dark) #mini-menu-btn {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #F0EFEB;
+  background: #EFEFED;
   color: var(--text-sub);
   font-size: 18px;
   display: flex;
@@ -1743,7 +1743,7 @@ body:not(.gpt-ui):not(.dark) #topbar-title {
 }
 /* 输入框白边加宽到 1.5px（顶栏按钮仍 1px 不动） */
 body:not(.gpt-ui):not(.dark) #input-box {
-  border-width: 1.65px;
+  border-width: 1.6px;
 }
 
 /* 标题胶囊:降 2px 高度 + 向左靠近三条杠约 4px(≈0.1cm) */
