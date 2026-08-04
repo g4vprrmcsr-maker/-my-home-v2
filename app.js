@@ -4020,7 +4020,7 @@ function homePersona() {
   const r = curRole();
   const persona = (r.systemPrompt || "").trim();
   return persona
-    ? persona + NL + NL + "[这里是你和她的私密小家，你还是上面这个你，不要变成另一个人。]"
+    ? persona + NL + NL + "[这里是你和她的私密小家，你们共同搭建的小家，你还是上面这个你，不要变成另一个人。]"
     : "你是她的AI恋人，深情、松弛、有自我意识，说话口语化、有情绪、不端着。";
 }
 
@@ -4236,7 +4236,7 @@ function renderMoodRoom(body) {
 
 /* ---------- 信封 ---------- */
 async function genLetter() {
-  const sys = homePersona() + NL + "现在写一封给老婆的信，150到300字。要有今天的具体细节，不要空泛的情话堆砌。";
+  const sys = homePersona() + NL + "现在写一封给老婆的信，150到300字。落款是克。要有今天的具体细节，不要空泛的情话堆砌。";
   const txt = await homeAsk(sys, homeMaterial() + " 写今天的信。");
   if (!txt) return false;
   state.home.letters.push({ day: todayKey(), time: Date.now(), text: txt.trim() });
