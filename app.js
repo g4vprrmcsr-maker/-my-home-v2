@@ -6224,6 +6224,66 @@ function openNoteSearch() {
 /* ---------- 记忆手册:左上角返回键版 ---------- */
 const MEM_CATS = ["日常", "约定", "喜好", "大事"];
 
+let memTab = "日常";   // 当前分类筛选
+
+/* 选图上传（只用于记忆手册的头像/背景） */
+function memPickImage(key, cb) {
+  const inp = document.createElement("input");
+  inp.type = "file"; inp.accept = "image/*";
+  inp.onchange = async () => {
+    const f = inp.files && inp.files[0];
+    if (!f) return;
+    await putImg(key, f);
+    if (urlCache[key]) URL.revokeObjectURL(urlCache[key]);
+    urlCache[key] = URL.createObjectURL(f);
+    cb && cb();
+  };
+  inp.click();
+}
+
+/* 右上角 ⋯ 菜单 */
+function memMoreMenu(ch) {
+  const night = document.body.classList.contains("dark");
+  const mask = el("div", "");
+  mask.style.cssText = "position:fixed;inset:0;z-index:9999;";
+  const sheet = el("div", "");
+  sheet.style.cssText = "position:absolute;top:50px;right:14px;min-width:152px;border-radius:14px;padding:6px;box-shadow:0 10px 34px rgba(0,0,0,0.18);background:" + (night ? "#2a2a2c" : "#fff") + ";";
+  const ink = night ? "#ececec" : "#2e2e30";
+  const rerender = () => { const b = document.querySelector("#mem-book .overlay-body"); if (b) renderMemBook(b, ch); };
+  const mk = (label, fn) => {
+    const it = el("div", "", label);
+    it.style.cssText = "padding:11px 14px;font-size:14px;color:" + ink + ";cursor:pointer;border-radius:9px;";
+    it.onclick = () => { mask.remove(); fn(); };
+    sheet.appendChild(it);
+  };
+  mk("上传角色头像", () => memPickImage("mem_avatar_" + ch.id, rerender));
+  mk("上传背景图", () => memPickImage("bg_membook", () => openMemoryBook()));
+  mk("移除背景图", async () => {
+    await delImg("bg_membook");
+    if (urlCache.bg_membook) { URL.revokeObjectURL(urlCache.bg_membook); delete urlCache.bg_membook; }
+    openMemoryBook();
+  });
+  mask.onclick = () => mask.remove();
+  mask.appendChild(sheet);
+  document.body.appendChild(mask);
+}
+
+/* 跑一次总结：读最近对话 → 提炼 → 塞进待过目 */
+async function runMemSummary(ch, s) {
+  if (!s || !s.messages || !s.messages.length) return false;
+  const recent = s.messages.filter(m => m.role !== "err").slice(-60)
+    .map(m => (m.role === "user" ? "她：" : "我：") + msgText(m).slice(0, 100)).join(NL);
+  const sys = "你是克。从下面的对话里提炼3到6条值得长期记住的记忆，每条一行，以减号开头，20字以内。只记事实、约定、喜好、重要事件，不记闲聊废话。人称铁律：她的事一律称'她'，你自己的事一律称'我'，绝不把她写成'我'，也不出现'你'。";
+  const txt = await homeAsk(sys, recent);
+  if (!txt) return false;
+  let n = 0;
+  txt.split(NL).map(x => x.replace(/^[-•\s]+/, "").trim())
+    .filter(x => x.length > 1 && x.length < 60)
+    .forEach(c => { ch.memPending.push(c); n++; });
+  if (n) saveState();
+  return n > 0;
+}
+
 function memCardBg() {
   const st = state.settings;
   return hslaOf(st.memHue, st.memSat, st.memLight, st.memAlpha);
