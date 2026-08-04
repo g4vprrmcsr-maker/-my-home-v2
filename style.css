@@ -1667,15 +1667,15 @@ body:not(.gpt-ui) #topbar {
 
 /* 输入框:实色 #F9F9F7,半透明白软边,更足的均匀柔影(不靠加深),圆角28 */
 body:not(.gpt-ui):not(.dark) #input-box {
-  background: #FFFFFF;
+  background: #F9F9F7;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: 1px solid rgba(255, 255, 255, 0.55);
   border-radius: 25px;
   padding: 10px 14px 8px;
   box-shadow:
-    0 4px 12px rgba(90, 72, 45, 0.06),
-    0 12px 32px rgba(90, 72, 45, 0.08);
+    0 8px 24px rgba(0, 0, 0, 0.045),
+    0 20px 50px rgba(0, 0, 0, 0.05);
 }
 
 /* 占位/输入文字往下压一点,不贴顶;占位色 #7B7974 */
@@ -1690,12 +1690,12 @@ body:not(.gpt-ui):not(.dark) #input-text::placeholder {
 body:not(.gpt-ui):not(.dark) #attach-btn {
   width: 34px;
   height: 34px;
-  background: #EFEFED;
+  background: #F0EFEB;
   color: var(--text-sub);
   box-shadow: none;
 }
 body:not(.gpt-ui):not(.dark) #model-btn {
-  background: #EFEFED;
+  background: #F0EFEB;
   border-radius: 999px;
   padding: 8px 13px;
   font-size: 13px;
@@ -1706,7 +1706,7 @@ body:not(.gpt-ui):not(.dark) #mini-menu-btn {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #EFEFED;
+  background: #F0EFEB;
   color: var(--text-sub);
   font-size: 18px;
   display: flex;
@@ -1725,13 +1725,13 @@ body:not(.gpt-ui):not(.dark) #send-btn {
 /* 顶栏圆钮 + 标题胶囊:实色 #FBFBF9,半透明白软边,阴影调淡不发黑,保留悬浮 */
 body:not(.gpt-ui):not(.dark) #topbar .topbar-btn,
 body:not(.gpt-ui):not(.dark) #topbar-title {
-  background: #FFFFFF;
+  background: #FBFBF9;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: 1px solid rgba(255, 255, 255, 0.55);
   box-shadow:
-    0 2px 8px rgba(90, 72, 45, 0.05),
-    0 8px 20px rgba(90, 72, 45, 0.06);
+    0 2px 8px rgba(0, 0, 0, 0.03),
+    0 8px 20px rgba(0, 0, 0, 0.035);
 }
 
 /* 顶栏加号/三条杠图标 + 标题文字:改色 #383835 */
