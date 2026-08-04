@@ -1743,7 +1743,7 @@ body:not(.gpt-ui):not(.dark) #topbar-title {
 }
 /* 输入框白边加宽到 1.5px（顶栏按钮仍 1px 不动） */
 body:not(.gpt-ui):not(.dark) #input-box {
-  border-width: 1.7px;
+  border-width: 1.65px;
 }
 
 /* 标题胶囊:降 2px 高度 + 向左靠近三条杠约 4px(≈0.1cm) */
