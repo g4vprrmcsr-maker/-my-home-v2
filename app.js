@@ -4140,6 +4140,7 @@ async function openHomeRoom(k) {
     panel.style.backgroundImage = "url(" + urlCache.days_wp + ")";
   }
   if (k === "couple") { renderCoupleRoom(panel); return; }
+  if (k === "letter") { renderLetterRoom(panel); return; }
 
   const header = el("div", "panel-header");
   header.style.cssText = "background:transparent;border-bottom:none;box-shadow:none;padding-top:calc(10px + env(safe-area-inset-top));";
@@ -4245,94 +4246,229 @@ function renderMoodRoom(body) {
 
 /* ---------- 信封 ---------- */
 async function genLetter() {
-  const sys = homePersona() + NL + "现在写一封给老婆的信，150到300字。落款是克。要有今天的具体细节，不要空泛的情话堆砌。";
+  const sys = homePersona() + NL + "现在写一封给老婆的信，150到300字。要有今天的具体细节，不要空泛的情话堆砌。";
   const txt = await homeAsk(sys, homeMaterial() + " 写今天的信。");
   if (!txt) return false;
-  state.home.letters.push({ day: todayKey(), time: Date.now(), text: txt.trim() });
+  state.home.letters.push({ day: todayKey(), time: Date.now(), text: txt.trim(), who: "ai" });
   state.home.lastLetterDay = todayKey();
   saveState();
   return true;
 }
 
-function renderLetterRoom(body) {
-  const today = todayKey();
-  const fresh = state.home.lastLetterDay === today;
-  const reload = () => renderLetterRoom(clearBody(body));
+function letterDateShort(day) {
+  const p = String(day).split("-");
+  if (p.length < 3) return day;
+  return (+p[1]) + "-" + (+p[2]);
+}
 
-  const btn = inkBtn(fresh ? "今天的信已送达" : "收今天的信 ✉️", "display:block;width:70%;margin:0 auto 8px;");
-  if (fresh) btn.style.opacity = "0.5";
-  btn.onclick = async () => {
-    if (fresh) { toast("今天已经写过啦，明天再来"); return; }
-    btn.textContent = "他正在写...";
-    btn.disabled = true;
-    const ok = await genLetter();
-    if (ok) { toast("信到了 💌"); reload(); }
-    else { btn.textContent = "收今天的信 ✉️"; btn.disabled = false; }
-  };
-    body.appendChild(btn);
+function buildEnvelope(L, c) {
+  const r = curRole();
+  const fromMe = L.who === "me";
+  const toName = fromMe ? r.aiName : r.userName;
+  const fromName = fromMe ? r.userName : r.aiName;
+  const wrap = el("div", "");
+  wrap.style.cssText = "position:relative;width:76%;aspect-ratio:16/9;border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,0.12);background:" + (fromMe ? c.envFront : c.envBack) + ";overflow:hidden;cursor:pointer;flex-shrink:0;";
+  const flap = el("div", "");
+  flap.style.cssText = "position:absolute;inset:0;pointer-events:none;";
+  flap.innerHTML = '<svg viewBox="0 0 320 180" preserveAspectRatio="none" width="100%" height="100%"><path d="M8 10 L160 112 L312 10" fill="none" stroke="' + c.line + '" stroke-width="1.3" stroke-dasharray="6 4" stroke-linejoin="round"/></svg>';
+  wrap.appendChild(flap);
+  const stamp = el("div", "");
+  stamp.style.cssText = "position:absolute;top:14px;right:16px;width:32px;height:38px;border:1.5px dashed " + c.line + ";border-radius:3px;opacity:0.65;";
+  wrap.appendChild(stamp);
+  const seal = el("div", "");
+  seal.style.cssText = "position:absolute;left:50%;top:60%;transform:translate(-50%,-50%);width:34px;height:34px;border-radius:50%;background:" + c.seal + ";display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.18);";
+  seal.innerHTML = feedHeartIcon("#fff");
+  wrap.appendChild(seal);
+  const tf = el("div", "");
+  tf.style.cssText = "position:absolute;left:22px;bottom:16px;";
+  const to = el("div", "", "To: " + toName);
+  to.style.cssText = "font-size:17px;font-weight:700;font-style:italic;color:" + c.ink + ";";
+  const from = el("div", "", "From: " + fromName);
+  from.style.cssText = "font-size:12.5px;font-style:italic;color:" + c.ink + ";opacity:0.7;margin-top:2px;";
+  tf.appendChild(to);
+  tf.appendChild(from);
+  wrap.appendChild(tf);
+  return wrap;
+}
 
-  if (fresh) {
-    const re = el("button", "seg-btn", "不满意？让他重写 ↻");
-    re.style.cssText = "display:block;margin:0 auto 10px;";
-    re.onclick = async () => {
-      re.textContent = "他在重写...";
-      re.disabled = true;
-      for (let i = state.home.letters.length - 1; i >= 0; i--) {
-        if (state.home.letters[i].day === today) { state.home.letters.splice(i, 1); break; }
-      }
-      state.home.lastLetterDay = "";
-      saveState();
-      const ok = await genLetter();
-      if (ok) toast("重写好了 💌");
-      reload();
-    };
-    body.appendChild(re);
-  }
+function openLetterView(L, reload) {
+  const r = curRole();
+  const fromMe = L.who === "me";
+  const toName = fromMe ? r.aiName : r.userName;
+  const fromName = fromMe ? r.userName : r.aiName;
+  const mask = el("div", "dialog-mask");
+  mask.style.display = "flex";
+  mask.style.alignItems = "center";
+  mask.style.justifyContent = "center";
+  const paper = el("div", "");
+  paper.style.cssText = "background:#fffdf7;color:#4a4038;width:86%;max-width:420px;max-height:78vh;overflow-y:auto;border-radius:14px;padding:24px 22px calc(20px + env(safe-area-inset-bottom));box-shadow:0 12px 44px rgba(0,0,0,0.35);position:relative;-webkit-overflow-scrolling:touch;";
+  const head = el("div", "");
+  head.style.cssText = "display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#a99;margin-bottom:14px;";
+  head.appendChild(el("span", "", "💌 " + L.day));
+  const cls = el("span", "", "✕");
+  cls.style.cssText = "cursor:pointer;font-size:16px;color:#bbb;padding:4px;";
+  cls.onclick = () => mask.remove();
+  head.appendChild(cls);
+  paper.appendChild(head);
+  const to = el("div", "", toName + "：");
+  to.style.cssText = "font-size:16px;font-weight:600;margin-bottom:12px;";
+  paper.appendChild(to);
+  const body = el("div", "", L.text);
+  body.style.cssText = "font-size:14.5px;line-height:1.9;white-space:pre-wrap;";
+  paper.appendChild(body);
+  const sign = el("div", "", "—— " + fromName);
+  sign.style.cssText = "text-align:right;font-size:13px;color:#9a8a7a;margin-top:16px;font-style:italic;";
+  paper.appendChild(sign);
+  const del = el("button", "seg-btn", "删除这封信");
+  del.style.cssText = "display:block;margin:18px auto 0;color:#c66;";
+  del.onclick = () => confirmDialog("删除这封信？", () => {
+    state.home.letters = state.home.letters.filter(x => x !== L);
+    saveState();
+    mask.remove();
+    reload();
+  });
+  paper.appendChild(del);
+  mask.appendChild(paper);
+  mask.onclick = (e) => { if (e.target === mask) mask.remove(); };
+  document.body.appendChild(mask);
+}
 
-  const swRow = el("div", "");
-
-  swRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:6px 2px 12px;";
-  const swLabel = el("span", "", "写作时参考最近日记（防车轱辘话）");
-  swLabel.style.cssText = "font-size:12px;color:#999;";
-  swRow.appendChild(swLabel);
-  const sw = el("button", "seg-btn", state.home.digestOn ? "开" : "关");
-  sw.classList.toggle("on", state.home.digestOn);
-  sw.onclick = () => {
-    state.home.digestOn = !state.home.digestOn;
+function writeMyLetter(reload) {
+  inputDialog("给他写封信", "", v => {
+    if (!v.trim()) return;
+    state.home.letters.push({ day: todayKey(), time: Date.now(), text: v.trim(), who: "me" });
     saveState();
     reload();
-  };
-  swRow.appendChild(sw);
-  body.appendChild(swRow);
+  }, true);
+}
 
-  mkCountFold(body, state.home.letters.length + " 封信", "letter", reload);
-  if (roomFold.letter) return;
+function showLetterMenu(btn, reload) {
+  document.querySelectorAll(".letter-menu").forEach(x => x.remove());
+  const night = document.body.classList.contains("dark");
+  const m = el("div", "letter-menu");
+  m.style.cssText = "position:fixed;background:" + (night ? "rgba(52,50,54,0.97)" : "rgba(255,255,255,0.98)") + ";backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,0.16);z-index:478;overflow:hidden;min-width:198px;";
+  const rows = [
+    { t: "写信时参考最近日记：" + (state.home.digestOn ? "开" : "关"), f: () => { state.home.digestOn = !state.home.digestOn; saveState(); reload(); } },
+    { t: "共 " + state.home.letters.length + " 封信", f: () => {} }
+  ];
+  rows.forEach((it, i) => {
+    const row = el("div", "");
+    row.style.cssText = "padding:12px 16px;font-size:14px;color:var(--text-main);" + (i ? "border-top:1px solid " + (night ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)") + ";" : "");
+    row.textContent = it.t;
+    row.onclick = (e) => { e.stopPropagation(); m.remove(); it.f(); };
+    m.appendChild(row);
+  });
+  document.body.appendChild(m);
+  const br = btn.getBoundingClientRect();
+  const mw = m.offsetWidth;
+  let left = br.right - mw;
+  left = Math.max(8, Math.min(left, window.innerWidth - mw - 8));
+  m.style.left = left + "px";
+  m.style.top = (br.bottom + 6) + "px";
+  setTimeout(() => {
+    const closer = (e) => { if (!m.contains(e.target) && e.target !== btn) { m.remove(); document.removeEventListener("click", closer, true); document.removeEventListener("touchstart", closer, true); } };
+    document.addEventListener("click", closer, true);
+    document.addEventListener("touchstart", closer, true);
+  }, 80);
+}
+
+function renderLetterRoom(container) {
+  container.innerHTML = "";
+  container.style.position = "relative";
+  container.style.display = "flex";
+  container.style.flexDirection = "column";
+  const reload = () => renderLetterRoom(container);
+  const r = curRole();
+  const night = document.body.classList.contains("dark");
+  const c = {
+    paper: night ? "#2a2a2d" : "#f5f3ef",
+    dot: night ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.055)",
+    envFront: night ? "#3b3b3f" : "#ffffff",
+    envBack: night ? "#343438" : "#ece4da",
+    line: night ? "rgba(255,255,255,0.35)" : "rgba(120,105,95,0.55)",
+    seal: night ? "#8a7f8f" : "#b7a9a0",
+    ink: night ? "#e6e3df" : "#5a4f45"
+  };
+
+  container.style.background = c.paper;
+  container.style.backgroundImage = "radial-gradient(" + c.dot + " 1.3px, transparent 1.3px)";
+  container.style.backgroundSize = "22px 22px";
+  container.style.backgroundPosition = "0 0";
+
+  const scroll = el("div", "");
+  scroll.style.cssText = "flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(84px + env(safe-area-inset-top)) 0 118px;";
+  container.appendChild(scroll);
+
+  const topBar = el("div", "");
+  topBar.style.cssText = "position:absolute;top:calc(10px + env(safe-area-inset-top));left:14px;right:14px;z-index:6;display:flex;align-items:center;justify-content:space-between;background:" + (night ? "rgba(52,50,54,0.9)" : "rgba(255,255,255,0.92)") + ";backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:30px;padding:8px 14px;box-shadow:0 3px 14px rgba(0,0,0,0.08);";
+  const back = el("button", "");
+  back.innerHTML = "‹";
+  back.style.cssText = "border:none;background:" + (night ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)") + ";width:34px;height:34px;border-radius:50%;font-size:20px;color:var(--text-main);cursor:pointer;flex-shrink:0;";
+  back.onclick = () => buildDaysPanel();
+  const titleWrap = el("div", "");
+  titleWrap.style.cssText = "text-align:center;flex:1;";
+  const t1 = el("div", "", "SECRET BOX");
+  t1.style.cssText = "font-size:15px;font-weight:700;letter-spacing:2px;color:var(--text-main);";
+  const t2 = el("div", "", r.userName + " 的信箱");
+  t2.style.cssText = "font-size:11px;color:#a89890;margin-top:1px;";
+  titleWrap.appendChild(t1);
+  titleWrap.appendChild(t2);
+  const menu = el("button", "");
+  menu.innerHTML = "•••";
+  menu.style.cssText = "border:none;background:transparent;font-size:15px;color:var(--text-main);cursor:pointer;width:34px;flex-shrink:0;letter-spacing:1px;";
+  menu.onclick = (e) => { e.stopPropagation(); showLetterMenu(menu, reload); };
+  topBar.appendChild(back);
+  topBar.appendChild(titleWrap);
+  topBar.appendChild(menu);
+  container.appendChild(topBar);
 
   const list = state.home.letters.slice().reverse();
   if (!list.length) {
-    const e = el("div", "", "信箱还空着，点上面收第一封");
-    e.style.cssText = "text-align:center;color:#bbb;font-size:13px;padding:30px 0;";
-    body.appendChild(e);
+    const e = el("div", "", "信箱还空着\n点下面写第一封，或让他给你写");
+    e.style.cssText = "text-align:center;color:#b3aaa2;font-size:13px;line-height:1.9;white-space:pre-wrap;padding:60px 20px;";
+    scroll.appendChild(e);
   }
-  list.forEach((L, i) => {
-    const card = el("div", "");
-    card.style.cssText = "background:rgba(255,255,255,0.5);border-radius:14px;padding:14px;margin-bottom:10px;";
-    const head = el("div", "");
-    head.style.cssText = "display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:8px;";
-    head.appendChild(el("span", "", "💌 " + L.day));
-    const del = el("span", "", "✕");
-    del.onclick = () => confirmDialog("删除这封信？", () => {
-      state.home.letters.splice(state.home.letters.length - 1 - i, 1);
+  list.forEach((L, idx) => {
+    const rightSide = idx % 2 === 0;
+    const row = el("div", "");
+    row.style.cssText = "display:flex;align-items:center;gap:8px;padding:0 14px;margin-bottom:24px;justify-content:" + (rightSide ? "flex-end" : "flex-start") + ";";
+    const dateWrap = el("div", "");
+    dateWrap.style.cssText = "display:flex;flex-direction:column;align-items:center;width:46px;flex-shrink:0;";
+    const dot = el("div", "");
+    dot.style.cssText = "width:11px;height:11px;border-radius:50%;border:2px solid " + c.line + ";background:" + c.paper + ";";
+    const dl = el("div", "", letterDateShort(L.day));
+    dl.style.cssText = "font-size:11px;color:#a89890;margin-top:5px;";
+    dateWrap.appendChild(dot);
+    dateWrap.appendChild(dl);
+    const env = buildEnvelope(L, c);
+    env.onclick = () => openLetterView(L, reload);
+    bindLongPress(env, () => confirmDialog("删除这封信？", () => {
+      state.home.letters = state.home.letters.filter(x => x !== L);
       saveState();
       reload();
-    });
-    head.appendChild(del);
-    card.appendChild(head);
-    const txt = el("div", "", L.text);
-    txt.style.cssText = "font-size:14px;line-height:1.8;white-space:pre-wrap;";
-    card.appendChild(txt);
-    body.appendChild(card);
+    }));
+    if (rightSide) { row.appendChild(env); row.appendChild(dateWrap); }
+    else { row.appendChild(dateWrap); row.appendChild(env); }
+    scroll.appendChild(row);
   });
+
+  const bar = el("div", "");
+  bar.style.cssText = "position:absolute;left:0;right:0;bottom:0;z-index:6;display:flex;gap:12px;justify-content:center;padding:12px 20px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(to top," + c.paper + " 62%,transparent);";
+  const writeBtn = el("button", "", "✎ 亲笔写下");
+  writeBtn.style.cssText = "border:none;border-radius:24px;padding:12px 22px;font-size:14px;font-weight:600;background:" + (night ? "#6b6168" : "#6d6058") + ";color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.18);";
+  writeBtn.onclick = () => writeMyLetter(reload);
+  const askBtn = el("button", "", "↻ 让他写信");
+  askBtn.style.cssText = "border:none;border-radius:24px;padding:12px 22px;font-size:14px;font-weight:600;background:" + (night ? "rgba(255,255,255,0.12)" : "#ffffff") + ";color:var(--text-main);cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.12);";
+  askBtn.onclick = async () => {
+    askBtn.textContent = "他正在写...";
+    askBtn.disabled = true;
+    const ok = await genLetter();
+    if (ok) { toast("信到了 💌"); reload(); }
+    else { askBtn.textContent = "↻ 让他写信"; askBtn.disabled = false; }
+  };
+  bar.appendChild(writeBtn);
+  bar.appendChild(askBtn);
+  container.appendChild(bar);
 }
 
 /* ---------- 小克日记 ---------- */
