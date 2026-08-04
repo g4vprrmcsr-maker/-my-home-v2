@@ -4374,7 +4374,6 @@ function showLetterMenu(btn, reload) {
 
 function renderLetterRoom(container) {
   container.innerHTML = "";
-  container.style.position = "relative";
   container.style.display = "flex";
   container.style.flexDirection = "column";
   const reload = () => renderLetterRoom(container);
