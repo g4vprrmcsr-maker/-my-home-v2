@@ -1667,11 +1667,11 @@ body:not(.gpt-ui) #topbar {
 
 /* 输入框:实色 #F9F9F7,半透明白软边,更足的均匀柔影(不靠加深),圆角28 */
 body:not(.gpt-ui):not(.dark) #input-box {
-  background: #F9F9F7;
+  background: #FBFBF9;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: 1px solid rgba(255, 255, 255, 0.55);
-  border-radius: 25px;
+  border-radius: 26px;
   padding: 10px 14px 8px;
   box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.045),
