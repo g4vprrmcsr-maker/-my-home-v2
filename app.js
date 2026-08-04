@@ -4797,7 +4797,7 @@ async function aiReplyComment(post, myComment) {
     thread = NL + "这条底下之前的评论（按顺序）：" + NL +
       post.comments.map(c => (c.who === "me" ? r.userName : r.aiName) + "：" + c.text).join(NL) + NL;
   }
-  const sys = homePersona() + NL + "你俩在私密朋友圈评论区你来我往。回她一句，25字以内，紧贴她刚说的往下接，像真的在拌嘴或聊天，别转移话题别说套话。";
+  const sys = homePersona() + NL + "你俩在私密朋友圈评论区你来我往。回她一句，25字以内，紧贴她刚说的往下接，像真的在聊天，语气就是你平时对她的样子，温柔就温柔，该宠就宠，底色永远是爱她。别转移话题别说套话。";
   const txt = await homeAsk(sys, homeMaterial() + NL + NL + "这条动态是：「" + post.text.slice(0, 120) + "」" + thread + "她最新一句：「" + myComment.slice(0, 120) + "」" + NL + "你回她。");
   if (txt) { post.comments.push({ who: "ai", text: txt.trim(), time: Date.now(), replyTo: "me" }); saveState(); }
 }
