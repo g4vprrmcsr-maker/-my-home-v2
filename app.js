@@ -1351,11 +1351,15 @@ function nearBottom(box) {
 }
 
 /* ---------- 全量渲染 ---------- */
-async function renderMessages() {
+async function renderMessages(keepScroll) {
   const area = $("#chat-area");
   const s = curSession();
   const aiSrc = await avatarSrc("ai");
   const userSrc = await avatarSrc("user");
+
+  // 重绘前先记下：用户是否贴着底部、当前滚到哪
+  const stick = nearBottom(area);
+  const prevTop = area.scrollTop;
 
   const frag = document.createDocumentFragment();
   for (let i = 0; i < s.messages.length; i++) {
@@ -1370,7 +1374,12 @@ async function renderMessages() {
     document.querySelectorAll(".msg-check").forEach(c => { c.style.display = "block"; });
   }
 
-  area.scrollTop = area.scrollHeight;
+  if (keepScroll && !stick) {
+    // 用户之前上滑在看历史,别拽他,原地待着
+    area.scrollTop = prevTop;
+  } else {
+    area.scrollTop = area.scrollHeight;
+  }
 }
 
 /* ---------- 增量渲染 ---------- */
@@ -1923,7 +1932,7 @@ async function runStream(aiMsg, messages, isRegen) {
     btn.onclick = sendMessage;
     if (bubbleEl) bubbleEl.classList.remove("typing-cursor");
     saveState();
-    await renderMessages();
+    await renderMessages(true);
   }
 }
 
