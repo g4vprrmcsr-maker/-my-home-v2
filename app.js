@@ -6328,9 +6328,7 @@ async function openMemoryBook() {
   const headColor = night ? "#ececec" : "#131313";
   const pageBg = night ? "#161618" : "#fafafa";
   const head = el("div", "overlay-head");
-  // 横幅不透明：有壁纸贴壁纸(与身后对齐)，没壁纸用页面底色，挡住下方滚动内容
-  const headBg = urlCache.bg_membook ? "url(" + urlCache.bg_membook + ") center top / cover no-repeat" : pageBg;
-  head.style.cssText = "position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;background:" + headBg + ";padding:calc(env(safe-area-inset-top) + 10px) 18px 10px;";
+  head.style.cssText = "position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;background:transparent;padding:calc(env(safe-area-inset-top) + 10px) 18px 10px;";
   const back = el("div", "", "‹");
   back.style.cssText = "font-size:26px;line-height:1;cursor:pointer;color:" + headColor + ";width:28px;";
   back.onclick = () => ov.remove();
@@ -6353,7 +6351,7 @@ async function openMemoryBook() {
       if (typeof delImg === "function") delImg("bg_membook");
       urlCache.bg_membook = null;
       const b = ov.querySelector(".overlay-bg"); if (b) b.remove();
-      ov.style.background = pageBg; head.style.background = pageBg;
+      ov.style.background = pageBg;
       renderMemBook(body, ch);
     }]);
     items.forEach(([t, fn], i, arr) => {
@@ -6394,7 +6392,6 @@ function renderMemBook(body, ch) {
   const cardInk  = cardDark ? "#f0f0f0" : "#131313";
   const cardSub  = cardDark ? "#b0b0b4" : "#8f8f93";
   const cardLine = cardDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.10)";
-  // 只描边，无阴影
   const cardBase = "background:" + cardBg + ";box-shadow:none;";
 
   body.style.background = urlCache.bg_membook ? "transparent" : (night ? "#161618" : "#fafafa");
@@ -6402,11 +6399,10 @@ function renderMemBook(body, ch) {
   const avKey = "mem_avatar_" + ch.id;
   const cats = (typeof MEM_CATS !== "undefined" ? MEM_CATS : ["日常", "约定", "喜好", "情绪"]);
 
-  // 标准对称爱心
-  const heart = (on, size, col) => '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + (on ? col : "none") + '" stroke="' + col + '" stroke-width="1.6" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+  const heart = (on, size, col) => '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + (on ? col : "none") + '" stroke="' + col + '" stroke-width="1.7" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
   const penSVG   = (c) => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
   const checkSVG = (c) => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
-  const trashSVG = (c) => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>';
+  const trashSVG = (c) => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10.5v6M14 10.5v6"/></svg>';
 
   /* 头部 */
   const total = ch.memories.length;
@@ -6442,10 +6438,10 @@ function renderMemBook(body, ch) {
   sig.style.cssText = "font-size:12px;color:" + lbl + ";margin-top:4px;line-height:1.5;white-space:pre-wrap;";
   nameBox.appendChild(nm); if (ch.memSign) nameBox.appendChild(sig); body.appendChild(nameBox);
 
-  /* 按钮：总结随色；手写透明跟随主题(不写死) */
+  /* 按钮：总结随色+轻阴影；手写透明跟随主题+无边+轻阴影 */
   const actions = el("div", ""); actions.style.cssText = "display:flex;gap:10px;margin-bottom:14px;";
   const sumBtn = el("button", "", "总结对话");
-  sumBtn.style.cssText = "flex:1;height:36px;border:none;border-radius:11px;font-size:13.5px;font-weight:600;cursor:pointer;background:" + B.bg + ";color:" + B.ink + ";";
+  sumBtn.style.cssText = "flex:1;height:36px;border:none;border-radius:11px;font-size:13.5px;font-weight:600;cursor:pointer;background:" + B.bg + ";color:" + B.ink + ";box-shadow:0 1px 3px rgba(0,0,0,0.06);";
   sumBtn.onclick = async () => {
     const s2 = curSession();
     if (!s2 || !s2.messages || !s2.messages.length) { toast("这会话还没聊呢"); return; }
@@ -6457,7 +6453,7 @@ function renderMemBook(body, ch) {
     else { sumBtn.textContent = "总结对话"; sumBtn.disabled = false; }
   };
   const addBtn = el("button", "", "＋ 手写记忆");
-  addBtn.style.cssText = "flex:1;height:36px;border:0.5px solid " + B.bg + ";border-radius:11px;font-size:13.5px;font-weight:600;cursor:pointer;background:transparent;color:" + ink131 + ";";
+  addBtn.style.cssText = "flex:1;height:36px;border:none;border-radius:11px;font-size:13.5px;font-weight:600;cursor:pointer;background:transparent;color:" + ink131 + ";box-shadow:0 1px 3px rgba(0,0,0,0.05);";
   addBtn.onclick = () => inputDialog("新记忆", "", v => { if (v.trim()) { ch.memories.push({ id: uid(), text: v.trim(), checked: true, core: false, cat: cats[0] }); saveState(); renderMemBook(body, ch); } }, true);
   actions.appendChild(sumBtn); actions.appendChild(addBtn); body.appendChild(actions);
 
@@ -6497,6 +6493,26 @@ function renderMemBook(body, ch) {
     const gap = el("div", ""); gap.style.height = "6px"; body.appendChild(gap);
   }
 
+  /* 自建确认框：挂在记忆页顶层，保证可见可点 */
+  const askDelete = (idx) => {
+    const ov = document.getElementById("mem-book") || document.body;
+    const wrap = document.createElement("div");
+    wrap.style.cssText = "position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.28);display:flex;align-items:center;justify-content:center;";
+    const dBg = night ? "#242426" : "#fff", dInk = night ? "#ececec" : "#131313", dLine = night ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.08)";
+    const box = el("div", ""); box.style.cssText = "min-width:270px;max-width:80%;border-radius:16px;overflow:hidden;background:" + dBg + ";box-shadow:0 14px 44px rgba(0,0,0,0.22);";
+    box.onclick = e => e.stopPropagation();
+    const q = el("div", "", "删除这条记忆？"); q.style.cssText = "padding:22px 20px 18px;font-size:16px;font-weight:600;text-align:center;color:" + dInk + ";";
+    box.appendChild(q);
+    const row = el("div", ""); row.style.cssText = "display:flex;border-top:0.5px solid " + dLine + ";";
+    const cancel = el("div", "", "取消"); cancel.style.cssText = "flex:1;padding:14px;text-align:center;font-size:15px;cursor:pointer;color:" + dInk + ";border-right:0.5px solid " + dLine + ";";
+    const ok = el("div", "", "删除"); ok.style.cssText = "flex:1;padding:14px;text-align:center;font-size:15px;font-weight:600;cursor:pointer;color:#e2564d;";
+    cancel.onclick = () => wrap.remove();
+    ok.onclick = () => { wrap.remove(); ch.memories.splice(idx, 1); saveState(); renderMemBook(body, ch); };
+    row.appendChild(cancel); row.appendChild(ok); box.appendChild(row);
+    wrap.appendChild(box); wrap.onclick = () => wrap.remove();
+    ov.appendChild(wrap);
+  };
+
   /* 卡片菜单 */
   const memCardMenu = (m) => {
     const ov = document.getElementById("mem-book") || document.body;
@@ -6514,15 +6530,15 @@ function renderMemBook(body, ch) {
     addRow("编辑", penSVG(mInk), () => inputDialog("编辑记忆", m.text, v => { if (v.trim()) { m.text = v.trim(); saveState(); renderMemBook(body, ch); } }, true));
     const hd = el("div", "", "移动到分类"); hd.style.cssText = "padding:11px 18px 5px;font-size:11px;color:" + (night ? "#8a8a8e" : "#9a9a9a") + ";"; menu.appendChild(hd);
     cats.forEach(cat => { const cur = (m.cat || cats[0]) === cat; addRow(cat, cur ? checkSVG(B.bg) : "", () => { m.cat = cat; saveState(); renderMemBook(body, ch); }); });
-    addRow(m.core ? "取消核心" : "设为核心", heart(m.core, 16, m.core ? B.bg : mInk), () => { m.core = !m.core; if (m.core) m.checked = true; saveState(); renderMemBook(body, ch); });
-    const del = addRow("删除", trashSVG("#e2564d"), () => confirmDialog("删除这条记忆？", () => { ch.memories.splice(idx, 1); saveState(); renderMemBook(body, ch); }), true);
+    addRow(m.core ? "取消核心" : "设为核心", heart(m.core, 15, m.core ? B.bg : mInk), () => { m.core = !m.core; if (m.core) m.checked = true; saveState(); renderMemBook(body, ch); });
+    const del = addRow("删除", trashSVG("#e2564d"), () => askDelete(idx), true);
     del.style.borderBottom = "none";
     back.appendChild(menu);
     back.onclick = () => back.remove();
     ov.appendChild(back);
   };
 
-  /* 记忆卡：只描边；点字就地编辑(不再错位) */
+  /* 记忆卡：只描边；点字就地编辑 */
   const renderCard = (m) => {
     const bColor = (m.core || m.checked) ? B.bg : cardLine;
     const c = el("div", ""); c.style.cssText = cardBase + "border:0.5px solid " + bColor + ";border-radius:14px;padding:0;margin-bottom:10px;overflow:hidden;";
@@ -6546,8 +6562,8 @@ function renderMemBook(body, ch) {
     c.appendChild(t);
     const meta = el("div", ""); meta.style.cssText = "display:flex;align-items:center;padding:9px 16px;border-top:0.5px solid " + cardLine + ";";
     const hs = el("span", ""); hs.style.cssText = "cursor:pointer;display:flex;align-items:center;";
-    hs.innerHTML = heart(m.checked, 17, m.checked ? B.bg : cardSub);
-    const en = el("span", "", m.checked ? "已启用" : "未启用"); en.style.cssText = "font-size:11.5px;margin-left:8px;cursor:pointer;color:" + (m.checked ? cardInk : cardSub) + ";";
+    hs.innerHTML = heart(m.checked, 14, m.checked ? B.bg : cardSub);
+    const en = el("span", "", m.checked ? "已启用" : "未启用"); en.style.cssText = "font-size:11.5px;margin-left:7px;cursor:pointer;color:" + (m.checked ? cardInk : cardSub) + ";";
     const tk = () => { m.checked = !m.checked; saveState(); renderMemBook(body, ch); };
     hs.onclick = tk; en.onclick = tk;
     meta.appendChild(hs); meta.appendChild(en);
