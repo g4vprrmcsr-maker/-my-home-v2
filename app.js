@@ -6225,6 +6225,21 @@ function openNoteSearch() {
 const MEM_CATS = ["日常", "约定", "喜好", "大事"];
 
 let memTab = "日常";   // 当前分类筛选
+/* 记忆手册配色（黑白灰默认，可调） */
+function memCardBg() {
+  const night = document.body.classList.contains("dark");
+  const L = state.settings && state.settings.memLight;
+  if (L === undefined || L === null) return night ? "#1e1e1e" : "#ffffff";
+  const v = Math.max(0, Math.min(255, Math.round(L / 100 * 255)));
+  return "rgb(" + v + "," + v + "," + v + ")";
+}
+
+function memBtnStyle() {
+  const night = document.body.classList.contains("dark");
+  return night
+    ? { bg: "#ededed", ink: "#1c1c1c" }   // 暗色：浅色按钮 + 深字
+    : { bg: "#1c1c1c", ink: "#ffffff" };  // 白天：近黑按钮 + 白字
+}
 
 /* 选图上传（只用于记忆手册的头像/背景） */
 function memPickImage(key, cb) {
