@@ -6379,7 +6379,7 @@ function renderMemBook(body, ch) {
 
   const olds = document.getElementById("mem-style"); if (olds) olds.remove();
   const s = document.createElement("style"); s.id = "mem-style";
-  s.textContent = ".mem-slider{-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;outline:none;}.mem-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,0.2);cursor:pointer;}";
+  s.textContent = ".mem-slider{-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;outline:none;}.mem-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 1px 1px rgba(0,0,0,0.08);cursor:pointer;}";
   document.head.appendChild(s);
 
   const ink131 = night ? "#ececec" : "#131313";
@@ -6399,7 +6399,7 @@ function renderMemBook(body, ch) {
   const avKey = "mem_avatar_" + ch.id;
   const cats = (typeof MEM_CATS !== "undefined" ? MEM_CATS : ["日常", "约定", "喜好", "情绪"]);
 
-  const heart = (on, size, col) => '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + (on ? col : "none") + '" stroke="' + col + '" stroke-width="1.7" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+  const heart = (on, size, col) => '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + (on ? col : "none") + '" stroke="' + col + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5C11 19.6 4 14.6 4 9.4 4 6.5 6 4.6 8.4 4.6c1.5 0 2.8.8 3.6 2 .8-1.2 2.1-2 3.6-2C18 4.6 20 6.5 20 9.4c0 5.2-7 10.2-8 11.1z"/></svg>';
   const penSVG   = (c) => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
   const checkSVG = (c) => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
   const trashSVG = (c) => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="' + c + '" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10.5v6M14 10.5v6"/></svg>';
@@ -6416,7 +6416,7 @@ function renderMemBook(body, ch) {
   else { const ph = el("div", "", (ch.memNick || ch.aiName || "·").slice(0, 1)); ph.style.cssText = "font-size:28px;color:" + sub + ";"; av.appendChild(ph); }
   const badge = el("div", "");
   badge.style.cssText = "position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;background:" + B.bg + ";border:2px solid " + (urlCache.bg_membook ? "transparent" : (night ? "#161618" : "#fafafa")) + ";";
-  badge.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="' + B.ink + '" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>';
+  badge.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="' + B.ink + '" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>';
   badge.onclick = () => { if (typeof memPickImage === "function") memPickImage(avKey, () => renderMemBook(body, ch)); };
   avWrap.appendChild(av); avWrap.appendChild(badge); headRow.appendChild(avWrap);
 
@@ -6438,10 +6438,10 @@ function renderMemBook(body, ch) {
   sig.style.cssText = "font-size:12px;color:" + lbl + ";margin-top:4px;line-height:1.5;white-space:pre-wrap;";
   nameBox.appendChild(nm); if (ch.memSign) nameBox.appendChild(sig); body.appendChild(nameBox);
 
-  /* 按钮：总结随色+轻阴影；手写透明跟随主题+无边+轻阴影 */
+  /* 按钮：总结随色+老阴影；手写实心不透明+老阴影 */
   const actions = el("div", ""); actions.style.cssText = "display:flex;gap:10px;margin-bottom:14px;";
   const sumBtn = el("button", "", "总结对话");
-  sumBtn.style.cssText = "flex:1;height:36px;border:none;border-radius:11px;font-size:13.5px;font-weight:600;cursor:pointer;background:" + B.bg + ";color:" + B.ink + ";box-shadow:0 1px 3px rgba(0,0,0,0.06);";
+  sumBtn.style.cssText = "flex:1;height:36px;border:none;border-radius:11px;font-size:13.5px;font-weight:600;cursor:pointer;background:" + B.bg + ";color:" + B.ink + ";box-shadow:0 1px 2px rgba(0,0,0,0.05);";
   sumBtn.onclick = async () => {
     const s2 = curSession();
     if (!s2 || !s2.messages || !s2.messages.length) { toast("这会话还没聊呢"); return; }
@@ -6453,7 +6453,7 @@ function renderMemBook(body, ch) {
     else { sumBtn.textContent = "总结对话"; sumBtn.disabled = false; }
   };
   const addBtn = el("button", "", "＋ 手写记忆");
-  addBtn.style.cssText = "flex:1;height:36px;border:none;border-radius:11px;font-size:13.5px;font-weight:600;cursor:pointer;background:transparent;color:" + ink131 + ";box-shadow:0 1px 3px rgba(0,0,0,0.05);";
+  addBtn.style.cssText = "flex:1;height:36px;border:none;border-radius:11px;font-size:13.5px;font-weight:600;cursor:pointer;background:" + (night ? "#1c1c1e" : "#fff") + ";color:" + ink131 + ";box-shadow:0 1px 2px rgba(0,0,0,0.03);";
   addBtn.onclick = () => inputDialog("新记忆", "", v => { if (v.trim()) { ch.memories.push({ id: uid(), text: v.trim(), checked: true, core: false, cat: cats[0] }); saveState(); renderMemBook(body, ch); } }, true);
   actions.appendChild(sumBtn); actions.appendChild(addBtn); body.appendChild(actions);
 
