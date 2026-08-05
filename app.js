@@ -6415,8 +6415,8 @@ function renderMemBook(body, ch) {
   if (urlCache[avKey]) { const im = document.createElement("img"); im.src = urlCache[avKey]; im.style.cssText = "width:100%;height:100%;object-fit:cover;"; av.appendChild(im); }
   else { const ph = el("div", "", (ch.memNick || ch.aiName || "·").slice(0, 1)); ph.style.cssText = "font-size:28px;color:" + sub + ";"; av.appendChild(ph); }
   const badge = el("div", "");
-  badge.style.cssText = "position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;background:" + B.bg + ";border:2px solid " + (urlCache.bg_membook ? "transparent" : (night ? "#161618" : "#fafafa")) + ";";
-  badge.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="' + B.ink + '" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>';
+  badge.style.cssText = "position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;background:" + B.bg + ";color:" + B.ink + ";border:2px solid " + (urlCache.bg_membook ? "transparent" : (night ? "#161618" : "#fafafa")) + ";";
+  badge.textContent = "＋";
   badge.onclick = () => { if (typeof memPickImage === "function") memPickImage(avKey, () => renderMemBook(body, ch)); };
   avWrap.appendChild(av); avWrap.appendChild(badge); headRow.appendChild(avWrap);
 
@@ -6438,7 +6438,7 @@ function renderMemBook(body, ch) {
   sig.style.cssText = "font-size:12px;color:" + lbl + ";margin-top:4px;line-height:1.5;white-space:pre-wrap;";
   nameBox.appendChild(nm); if (ch.memSign) nameBox.appendChild(sig); body.appendChild(nameBox);
 
-  /* 按钮：总结随色+老阴影；手写实心不透明+老阴影 */
+  /* 按钮：总结随色+老阴影；手写实心不透明+淡边+老阴影 */
   const actions = el("div", ""); actions.style.cssText = "display:flex;gap:10px;margin-bottom:14px;";
   const sumBtn = el("button", "", "总结对话");
   sumBtn.style.cssText = "flex:1;height:36px;border:none;border-radius:11px;font-size:13.5px;font-weight:600;cursor:pointer;background:" + B.bg + ";color:" + B.ink + ";box-shadow:0 1px 2px rgba(0,0,0,0.05);";
@@ -6453,7 +6453,7 @@ function renderMemBook(body, ch) {
     else { sumBtn.textContent = "总结对话"; sumBtn.disabled = false; }
   };
   const addBtn = el("button", "", "＋ 手写记忆");
-  addBtn.style.cssText = "flex:1;height:36px;border:none;border-radius:11px;font-size:13.5px;font-weight:600;cursor:pointer;background:" + (night ? "#1c1c1e" : "#fff") + ";color:" + ink131 + ";box-shadow:0 1px 2px rgba(0,0,0,0.03);";
+  addBtn.style.cssText = "flex:1;height:36px;border:0.5px solid " + line + ";border-radius:11px;font-size:13.5px;font-weight:600;cursor:pointer;background:" + (night ? "#1c1c1e" : "#fff") + ";color:" + ink131 + ";box-shadow:0 1px 2px rgba(0,0,0,0.03);";
   addBtn.onclick = () => inputDialog("新记忆", "", v => { if (v.trim()) { ch.memories.push({ id: uid(), text: v.trim(), checked: true, core: false, cat: cats[0] }); saveState(); renderMemBook(body, ch); } }, true);
   actions.appendChild(sumBtn); actions.appendChild(addBtn); body.appendChild(actions);
 
@@ -6538,7 +6538,7 @@ function renderMemBook(body, ch) {
     ov.appendChild(back);
   };
 
-  /* 记忆卡：只描边；点字就地编辑 */
+  /* 记忆卡：只描边；点字就地编辑；横线两端留14px */
   const renderCard = (m) => {
     const bColor = (m.core || m.checked) ? B.bg : cardLine;
     const c = el("div", ""); c.style.cssText = cardBase + "border:0.5px solid " + bColor + ";border-radius:14px;padding:0;margin-bottom:10px;overflow:hidden;";
@@ -6560,7 +6560,9 @@ function renderMemBook(body, ch) {
       else { t.textContent = m.text; }
     };
     c.appendChild(t);
-    const meta = el("div", ""); meta.style.cssText = "display:flex;align-items:center;padding:9px 16px;border-top:0.5px solid " + cardLine + ";";
+    const divider = el("div", ""); divider.style.cssText = "height:0.5px;background:" + cardLine + ";margin:0 14px;";
+    c.appendChild(divider);
+    const meta = el("div", ""); meta.style.cssText = "display:flex;align-items:center;padding:9px 16px;";
     const hs = el("span", ""); hs.style.cssText = "cursor:pointer;display:flex;align-items:center;";
     hs.innerHTML = heart(m.checked, 14, m.checked ? B.bg : cardSub);
     const en = el("span", "", m.checked ? "已启用" : "未启用"); en.style.cssText = "font-size:11.5px;margin-left:7px;cursor:pointer;color:" + (m.checked ? cardInk : cardSub) + ";";
