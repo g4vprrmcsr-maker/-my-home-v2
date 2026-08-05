@@ -6325,7 +6325,7 @@ async function openMemoryBook() {
 
   const headColor = night ? "#ececec" : "#131313";
   const head = el("div", "overlay-head");
-  head.style.cssText = "display:flex;align-items:center;justify-content:space-between;background:transparent;padding:6px 18px;";
+  head.style.cssText = "position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;background:transparent;padding:calc(env(safe-area-inset-top) + 10px) 18px 10px;";
   const back = el("div", "", "‹");
   back.style.cssText = "font-size:26px;line-height:1;cursor:pointer;color:" + headColor + ";width:28px;";
   back.onclick = () => ov.remove();
