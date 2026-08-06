@@ -2669,13 +2669,30 @@ function openCharEditor(r) {
 
 /* ---------- 导出导入 ---------- */
 function exportData() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  // 深拷贝 state，并剔除所有 base64 图片（data:image...），只导文字
+  const clean = stripImages(state);
+  const blob = new Blob([JSON.stringify(clean, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "home_backup_" + Date.now() + ".json";
   a.click();
-  saveState();
-  toast("已导出");
+  toast("已导出（不含图片）");
+}
+
+// 递归复制一份数据，遇到 base64 图片就丢掉，其它原样保留
+function stripImages(val) {
+  if (typeof val === "string") {
+    return val.startsWith("data:image") ? "" : val;
+  }
+  if (Array.isArray(val)) {
+    return val.map(stripImages);
+  }
+  if (val && typeof val === "object") {
+    const out = {};
+    for (const k in val) out[k] = stripImages(val[k]);
+    return out;
+  }
+  return val;
 }
 
 function importData(e) {
