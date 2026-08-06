@@ -2,7 +2,7 @@
    my home app.js v202
    S1开始:数据 / 仓库 / 工具 / markdown / 外观引擎
    ========================================== */
-
+// deploy trigger refresh
 
 const LS_KEY = "home_data_v3";
 const OLD_KEYS = ["home_data_v2", "home_data_v1"];
