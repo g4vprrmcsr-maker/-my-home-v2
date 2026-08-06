@@ -2562,7 +2562,6 @@ function newRole() {
 }
 
 /* ---------- 角色编辑器 ---------- */
-/* ---------- 角色编辑器 ---------- */
 function openCharEditor(r) {
   const old = document.getElementById("char-editor");
   if (old) old.remove();
@@ -2582,16 +2581,15 @@ function openCharEditor(r) {
   const body = el("div", "overlay-body");
   ov.appendChild(body);
 
-  function label(t) {
-    const l = el("div", "", t);
-    l.style.cssText = "font-size:13px;font-weight:600;margin:16px 2px 6px;color:var(--text-sub);";
-    body.appendChild(l);
-  }
-  function input(val, multiline) {
+  function groupTitle(t) { body.appendChild(el("div", "ce-group-title", t)); }
+  function card() { const c = el("div", "ce-card"); body.appendChild(c); return c; }
+  function field(parent, labelText, val, multiline) {
+    const f = el("div", "ce-field");
+    f.appendChild(el("div", "ce-field-label", labelText));
     const n = document.createElement(multiline ? "textarea" : "input");
-    n.className = multiline ? "form-textarea" : "form-input";
     n.value = val || "";
-    body.appendChild(n);
+    f.appendChild(n);
+    parent.appendChild(f);
     return n;
   }
 
@@ -2627,30 +2625,32 @@ function openCharEditor(r) {
     return item;
   }
 
-  const avGroup = el("div", "char-av-group");
-  avGroup.appendChild(avatarItem("ai", "AI头像"));
-  avGroup.appendChild(avatarItem("user", "我的头像"));
-  body.appendChild(avGroup);
+  // 形象卡
+  groupTitle("形象");
+  const avCard = el("div", "ce-card ce-av-card");
+  avCard.appendChild(avatarItem("ai", "AI头像"));
+  avCard.appendChild(avatarItem("user", "我的头像"));
+  body.appendChild(avCard);
   const avTip = el("div", "", "传你自己找的图，透明底也认");
-  avTip.style.cssText = "font-size:11px;color:var(--text-faint);margin:8px 2px 4px;";
+  avTip.style.cssText = "font-size:11px;color:var(--text-faint);margin:6px 6px 0;";
   body.appendChild(avTip);
 
-  label("角色名字");
-  const nameIn = input(r.name);
-  label("他的昵称");
-  const aIn = input(r.aiName);
-  label("你的昵称");
-  const uIn = input(r.userName);
+  // 基础信息卡
+  groupTitle("基础信息");
+  const infoCard = card();
+  const nameIn = field(infoCard, "角色名字", r.name);
+  const aIn = field(infoCard, "他的昵称", r.aiName);
+  const uIn = field(infoCard, "你的昵称", r.userName);
 
-  label("人设提示词");
-  const pIn = input(r.systemPrompt, true);
-  pIn.style.minHeight = "240px";
+  // 人设卡
+  groupTitle("人设提示词");
+  const pCard = card();
+  const pIn = field(pCard, "决定 TA 是谁、怎么说话", r.systemPrompt, true);
   const grow = () => { pIn.style.height = "auto"; pIn.style.height = pIn.scrollHeight + "px"; };
   pIn.addEventListener("input", grow);
   requestAnimationFrame(grow);
 
-  const save = el("button", "btn", "保存");
-  save.style.cssText = "width:100%;margin-top:24px;";
+  const save = el("button", "btn ce-save", "保存");
   save.onclick = () => {
     r.name = nameIn.value.trim() || r.name;
     r.systemPrompt = pIn.value;
