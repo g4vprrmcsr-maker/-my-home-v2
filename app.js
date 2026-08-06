@@ -6256,6 +6256,47 @@ function openNoteSearch() {
   };
 }
 
+/* 记忆页专用输入弹窗：挂在记忆页顶层(z-index 10001)，保证可见可点，不动全局 inputDialog */
+function memInputDialog(title, initial, onOk, multiline) {
+  const night = document.body.classList.contains("dark");
+  const host = document.getElementById("mem-book") || document.body;
+  const bg = night ? "#242426" : "#fff";
+  const ink = night ? "#ececec" : "#131313";
+  const fieldBg = night ? "#1c1c1e" : "#f5f5f7";
+  const fieldLine = night ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)";
+
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.28);display:flex;align-items:center;justify-content:center;padding:0 32px;";
+  const box = el("div", "");
+  box.style.cssText = "width:100%;max-width:340px;border-radius:18px;padding:20px;box-sizing:border-box;background:" + bg + ";box-shadow:0 14px 44px rgba(0,0,0,0.22);";
+  box.onclick = e => e.stopPropagation();
+
+  const h = el("div", "", title);
+  h.style.cssText = "font-size:16px;font-weight:600;color:" + ink + ";margin-bottom:14px;";
+  box.appendChild(h);
+
+  const input = document.createElement(multiline ? "textarea" : "input");
+  input.value = initial || "";
+  input.style.cssText = "width:100%;box-sizing:border-box;border:0.5px solid " + fieldLine + ";border-radius:12px;background:" + fieldBg + ";color:" + ink + ";font-size:15px;padding:12px 14px;outline:none;" + (multiline ? "min-height:120px;resize:none;line-height:1.6;" : "");
+  box.appendChild(input);
+
+  const btns = el("div", "");
+  btns.style.cssText = "display:flex;gap:10px;justify-content:flex-end;margin-top:16px;";
+  const cancel = el("button", "", "取消");
+  cancel.style.cssText = "border:none;border-radius:12px;padding:9px 20px;font-size:14px;cursor:pointer;background:" + (night ? "rgba(255,255,255,0.10)" : "#f0f0f2") + ";color:" + ink + ";";
+  const ok = el("button", "", "确定");
+  ok.style.cssText = "border:none;border-radius:12px;padding:9px 22px;font-size:14px;font-weight:600;cursor:pointer;background:" + (night ? "#ececec" : "#1c1c1e") + ";color:" + (night ? "#1c1c1e" : "#fff") + ";";
+  cancel.onclick = () => wrap.remove();
+  ok.onclick = () => { onOk(input.value); wrap.remove(); };
+  btns.appendChild(cancel); btns.appendChild(ok);
+  box.appendChild(btns);
+
+  wrap.appendChild(box);
+  wrap.onclick = () => wrap.remove();
+  host.appendChild(wrap);
+  setTimeout(() => input.focus(), 30);
+}
+
 /* ---------- 记忆手册:左上角返回键版 ---------- */
 const MEM_CATS = ["日常", "约定", "喜好", "情绪"];
 
@@ -6377,8 +6418,8 @@ async function openMemoryBook() {
     const menu = el("div", ""); menu.id = "mem-menu";
     menu.style.cssText = "position:absolute;top:calc(env(safe-area-inset-top) + 46px);right:14px;z-index:40;min-width:140px;border-radius:12px;overflow:hidden;background:" + (night ? "#242426" : "#fff") + ";border:0.5px solid rgba(0,0,0,0.08);box-shadow:0 6px 20px rgba(0,0,0,0.15);";
     const items = [
-      ["编辑昵称", () => inputDialog("修改昵称", ch.memNick || "", v => { if (v.trim()) { ch.memNick = v.trim(); saveState(); renderMemBook(body, ch); } })],
-      ["编辑签名", () => inputDialog("编辑签名", ch.memSign || "", v => { ch.memSign = v; saveState(); renderMemBook(body, ch); }, true)],
+      ["编辑昵称", () => memInputDialog("修改昵称", ch.memNick || "", v => { if (v.trim()) { ch.memNick = v.trim(); saveState(); renderMemBook(body, ch); } })],
+      ["编辑签名", () => memInputDialog("编辑签名", ch.memSign || "", v => { ch.memSign = v; saveState(); renderMemBook(body, ch); }, true)],
       ["更换头像", () => { if (typeof memPickImage === "function") memPickImage(avKey, () => renderMemBook(body, ch)); else toast("点头像上的＋更换"); }],
       ["更换背景", () => { if (typeof memPickImage === "function") memPickImage("bg_membook", () => openMemoryBook()); else toast("换背景功能待接入"); }]
     ];
@@ -6489,7 +6530,7 @@ function renderMemBook(body, ch) {
   };
   const addBtn = el("button", "", "＋ 手写记忆");
   addBtn.style.cssText = "flex:1;height:36px;border:0.5px solid " + line + ";border-radius:11px;font-size:13.5px;font-weight:600;cursor:pointer;background:" + (night ? "#1c1c1e" : "#fff") + ";color:" + ink131 + ";box-shadow:0 1px 2px rgba(0,0,0,0.03);";
-  addBtn.onclick = () => inputDialog("新记忆", "", v => { if (v.trim()) { ch.memories.push({ id: uid(), text: v.trim(), checked: true, core: false, cat: cats[0] }); saveState(); renderMemBook(body, ch); } }, true);
+  addBtn.onclick = () => memInputDialog("新记忆", "", v => { if (v.trim()) { ch.memories.push({ id: uid(), text: v.trim(), checked: true, core: false, cat: cats[0] }); saveState(); renderMemBook(body, ch); } }, true);
   actions.appendChild(sumBtn); actions.appendChild(addBtn); body.appendChild(actions);
 
   /* 提醒总结 */
@@ -6562,7 +6603,7 @@ function renderMemBook(body, ch) {
       const l = el("span", "", label); const ic = el("span", ""); ic.style.cssText = "display:flex;align-items:center;opacity:0.85;"; ic.innerHTML = svg;
       r.appendChild(l); r.appendChild(ic); r.onclick = () => { back.remove(); fn(); }; menu.appendChild(r); return r;
     };
-    addRow("编辑", penSVG(mInk), () => inputDialog("编辑记忆", m.text, v => { if (v.trim()) { m.text = v.trim(); saveState(); renderMemBook(body, ch); } }, true));
+    addRow("编辑", penSVG(mInk), () => memInputDialog("编辑记忆", m.text, v => { if (v.trim()) { m.text = v.trim(); saveState(); renderMemBook(body, ch); } }, true));
     const hd = el("div", "", "移动到分类"); hd.style.cssText = "padding:11px 18px 5px;font-size:11px;color:" + (night ? "#8a8a8e" : "#9a9a9a") + ";"; menu.appendChild(hd);
     cats.forEach(cat => { const cur = (m.cat || cats[0]) === cat; addRow(cat, cur ? checkSVG(B.bg) : "", () => { m.cat = cat; saveState(); renderMemBook(body, ch); }); });
     addRow(m.core ? "取消核心" : "设为核心", heart(m.core, 15, m.core ? B.bg : mInk), () => { m.core = !m.core; if (m.core) m.checked = true; saveState(); renderMemBook(body, ch); });
