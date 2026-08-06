@@ -257,10 +257,14 @@ function openDB() {
   });
 }
 
-function putImg(key, blob) {
+async function putImg(key, data) {
+  if (data instanceof File && data.type && data.type.indexOf("image/") === 0) {
+    try { data = await compressForStore(data); }
+    catch (e) { /* 压缩失败就存原图，别让上传彻底失败 */ }
+  }
   return new Promise((resolve, reject) => {
     const tx = DB.transaction("imgs", "readwrite");
-    tx.objectStore("imgs").put(blob, key);
+    tx.objectStore("imgs").put(data, key);
     tx.oncomplete = resolve;
     tx.onerror = () => reject(tx.error);
   });
@@ -455,9 +459,10 @@ async function applyBg() {
 }
 
 /* ---------- 图片压缩 ---------- */
-function compressImage(file, maxSide, quality) {
+function compressImage(file, maxSide, quality, type) {
   maxSide = maxSide || 1024;
   quality = quality || 0.8;
+  type = type || "image/jpeg";
   return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -473,11 +478,19 @@ function compressImage(file, maxSide, quality) {
       canvas.height = h;
       canvas.getContext("2d").drawImage(img, 0, 0, w, h);
       URL.revokeObjectURL(url);
-      resolve(canvas.toDataURL("image/jpeg", quality));
+      resolve(canvas.toDataURL(type, quality));
     };
     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("图片读取失败")); };
     img.src = url;
   });
+}
+
+/* ---------- 存图前统一压缩：PNG 保透明，其它转 JPEG，输出 Blob ---------- */
+async function compressForStore(file) {
+  const isPng = file.type === "image/png";
+  const dataUrl = await compressImage(file, isPng ? 640 : 1280, 0.85, isPng ? "image/png" : "image/jpeg");
+  const res = await fetch(dataUrl);
+  return await res.blob();
 }
 
 /* ---------- 字体表 ---------- */
