@@ -2562,6 +2562,7 @@ function newRole() {
 }
 
 /* ---------- 角色编辑器 ---------- */
+/* ---------- 角色编辑器 ---------- */
 function openCharEditor(r) {
   const old = document.getElementById("char-editor");
   if (old) old.remove();
@@ -2590,62 +2591,66 @@ function openCharEditor(r) {
     const n = document.createElement(multiline ? "textarea" : "input");
     n.className = multiline ? "form-textarea" : "form-input";
     n.value = val || "";
-    if (multiline) n.style.minHeight = "200px";
     body.appendChild(n);
     return n;
   }
 
+  function avatarItem(kind, labelText) {
+    const item = el("div", "char-av-item");
+    const wrap = el("div", "char-av-wrap");
+    const prev = el("img", "avatar-preview");
+    const key = r.id + "_" + kind;
+    getImg(key).then(blob => {
+      prev.src = blob ? URL.createObjectURL(blob) : (kind === "ai" ? AI_FALLBACK : USER_FALLBACK);
+    });
+    const badge = el("div", "char-av-badge", "＋");
+    const file = document.createElement("input");
+    file.type = "file";
+    file.accept = "image/*";
+    file.className = "char-file-hidden";
+    file.onchange = async (e) => {
+      const f = e.target.files[0];
+      if (!f) return;
+      await putImg(key, f);
+      clearUrlCache();
+      const b = await getImg(key);
+      prev.src = b ? URL.createObjectURL(b) : (kind === "ai" ? AI_FALLBACK : USER_FALLBACK);
+      renderAll();
+      toast("已上传");
+    };
+    wrap.onclick = () => file.click();
+    wrap.appendChild(prev);
+    wrap.appendChild(badge);
+    wrap.appendChild(file);
+    item.appendChild(wrap);
+    item.appendChild(el("div", "char-av-label", labelText));
+    return item;
+  }
+
+  const avGroup = el("div", "char-av-group");
+  avGroup.appendChild(avatarItem("ai", "AI头像"));
+  avGroup.appendChild(avatarItem("user", "我的头像"));
+  body.appendChild(avGroup);
+  const avTip = el("div", "", "传你自己找的图，透明底也认");
+  avTip.style.cssText = "font-size:11px;color:var(--text-faint);margin:8px 2px 4px;";
+  body.appendChild(avTip);
+
   label("角色名字");
   const nameIn = input(r.name);
-  label("人设提示词");
-  const pIn = input(r.systemPrompt, true);
   label("他的昵称");
   const aIn = input(r.aiName);
   label("你的昵称");
   const uIn = input(r.userName);
 
-  label("AI头像（传你自己找的图,透明底也认）");
-  const aiRow = el("div", "avatar-upload");
-  const aiPrev = el("img", "avatar-preview");
-  avatarSrc("ai").then(src => { aiPrev.src = src; });
-  const aiFile = document.createElement("input");
-  aiFile.type = "file";
-  aiFile.accept = "image/*";
-  aiFile.onchange = async (e) => {
-    const f = e.target.files[0];
-    if (!f) return;
-    await putImg(r.id + "_ai", f);
-    clearUrlCache();
-    aiPrev.src = await avatarSrc("ai");
-    renderAll();
-    toast("已上传");
-  };
-  aiRow.appendChild(aiPrev);
-  aiRow.appendChild(aiFile);
-  body.appendChild(aiRow);
-
-  label("我的头像");
-  const uRow = el("div", "avatar-upload");
-  const uPrev = el("img", "avatar-preview");
-  avatarSrc("user").then(src => { uPrev.src = src; });
-  const uFile = document.createElement("input");
-  uFile.type = "file";
-  uFile.accept = "image/*";
-  uFile.onchange = async (e) => {
-    const f = e.target.files[0];
-    if (!f) return;
-    await putImg(r.id + "_user", f);
-    clearUrlCache();
-    uPrev.src = await avatarSrc("user");
-    renderAll();
-    toast("已上传");
-  };
-  uRow.appendChild(uPrev);
-  uRow.appendChild(uFile);
-  body.appendChild(uRow);
+  label("人设提示词");
+  const pIn = input(r.systemPrompt, true);
+  pIn.style.minHeight = "240px";
+  const grow = () => { pIn.style.height = "auto"; pIn.style.height = pIn.scrollHeight + "px"; };
+  pIn.addEventListener("input", grow);
+  requestAnimationFrame(grow);
 
   const save = el("button", "btn", "保存");
-  save.style.cssText = "width:100%;margin-top:22px;";
+  save.style.cssText = "width:100%;margin-top:24px;";
   save.onclick = () => {
     r.name = nameIn.value.trim() || r.name;
     r.systemPrompt = pIn.value;
