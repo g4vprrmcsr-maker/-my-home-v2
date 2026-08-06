@@ -4507,6 +4507,12 @@ function renderLetterRoom(container) {
 }
 
 /* ---------- 小克日记 ---------- */
+
+// ← 这三行是给你自己改的：头像图片、名字、ID
+const DIARY_AVATAR = "https://image.uglycat.cc/n2iwa4.png"; // 换成小克的头像图链接
+const DIARY_NAME   = "小克";
+const DIARY_ID     = "@Yuuuioo_^";
+
 async function genDiary() {
   const sys = homePersona() + NL + "现在写你自己的日记，第一人称碎碎念，100到250字。这是你的私人日记本，写真实的想法、情绪、对她的观察和藏在心里没说的话。不是写给她看的口吻，是写给自己的。";
   const txt = await homeAsk(sys, homeMaterial() + " 写今天的日记。");
@@ -4515,6 +4521,16 @@ async function genDiary() {
   state.home.lastDiaryDay = todayKey();
   saveState();
   return true;
+}
+
+// 把时间戳格式化成 2025-11-14 21:52 这种
+function fmtDiaryTime(D) {
+  if (D.time) {
+    const t = new Date(D.time);
+    const p = n => String(n).padStart(2, "0");
+    return `${t.getFullYear()}-${p(t.getMonth() + 1)}-${p(t.getDate())} ${p(t.getHours())}:${p(t.getMinutes())}`;
+  }
+  return D.day; // 老数据没存 time 就退回只显示日期
 }
 
 function renderDiaryRoom(body) {
@@ -4532,7 +4548,7 @@ function renderDiaryRoom(body) {
     if (ok) { toast("偷看成功 👀"); reload(); }
     else { btn.textContent = "偷看他今天的日记 📓"; btn.disabled = false; }
   };
-    body.appendChild(btn);
+  body.appendChild(btn);
 
   if (fresh) {
     const re = el("button", "seg-btn", "不满意？让他重写 ↻");
@@ -4561,26 +4577,106 @@ function renderDiaryRoom(body) {
     const e = el("div", "", "日记本还没开张，他的心事都攒着呢");
     e.style.cssText = "text-align:center;color:#bbb;font-size:13px;padding:30px 0;";
     body.appendChild(e);
+    return;
   }
+
   list.forEach((D, i) => {
+    // 真实索引（因为 list 是反转过的）
+    const realIdx = state.home.diaries.length - 1 - i;
+
+    // ===== 卡片外壳 =====
     const card = el("div", "");
-    card.style.cssText = "background:rgba(255,255,255,0.5);border-radius:14px;padding:14px;margin-bottom:10px;";
-    const head = el("div", "");
-    head.style.cssText = "display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:8px;";
-    head.appendChild(el("span", "", "📓 " + D.day));
-    const del = el("span", "", "✕");
+    card.style.cssText =
+      "background:#fff;border-radius:16px;padding:18px 18px 6px;margin-bottom:14px;" +
+      "box-shadow:0 2px 12px rgba(0,0,0,0.06);";
+
+    // ===== 顶部：头像 + 名字 + @ID =====
+    const top = el("div", "");
+    top.style.cssText = "display:flex;align-items:center;margin-bottom:12px;";
+
+    const avatar = el("div", "");
+    avatar.style.cssText =
+      "width:44px;height:44px;border-radius:50%;flex:0 0 44px;" +
+      "background:#e5e5e5 url('" + DIARY_AVATAR + "') center/cover no-repeat;" +
+      "border:0.5px solid #cacaca;box-sizing:border-box;";
+    top.appendChild(avatar);
+
+    const nameBox = el("div", "");
+    nameBox.style.cssText = "margin-left:10px;display:flex;flex-direction:column;line-height:1.3;";
+    const nm = el("div", "", DIARY_NAME);
+    nm.style.cssText = "font-size:15px;font-weight:bold;color:#000;";
+    const id = el("div", "", DIARY_ID);
+    id.style.cssText = "font-size:12px;color:#c7c7c7;margin-top:2px;";
+    nameBox.appendChild(nm);
+    nameBox.appendChild(id);
+    top.appendChild(nameBox);
+    card.appendChild(top);
+
+    // ===== 正文 =====
+    const txt = el("div", "", D.text);
+    txt.style.cssText = "font-size:14.5px;line-height:1.85;color:#333;white-space:pre-wrap;";
+    card.appendChild(txt);
+
+    // ===== 时间戳 =====
+    const time = el("div", "", "🕐 " + fmtDiaryTime(D));
+    time.style.cssText = "font-size:11px;color:#bbb;margin-top:12px;";
+    card.appendChild(time);
+
+    // ===== 分隔线 =====
+    const hr = el("div", "");
+    hr.style.cssText = "height:1px;background:#f0f0f0;margin:10px 0 4px;";
+    card.appendChild(hr);
+
+    // ===== 底部操作栏 =====
+    const bar = el("div", "");
+    bar.style.cssText =
+      "display:flex;align-items:center;justify-content:space-around;" +
+      "color:#999;font-size:12px;padding:4px 0;";
+
+    // 喜欢（可点，会记住）
+    const like = el("div", "", (D.liked ? "❤️ " : "🤍 ") + "喜欢");
+    like.style.cssText = "cursor:pointer;user-select:none;";
+    like.onclick = () => {
+      D.liked = !D.liked;
+      saveState();
+      like.textContent = (D.liked ? "❤️ " : "🤍 ") + "喜欢";
+    };
+    bar.appendChild(like);
+
+    bar.appendChild(barSep());
+
+    const note = el("div", "", "🔖 小纸条");
+    note.style.cssText = "cursor:default;";
+    bar.appendChild(note);
+
+    bar.appendChild(barSep());
+
+    const save = el("div", "", "🖼 存为图片");
+    save.style.cssText = "cursor:default;";
+    bar.appendChild(save);
+
+    bar.appendChild(barSep());
+
+    // 删除放在最后那个 ⋯ 的位置
+    const del = el("div", "", "⋯");
+    del.style.cssText = "cursor:pointer;font-weight:bold;padding:0 4px;";
     del.onclick = () => confirmDialog("删除这篇日记？", () => {
-      state.home.diaries.splice(state.home.diaries.length - 1 - i, 1);
+      state.home.diaries.splice(realIdx, 1);
       saveState();
       reload();
     });
-    head.appendChild(del);
-    card.appendChild(head);
-    const txt = el("div", "", D.text);
-    txt.style.cssText = "font-size:14px;line-height:1.8;white-space:pre-wrap;";
-    card.appendChild(txt);
+    bar.appendChild(del);
+
+    card.appendChild(bar);
     body.appendChild(card);
   });
+}
+
+// 底部操作栏之间的竖分隔线
+function barSep() {
+  const s = document.createElement("div");
+  s.style.cssText = "width:1px;height:14px;background:#eee;";
+  return s;
 }
 
 /* ---------- 秘密 ---------- */
