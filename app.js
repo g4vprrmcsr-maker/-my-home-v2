@@ -24,7 +24,7 @@ function uid() {
 function defaultSettings() {
   const provId = uid();
   return {
-    providers: [{ id: provId, name: "默认供应商", baseURL: "", apiKey: "", models: [], model: "" }],
+     providers: [{ id: provId, name: "默认供应商", baseURL: "", apiKey: "", models: [], model: "", picks: [] }],
     currentProviderId: provId,
     temperature: 1,
     contextCount: 20,
@@ -2186,7 +2186,7 @@ function renderProviderBar() {
 function newProvider() {
   inputDialog("供应商名字", "", v => {
     if (!v.trim()) return;
-    const p = { id: uid(), name: v.trim(), baseURL: "", apiKey: "", models: [], model: "" };
+        const p = { id: uid(), name: v.trim(), baseURL: "", apiKey: "", models: [], model: "", picks: [] };
     state.settings.providers.push(p);
     state.settings.currentProviderId = p.id;
     saveState();
@@ -2230,8 +2230,10 @@ async function fetchModels() {
 
 function renderModelSelect() {
   const sel = $("#set-model");
+  if (sel) sel.style.display = "none";
+
   let search = document.getElementById("model-search");
-    if (!search) {
+  if (!search) {
     search = document.createElement("input");
     search.id = "model-search";
     search.type = "text";
@@ -2240,33 +2242,58 @@ function renderModelSelect() {
     sel.parentNode.insertBefore(search, sel);
     search.addEventListener("input", () => drawModelOptions(search.value));
   }
+
+  let box = document.getElementById("model-pick-list");
+  if (!box) {
+    box = document.createElement("div");
+    box.id = "model-pick-list";
+    box.style.cssText = "max-height:300px;overflow-y:auto;border:1px solid var(--line);border-radius:12px;";
+    sel.parentNode.insertBefore(box, sel.nextSibling);
+  }
   drawModelOptions(search.value);
 }
 
 function drawModelOptions(filter) {
   const p = curProvider();
-  const sel = $("#set-model");
+  if (!p.picks) p.picks = [];
+  const box = document.getElementById("model-pick-list");
+  if (!box) return;
   const f = (filter || "").trim().toLowerCase();
   const arr = f ? p.models.filter(id => id.toLowerCase().indexOf(f) >= 0) : p.models;
-  sel.innerHTML = "";
+  box.innerHTML = "";
   if (!arr.length) {
-    const o = document.createElement("option");
-    o.textContent = "没找到匹配的模型";
-    sel.appendChild(o);
+    const e = el("div", "", p.models.length ? "没找到匹配的模型" : "先点上面「拉取模型列表」");
+    e.style.cssText = "padding:12px;color:#aaa;font-size:13px;";
+    box.appendChild(e);
     return;
   }
   arr.forEach(id => {
-    const o = document.createElement("option");
-    o.value = id;
-    o.textContent = id;
-    if (id === p.model) o.selected = true;
-    sel.appendChild(o);
+    const picked = p.picks.includes(id);
+    const row = el("div", "");
+    row.style.cssText = "display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);";
+
+    const name = el("div", "", id);
+    name.style.cssText = "flex:1;min-width:0;font-size:14px;word-break:break-all;" + (id === p.model ? "font-weight:600;" : "");
+    name.onclick = () => {
+      p.model = id;
+      saveState();
+      renderModelBtn();
+      drawModelOptions(filter);
+    };
+
+    const tog = el("button", "", picked ? "✓ 常用" : "＋ 加入");
+    tog.style.cssText = "border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12px;white-space:nowrap;cursor:pointer;background:" + (picked ? "#111" : "transparent") + ";color:" + (picked ? "#fff" : "var(--text-main)") + ";";
+    tog.onclick = (e) => {
+      e.stopPropagation();
+      p.picks = picked ? p.picks.filter(x => x !== id) : p.picks.concat(id);
+      saveState();
+      drawModelOptions(filter);
+    };
+
+    row.appendChild(name);
+    row.appendChild(tog);
+    box.appendChild(row);
   });
-  sel.onchange = () => {
-    p.model = sel.value;
-    saveState();
-    renderModelBtn();
-  };
 }
 
 function renderModelBtn() {
@@ -2279,13 +2306,20 @@ function toggleModelPopup() {
     pop.classList.remove("show");
     return;
   }
-  const p = curProvider();
-  if (!p.models.length) { toast("先去设置里拉取模型列表"); return; }
-  pop.innerHTML = "";
 
+  const groups = state.settings.providers
+    .map(pv => ({ pv: pv, picks: (pv.picks || []).slice() }))
+    .filter(g => g.picks.length);
+
+  if (!groups.length) {
+    toast("先在设置里把要用的模型「＋加入」常用");
+    return;
+  }
+
+  pop.innerHTML = "";
   const search = document.createElement("input");
-  search.placeholder = "搜索模型名...";
-  search.style.cssText = "width:100%;box-sizing:border-box;border:none;border-bottom:1px solid rgba(0,0,0,0.08);padding:10px 14px;font-size:14px;outline:none;background:transparent;position:sticky;top:0;";
+  search.placeholder = "搜索模型或供应商...";
+  search.style.cssText = "width:100%;box-sizing:border-box;border:none;border-bottom:1px solid rgba(0,0,0,0.08);padding:10px 14px;font-size:14px;outline:none;background:transparent;position:sticky;top:0;z-index:2;";
   pop.appendChild(search);
 
   const listWrap = document.createElement("div");
@@ -2294,27 +2328,41 @@ function toggleModelPopup() {
   function draw(filter) {
     listWrap.innerHTML = "";
     const f = (filter || "").trim().toLowerCase();
-    const arr = f ? p.models.filter(id => id.toLowerCase().indexOf(f) >= 0) : p.models;
-    if (!arr.length) {
-      const e = el("div", "model-item", "没找到匹配的模型");
+    let any = false;
+    groups.forEach(g => {
+      const provMatch = g.pv.name.toLowerCase().indexOf(f) >= 0;
+      const models = (!f || provMatch) ? g.picks : g.picks.filter(id => id.toLowerCase().indexOf(f) >= 0);
+      if (!models.length) return;
+      any = true;
+
+      const head = el("div", "", g.pv.name);
+      head.style.cssText = "padding:10px 14px 4px;font-size:12px;color:var(--text-faint);font-weight:600;";
+      listWrap.appendChild(head);
+
+      models.forEach(id => {
+        const isCur = g.pv.id === state.settings.currentProviderId && id === g.pv.model;
+        const div = el("div", "model-item" + (isCur ? " selected" : ""), id);
+        div.onclick = () => {
+          state.settings.currentProviderId = g.pv.id;
+          g.pv.model = id;
+          saveState();
+          renderModelBtn();
+          renderProviderBar();
+          if (document.getElementById("set-baseurl")) fillProviderForm();
+          pop.classList.remove("show");
+          toast("已切到 " + g.pv.name + " · " + id);
+        };
+        listWrap.appendChild(div);
+      });
+    });
+    if (!any) {
+      const e = el("div", "model-item", "没找到匹配的");
       e.style.color = "#aaa";
       listWrap.appendChild(e);
-      return;
     }
-    arr.forEach(id => {
-      const div = el("div", "model-item" + (id === p.model ? " selected" : ""), id);
-      div.onclick = () => {
-        p.model = id;
-        saveState();
-        renderModelBtn();
-        pop.classList.remove("show");
-      };
-      listWrap.appendChild(div);
-    });
   }
   search.addEventListener("input", () => draw(search.value));
   draw("");
-
   pop.classList.add("show");
 }
 
