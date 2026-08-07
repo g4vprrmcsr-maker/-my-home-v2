@@ -495,14 +495,13 @@ async function compressForStore(file) {
 
 /* ---------- 字体表 ---------- */
 const FONT_LIST = {
-  siyuan: "'Source Han Sans SC VF',system-ui,'PingFang SC',sans-serif",
-  misans: "'MiSans',system-ui,'PingFang SC',sans-serif",
   system: '-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif',
   round: 'ui-rounded,"SF Pro Rounded","PingFang SC",sans-serif',
   song: '"Songti SC","STSong",Georgia,serif',
   kai: '"Kaiti SC","STKaiti",serif',
   hei: '"PingFang SC","Heiti SC",sans-serif',
   mono: 'ui-monospace,Menlo,Consolas,monospace',
+  siyuan: "'Source Han Sans SC VF',system-ui,'PingFang SC',sans-serif",
   kaiti: "'Kaiti SC','STKaiti','KaiTi',serif",
   songti2: "'Songti SC','STSong',serif",
   georgia2: "Georgia,'Songti SC',serif",
@@ -510,9 +509,10 @@ const FONT_LIST = {
   snell: "'Snell Roundhand','Kaiti SC',cursive",
   marker: "'Marker Felt','Kaiti SC',sans-serif"
 };
+
 const FONT_NAMES = {
-  siyuan: "思源黑体", misans: "小米 MiSans",
   system: "系统", round: "圆体", song: "宋体", kai: "楷体", hei: "黑体", mono: "等宽",
+  siyuan: "思源黑体",
   kaiti: "楷体（手写感）", songti2: "宋体（书卷感）", georgia2: "Georgia（数字优雅）",
   palatino: "Palatino（衬线）", snell: "Snell（英文花体）", marker: "Marker（手账感）"
 };
@@ -958,14 +958,25 @@ function applyChatTypo() {
     document.head.appendChild(s5);
   }
   const st = state.settings;
+
+  // 可变字体(思源)走 wght 轴 + 关假撑，边缘才实；其它字体照常用 font-weight
+  const wght = (fontKey, w) => {
+    if (fontKey === "siyuan") {
+      return "font-synthesis:none;font-variation-settings:'wght' " + w +
+             ";font-weight:" + w + ";-webkit-font-smoothing:antialiased;";
+    }
+    return "font-weight:" + w + ";";
+  };
+
   const L = [];
-  L.push(".msg-bubble{letter-spacing:" + st.chatSpacing + "px;line-height:" + st.chatLineH + ";font-weight:" + st.chatWeight + ";}");
-  L.push("#sidebar,.menu-item,.session-item{letter-spacing:" + st.uiSpacing + "px;font-weight:" + st.uiWeight + ";font-size:" + (st.uiFs || 14) + "px;}");
+  L.push(".msg-bubble{letter-spacing:" + st.chatSpacing + "px;line-height:" + st.chatLineH + ";" + wght(st.chatFont, st.chatWeight) + "}");
+  L.push("#sidebar,.menu-item,.session-item{letter-spacing:" + st.uiSpacing + "px;font-size:" + (st.uiFs || 14) + "px;" + wght(st.uiFont, st.uiWeight) + "}");
   L.push(".menu-item,.session-item{line-height:" + st.uiLineH + ";}");
   if (st.aiTypoOn) {
     const f = FONT_LIST[st.aiFont2] || FONT_LIST.system;
-    L.push(".bub-ai{font-family:" + f + ";font-size:" + st.aiSize2 + "px;font-weight:" + st.aiWeight2 + ";letter-spacing:" + st.aiSpacing2 + "px;line-height:" + st.aiLineH2 + ";}");
+    L.push(".bub-ai{font-family:" + f + ";font-size:" + st.aiSize2 + "px;letter-spacing:" + st.aiSpacing2 + "px;line-height:" + st.aiLineH2 + ";" + wght(st.aiFont2, st.aiWeight2) + "}");
   }
+
   s5.textContent = L.join(NL);
 }
 
