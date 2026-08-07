@@ -1673,9 +1673,9 @@ body:not(.gpt-ui):not(.dark) #input-box {
   border: 1px solid rgba(255, 255, 255, 0.55);
   border-radius: 26px;
   padding: 10px 14px 8px;
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.045),
-    0 20px 50px rgba(0, 0, 0, 0.05);
+    box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.03),
+    0 8px 20px rgba(0, 0, 0, 0.035);
 }
 
 /* 占位/输入文字往下压一点,不贴顶;占位色 #7B7974 */
@@ -1696,10 +1696,10 @@ body:not(.gpt-ui):not(.dark) #attach-btn {
 }
 body:not(.gpt-ui):not(.dark) #model-btn {
   background: #F0EFEB;
-  border-radius: 999px;
+  border-radius: 14px;
   padding: 8px 13px;
   font-size: 13px;
-  max-width: 112px;
+  max-width: 150px;
   box-shadow: none;
 }
 body:not(.gpt-ui):not(.dark) #mini-menu-btn {
@@ -1709,12 +1709,11 @@ body:not(.gpt-ui):not(.dark) #mini-menu-btn {
   background: #F0EFEB;
   color: var(--text-sub);
   font-size: 18px;
+  box-shadow: none;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
-/* 发送键:改色 #131313,稍微大一点点 */
 body:not(.gpt-ui):not(.dark) #send-btn {
   width: 34px;
   height: 34px;
