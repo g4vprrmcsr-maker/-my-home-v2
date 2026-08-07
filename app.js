@@ -2354,7 +2354,7 @@ function toggleModelPopup() {
   pop.innerHTML = "";
   const search = document.createElement("input");
   search.placeholder = "搜索模型或供应商...";
-  search.style.cssText = "width:100%;box-sizing:border-box;border:none;border-bottom:1px solid rgba(0,0,0,0.08);padding:10px 14px;font-size:14px;outline:none;background:transparent;position:sticky;top:0;z-index:2;";
+  search.style.cssText = "width:100%;box-sizing:border-box;border:none;border-bottom:1px solid rgba(0,0,0,0.08);padding:12px 14px;font-size:14px;outline:none;background:var(--bg,#fff);color:var(--text-main);position:sticky;top:0;z-index:5;";
   pop.appendChild(search);
 
   const listWrap = document.createElement("div");
