@@ -495,6 +495,8 @@ async function compressForStore(file) {
 
 /* ---------- 字体表 ---------- */
 const FONT_LIST = {
+  siyuan: "'Source Han Sans SC VF',system-ui,'PingFang SC',sans-serif",
+  misans: "'MiSans',system-ui,'PingFang SC',sans-serif",
   system: '-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif',
   round: 'ui-rounded,"SF Pro Rounded","PingFang SC",sans-serif',
   song: '"Songti SC","STSong",Georgia,serif',
@@ -509,6 +511,7 @@ const FONT_LIST = {
   marker: "'Marker Felt','Kaiti SC',sans-serif"
 };
 const FONT_NAMES = {
+  siyuan: "思源黑体", misans: "小米 MiSans",
   system: "系统", round: "圆体", song: "宋体", kai: "楷体", hei: "黑体", mono: "等宽",
   kaiti: "楷体（手写感）", songti2: "宋体（书卷感）", georgia2: "Georgia（数字优雅）",
   palatino: "Palatino（衬线）", snell: "Snell（英文花体）", marker: "Marker（手账感）"
