@@ -1688,11 +1688,11 @@ body:not(.gpt-ui):not(.dark) #input-text::placeholder {
 
 /* 内部按钮:实底 #F0EFEB,平的无阴影,稍微大一点点 */
 body:not(.gpt-ui):not(.dark) #attach-btn {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   background: #F0EFEB;
   color: var(--text-sub);
-  font-size: 20px;
+  font-size: 17px;
   box-shadow: none;
 }
 body:not(.gpt-ui):not(.dark) #model-btn {
@@ -1706,9 +1706,8 @@ body:not(.gpt-ui):not(.dark) #model-btn {
 body:not(.gpt-ui):not(.dark) #mini-menu-btn {
   width: 30px;
   height: 28px;
-  border-radius: 50%;
   background: transparent;
-  color: var(--text-sub);
+  color: var(--text-faint);
   font-size: 17px;
   box-shadow: none;
   display: flex;
@@ -1716,8 +1715,8 @@ body:not(.gpt-ui):not(.dark) #mini-menu-btn {
   justify-content: center;
 }
 body:not(.gpt-ui):not(.dark) #send-btn {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   background: #131313;
   color: #ffffff;
 }
