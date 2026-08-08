@@ -1665,45 +1665,30 @@ body:not(.gpt-ui) #topbar {
   padding-right: 16px;
 }
 
-/* 输入框：保持与页面同色，只通过高光边缘和多层柔影建立悬浮感 */
-body:not(.gpt-ui):not(.dark) #input-box {
-  position: relative;
-  background: #F8F8F8;
+我现在的顶部状态栏是多少尺寸 什么px 我要加大2px 怎么改
 
+/* 输入框:实色 #F9F9F7,半透明白软边,更足的均匀柔影(不靠加深),圆角28 */
+body:not(.gpt-ui):not(.dark) #input-box {
+  background: #FBFBF9;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-
-  border: 1px solid rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.55);
   border-radius: 26px;
   padding: 10px 14px 8px;
-
-  box-shadow:
-    /* 上沿内高光 */
-    inset 0 1px 0 rgba(255, 255, 255, 0.88),
-
-    /* 底部极淡的内侧压暗，避免像纯白描边框 */
-    inset 0 -1px 0 rgba(0, 0, 0, 0.012),
-
-    /* 贴近边缘的接触阴影 */
-    0 1px 2px rgba(0, 0, 0, 0.018),
-
-    /* 主要悬浮阴影 */
-    0 10px 26px rgba(0, 0, 0, 0.045),
-
-    /* 更大范围的环境阴影 */
-    0 24px 56px rgba(0, 0, 0, 0.028);
+    box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.03),
+    0 8px 20px rgba(0, 0, 0, 0.035);
 }
 
-/* 占位和输入文字 */
+/* 占位/输入文字往下压一点,不贴顶;占位色 #7B7974 */
 body:not(.gpt-ui):not(.dark) #input-text {
   padding-top: 5px;
 }
-
 body:not(.gpt-ui):not(.dark) #input-text::placeholder {
   color: #7B7974;
 }
 
-/* 内部按钮 */
+/* 内部按钮:实底 #F0EFEB,平的无阴影,稍微大一点点 */
 body:not(.gpt-ui):not(.dark) #attach-btn {
   width: 28px;
   height: 28px;
@@ -1712,7 +1697,6 @@ body:not(.gpt-ui):not(.dark) #attach-btn {
   font-size: 17px;
   box-shadow: none;
 }
-
 body:not(.gpt-ui):not(.dark) #model-btn {
   background: var(--press);
   border-radius: 12px;
@@ -1721,58 +1705,34 @@ body:not(.gpt-ui):not(.dark) #model-btn {
   max-width: 150px;
   box-shadow: none;
 }
-
 body:not(.gpt-ui):not(.dark) #mini-menu-btn {
   width: 30px;
   height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
   background: transparent;
   color: var(--text-faint);
   font-size: 17px;
   box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-
 body:not(.gpt-ui):not(.dark) #send-btn {
   width: 32px;
   height: 32px;
   background: #131313;
   color: #ffffff;
-
-  /* 官方黑色按钮也有很轻的边缘处理 */
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
-/* 顶栏圆钮和标题胶囊 */
+/* 顶栏圆钮 + 标题胶囊:实色 #FBFBF9,半透明白软边,阴影调淡不发黑,保留悬浮 */
 body:not(.gpt-ui):not(.dark) #topbar .topbar-btn,
 body:not(.gpt-ui):not(.dark) #topbar-title {
-  background: #F8F8F8;
-
+  background: #FBFBF9;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-
-  border: 1px solid rgba(255, 255, 255, 0.76);
-
+  border: 1px solid rgba(255, 255, 255, 0.55);
   box-shadow:
-    /* 顶部受光 */
-    inset 0 1px 0 rgba(255, 255, 255, 0.90),
-
-    /* 下沿略微压暗，增强轮廓但不形成灰边 */
-    inset 0 -1px 0 rgba(0, 0, 0, 0.014),
-
-    /* 接触阴影 */
-    0 1px 2px rgba(0, 0, 0, 0.018),
-
-    /* 官方顶部按钮比输入框略悬浮 */
-    0 8px 22px rgba(0, 0, 0, 0.052),
-
-    /* 外围软影 */
-    0 20px 42px rgba(0, 0, 0, 0.028);
+    0 2px 8px rgba(0, 0, 0, 0.03),
+    0 8px 20px rgba(0, 0, 0, 0.035);
 }
 
 /* 顶栏加号/三条杠图标 + 标题文字:改色 #383835 */
@@ -1937,3 +1897,16 @@ body.gpt-ui #send-btn {
 }
 .char-av-label { font-size: 12px; color: var(--text-sub); }
 .char-file-hidden { display: none; }
+
+/* ===== 圆形按钮加大 2px：40 → 42px ===== */
+body:not(.gpt-ui):not(.dark) #topbar .topbar-btn {
+  width: 42px;
+  height: 42px;
+}
+
+/* ===== 标题胶囊加大 2px：40 → 42px ===== */
+body:not(.gpt-ui):not(.dark) #topbar-title {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
