@@ -1898,15 +1898,3 @@ body.gpt-ui #send-btn {
 .char-av-label { font-size: 12px; color: var(--text-sub); }
 .char-file-hidden { display: none; }
 
-/* ===== 圆形按钮加大 2px：40 → 42px ===== */
-body:not(.gpt-ui):not(.dark) #topbar .topbar-btn {
-  width: 42px;
-  height: 42px;
-}
-
-/* ===== 标题胶囊加大 2px：40 → 42px ===== */
-body:not(.gpt-ui):not(.dark) #topbar-title {
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
