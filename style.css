@@ -1690,13 +1690,13 @@ body:not(.gpt-ui):not(.dark) #input-text::placeholder {
 body:not(.gpt-ui):not(.dark) #attach-btn {
   width: 28px;
   height: 28px;
-  background: #F0EFEB;
+  background: var(--press);
   color: var(--text-sub);
   font-size: 17px;
   box-shadow: none;
 }
 body:not(.gpt-ui):not(.dark) #model-btn {
-  background: #F0EFEB;
+  background: var(--press);
   border-radius: 12px;
   padding: 5px 10px;
   font-size: 12px;
