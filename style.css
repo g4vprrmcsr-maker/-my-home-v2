@@ -254,11 +254,6 @@ body.dark #topbar-title {
   box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 3px 12px rgba(0,0,0,0.2);
 }
 
-body.skin-liquid #input-box {
-  background: rgba(255, 255, 255, 0.28);
-  box-shadow: inset 0 1px 1px rgba(255,255,255,0.55), 0 4px 16px rgba(0,0,0,0.06);
-}
-
 #chat-area {
   flex: 1;
   overflow-y: auto;
@@ -463,9 +458,7 @@ body.multi-mode .msg-check {
   z-index: 1;
   min-height: 42px;
 }
-body.gpt-ui #input-text {
-  min-height: auto;
-}
+
 .input-toolbar {
   display: flex;
   align-items: center;
@@ -1462,117 +1455,55 @@ body.dark .tgl { background: rgba(120, 120, 128, 0.4); }
   flex-shrink: 0;
 }
 .ic-tile svg { width: 17px; height: 17px; }
-/* ========== 仿ChatGPT聊天界面 ========== */
-body.gpt-ui #topbar {
-  background: transparent !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  box-shadow: none !important;
-  border-bottom: none !important;
+/* ==========================================================
+   ①通用结构（两种模式共用的位置/滚动，跟长相无关，别动这里调颜色）
+   ========================================================== */
+#input-area {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
 }
-body.gpt-ui .topbar-btn {
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(20px) saturate(1.8);
-  -webkit-backdrop-filter: blur(20px) saturate(1.8);
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 3px 12px rgba(0,0,0,0.06);
+#chat-area {
+  padding-top: calc(env(safe-area-inset-top) + 64px);
+  padding-bottom: var(--input-reserve, 140px);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 calc(env(safe-area-inset-top) + 64px),
+    #000 var(--chat-fade-start, 70%),
+    transparent 100%
+  );
 }
-body.dark.gpt-ui .topbar-btn {
-  background: rgba(60, 60, 60, 0.4);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 3px 12px rgba(0,0,0,0.2);
-}
-body.gpt-ui #topbar-title {
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(20px) saturate(1.8);
-  -webkit-backdrop-filter: blur(20px) saturate(1.8);
-  border-radius: 999px;
-  padding: 10px 20px;
-  font-size: var(--title-fs, 15px);
-  font-weight: var(--title-fw, 600);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 3px 12px rgba(0,0,0,0.06);
-  margin-left: 10px;
-  position: static;
-}
-#topbar.title-centered #topbar-title {
-  margin-left: 0;
-}
-#topbar.title-centered {
-  gap: 0;
-}
+::-webkit-scrollbar { width: 0; height: 0; }
+
+/* 标题居中布局（JS 加 title-centered 时用） */
+#topbar.title-centered { gap: 0; }
+#topbar.title-centered #topbar-title { margin-left: 0; }
 #topbar.title-centered .topbar-btn:last-child {
   margin-left: 0;
   position: absolute;
   right: 12px;
 }
-body.gpt-ui #topbar {
-  justify-content: flex-start;
-  gap: 10px;
-}
-body.gpt-ui .topbar-btn:last-child {
-  margin-left: auto;
-}
-body.dark.gpt-ui #topbar-title {
-  background: rgba(60, 60, 60, 0.4);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 3px 12px rgba(0,0,0,0.2);
-}
-body.gpt-ui #input-box {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  border-radius: 28px;
-  padding: 8px 8px 8px 6px;
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(16px) saturate(1.5);
-  -webkit-backdrop-filter: blur(16px) saturate(1.5);
-  box-shadow: 0 4px 18px rgba(0,0,0,0.06);
-}
-body.dark.gpt-ui #input-box {
-  background: rgba(60, 60, 60, 0.45);
-  box-shadow: 0 4px 18px rgba(0,0,0,0.2);
-}
 
-body.gpt-ui #attach-btn {
-  order: 0;
-}
-body.gpt-ui #input-text {
-  order: 1;
-  flex: 1;
-}
-body.gpt-ui #model-btn {
-  order: 2;
-}
-body.gpt-ui #mini-menu-btn {
-  order: 3;
-}
-body.gpt-ui #send-btn {
-  order: 4;
-}
-body.gpt-ui .input-toolbar {
-  display: contents;
-}
-body.gpt-ui #attach-btn {
-  background: transparent;
-  font-size: 20px;
-}
-body.gpt-ui #model-btn {
-  max-width: 90px;
-}
-body.gpt-ui #send-btn {
-  width: 34px;
-  height: 34px;
-  background: #111;
-  color: #fff;
-}
-body.dark.gpt-ui #send-btn {
-  background: #eaeaea;
-  color: #111;
-}
-body.gpt-ui .toolbar-spacer {
-  display: none;
-}
+/* 图标切换：经典显示三条杠，简约显示 GPT 图标 */
+.menu-icon-classic { display: block; }
+.menu-icon-gpt { display: none; }
+body.gpt-ui .menu-icon-classic { display: none; }
+body.gpt-ui .menu-icon-gpt { display: block; }
+#attach-btn svg { display: block; }
 
+/* 按钮点击层级/可点（两种模式共用） */
+#send-btn, #attach-btn, #model-btn, #mini-menu-btn {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+}
+body.gpt-ui #send-btn,
+body.gpt-ui #attach-btn,
+body.gpt-ui #model-btn,
+body.gpt-ui #mini-menu-btn { z-index: 10; }
 body.gpt-ui #input-text {
   touch-action: manipulation;
   -webkit-user-select: text;
@@ -1583,148 +1514,26 @@ body.gpt-ui #send-btn {
   touch-action: manipulation;
 }
 
-::-webkit-scrollbar { width: 0; height: 0; }
 
-#attach-btn svg {
-  display: block;
-}
-body.gpt-ui #attach-btn {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-#send-btn,
-#attach-btn,
-#model-btn,
-#mini-menu-btn {
-  position: relative;
-  z-index: 2;
-  pointer-events: auto;
-}
-body.gpt-ui #send-btn,
-body.gpt-ui #attach-btn,
-body.gpt-ui #model-btn,
-body.gpt-ui #mini-menu-btn {
-  position: relative;
-  z-index: 10;
-}
-.menu-icon-classic { display: block; }
-.menu-icon-gpt { display: none; }
-body.gpt-ui .menu-icon-classic { display: none; }
-body.gpt-ui .menu-icon-gpt { display: block; }
-#input-area {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 20;
-}
+/* ==========================================================
+   ②经典模式（实色）——只在 官方/默认皮肤 + 白天 生效
+   要调经典的实色外观，只改这一整块
+   ========================================================== */
 
-#chat-area {
-  padding-top: calc(env(safe-area-inset-top) + 64px);
-  padding-bottom: var(--input-reserve, 140px);
-
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    #000 calc(env(safe-area-inset-top) + 64px),
-    #000 var(--chat-fade-start, 70%),
-    transparent 100%
-  );
+/* 顶栏两侧留 16px 气口 */
+body:not(.gpt-ui) #topbar {
+  padding-left: 16px;
+  padding-right: 16px;
 }
-
-/* 输入栏透明度和柔和悬浮阴影：经典模式与 GPT 模式共用 */
-body #input-box,
-body.skin-liquid #input-box,
-body.gpt-ui #input-box {
-  background: var(--bg-input);
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.035),
-    0 8px 22px rgba(0, 0, 0, 0.065);
-}
-
-body.dark #input-box,
-body.dark.gpt-ui #input-box {
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.10),
-    0 8px 22px rgba(0, 0, 0, 0.16);
-}
-/* ========== 经典模式:实色悬浮输入区 + 顶栏(不碰 GPT / 夜间) ========== */
-
-/* 输入区两侧 16px 气口 */
+/* 输入区两侧留 16px 气口 */
 body:not(.gpt-ui) #input-area {
   padding-left: 16px;
   padding-right: 16px;
 }
 
-/* 顶栏两侧 16px 气口 */
-body:not(.gpt-ui) #topbar {
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-/* 输入框:实色 #F9F9F7,半透明白软边,更足的均匀柔影(不靠加深),圆角28 */
-body:not(.gpt-ui):not(.dark) #input-box {
-  background: #FBFBF9;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  border-radius: 26px;
-  padding: 10px 14px 8px;
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.03),
-    0 12px 24px rgba(0, 0, 0, 0.04),
-    0 32px 64px rgba(0, 0, 0, 0.04);
-}
-
-/* 占位/输入文字往下压一点,不贴顶;占位色 #7B7974 */
-body:not(.gpt-ui):not(.dark) #input-text {
-  padding-top: 5px;
-}
-body:not(.gpt-ui):not(.dark) #input-text::placeholder {
-  color: #7B7974;
-}
-
-/* 内部按钮:实底 #F0EFEB,平的无阴影,稍微大一点点 */
-body:not(.gpt-ui):not(.dark) #attach-btn {
-  width: 28px;
-  height: 28px;
-  background: var(--press);
-  color: var(--text-sub);
-  font-size: 17px;
-  box-shadow: none;
-}
-body:not(.gpt-ui):not(.dark) #model-btn {
-  background: var(--press);
-  border-radius: 12px;
-  padding: 5px 10px;
-  font-size: 12px;
-  max-width: 150px;
-  box-shadow: none;
-}
-body:not(.gpt-ui):not(.dark) #mini-menu-btn {
-  width: 30px;
-  height: 28px;
-  background: transparent;
-  color: var(--text-faint);
-  font-size: 17px;
-  box-shadow: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-body:not(.gpt-ui):not(.dark) #send-btn {
-  width: 32px;
-  height: 32px;
-  background: #131313;
-  color: #ffffff;
-}
-
-/* 顶栏圆钮 + 标题胶囊:实色 #FBFBF9,半透明白软边,阴影调淡不发黑,保留悬浮 */
-body:not(.gpt-ui):not(.dark) #topbar .topbar-btn,
-body:not(.gpt-ui):not(.dark) #topbar-title {
+/* 顶栏圆钮 + 标题胶囊：实色 */
+body:not(.gpt-ui):not(.dark):not(.skin-liquid) #topbar .topbar-btn,
+body:not(.gpt-ui):not(.dark):not(.skin-liquid) #topbar-title {
   background: #FBFBF9;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -1732,81 +1541,67 @@ body:not(.gpt-ui):not(.dark) #topbar-title {
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.02),
     0 8px 16px rgba(0, 0, 0, 0.03);
-}
-
-/* 顶栏加号/三条杠图标 + 标题文字:改色 #383835 */
-body:not(.gpt-ui):not(.dark) #topbar .topbar-btn {
   color: #383835;
 }
-body:not(.gpt-ui):not(.dark) #topbar-title {
-  color: #383835;
-}
-/* 输入框白边加宽到 1.5px（顶栏按钮仍 1px 不动） */
-body:not(.gpt-ui):not(.dark) #input-box {
-  border-width: 1.6px;
-}
-
-/* 标题胶囊:降 2px 高度 + 向左靠近三条杠约 4px(≈0.1cm) */
-body:not(.gpt-ui):not(.dark) #topbar-title {
+/* 标题胶囊：降高 + 左移贴近三条杠 */
+body:not(.gpt-ui):not(.dark):not(.skin-liquid) #topbar-title {
   padding: 9px 20px;
   margin-left: 6px;
 }
-/* ========== GPT模式:输入框恢复成原版老经典布局与尺寸(其余不动) ========== */
 
-/* 盒子:回到竖排块状,圆角20,内边距10 12 8 */
+/* 输入框：实色 */
+body:not(.gpt-ui):not(.dark):not(.skin-liquid) #input-box {
+  background: #FBFBF9;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1.6px solid rgba(255, 255, 255, 0.55);
+  border-radius: 26px;
+  padding: 10px 14px 8px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.03),
+    0 12px 24px rgba(0, 0, 0, 0.04),
+    0 32px 64px rgba(0, 0, 0, 0.04);
+}
+body:not(.gpt-ui):not(.dark):not(.skin-liquid) #input-text { padding-top: 5px; }
+body:not(.gpt-ui):not(.dark):not(.skin-liquid) #input-text::placeholder { color: #7B7974; }
+/* 发送键：更深的黑 */
+body:not(.gpt-ui):not(.dark):not(.skin-liquid) #send-btn {
+  background: #131313;
+  color: #ffffff;
+}
+
+
+/* ==========================================================
+   ③简约模式 / GPT（磨砂）——要调简约的外观，只改这一整块
+   ========================================================== */
+
+/* 顶栏间距略大一点 */
+body.gpt-ui #topbar { gap: 10px; }
+
+/* 输入框：磨砂（竖排块状，圆角20） */
 body.gpt-ui #input-box {
   display: block;
+  background: var(--bg-input);
+  backdrop-filter: blur(16px) saturate(1.5);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
   border-radius: 20px;
   padding: 10px 12px 8px;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.035),
+    0 8px 22px rgba(0, 0, 0, 0.065);
 }
 
-/* 工具条:回到文字下方单独一行 */
-body.gpt-ui .input-toolbar {
-  display: flex;
-  align-items: center;
-  margin-top: 6px;
-  gap: 8px;
-}
-body.gpt-ui .toolbar-spacer {
-  display: block;
-  flex: 1;
-}
 
-/* 清掉GPT横排的order,恢复DOM自然顺序 */
-body.gpt-ui #input-text,
-body.gpt-ui #attach-btn,
-body.gpt-ui #model-btn,
-body.gpt-ui #mini-menu-btn,
-body.gpt-ui #send-btn {
-  order: 0;
+/* ==========================================================
+   ④夜间（磨砂·深色）——要调夜间只改这一整块
+   ========================================================== */
+body.dark #input-box {
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.10),
+    0 8px 22px rgba(0, 0, 0, 0.16);
 }
-
-/* 输入区:整行文字,高度42 */
-body.gpt-ui #input-text {
-  min-height: 42px;
-  flex: none;
-}
-
-/* 加号:经典28圆钮 */
-body.gpt-ui #attach-btn {
-  width: 28px;
-  height: 28px;
-  background: var(--press);
-  font-size: 17px;
-}
-
-/* 模型胶囊:经典宽度 */
-body.gpt-ui #model-btn {
-  max-width: 150px;
-}
-
-/* 发送键:经典32圆钮(图标已在JS改回↑) */
-body.gpt-ui #send-btn {
-  width: 32px;
-  height: 32px;
-  background: var(--btn-main);
-  color: var(--btn-main-text);
-}
+body.dark.gpt-ui #input-box { background: rgba(60, 60, 60, 0.45); }
+body.dark.gpt-ui #send-btn { background: #eaeaea; color: #111; }
 
 /* API Key 睁闭眼 */
 .input-eye-wrap { position: relative; }
