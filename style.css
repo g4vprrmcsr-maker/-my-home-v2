@@ -1636,7 +1636,6 @@ body.gpt-ui .menu-icon-gpt { display: block; }
 }
 
 /* 输入栏透明度和柔和悬浮阴影：经典模式与 GPT 模式共用 */
-body #input-box,
 body.skin-liquid #input-box,
 body.gpt-ui #input-box {
   background: var(--bg-input);
