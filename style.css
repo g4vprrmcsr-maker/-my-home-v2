@@ -1688,27 +1688,28 @@ body:not(.gpt-ui):not(.dark) #input-text::placeholder {
 
 /* 内部按钮:实底 #F0EFEB,平的无阴影,稍微大一点点 */
 body:not(.gpt-ui):not(.dark) #attach-btn {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   background: #F0EFEB;
   color: var(--text-sub);
+  font-size: 20px;
   box-shadow: none;
 }
 body:not(.gpt-ui):not(.dark) #model-btn {
   background: #F0EFEB;
-  border-radius: 14px;
-  padding: 8px 13px;
-  font-size: 13px;
+  border-radius: 12px;
+  padding: 5px 10px;
+  font-size: 12px;
   max-width: 150px;
   box-shadow: none;
 }
 body:not(.gpt-ui):not(.dark) #mini-menu-btn {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 28px;
   border-radius: 50%;
-  background: #F0EFEB;
+  background: transparent;
   color: var(--text-sub);
-  font-size: 18px;
+  font-size: 17px;
   box-shadow: none;
   display: flex;
   align-items: center;
