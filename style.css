@@ -1691,3 +1691,111 @@ body.dark.gpt-ui #send-btn { background: #eaeaea; color: #111; }
 }
 .char-av-label { font-size: 12px; color: var(--text-sub); }
 .char-file-hidden { display: none; }
+/* ==========================================================
+   Kelivo 皮肤（作用域 body.skin-kelivo，不影响其他皮肤/逻辑）
+   数值来自 Kelivo 源码：顶栏/消息/思维链/输入栏
+   ========================================================== */
+body.skin-kelivo{
+  --kv-primary:#4D5C92;--kv-on-primary:#fff;--kv-primary-container:#DCE1FF;
+  --kv-surface:#F7F7F7;--kv-on-surface:#202020;--kv-outline:rgba(0,0,0,.20);
+  --kv-card:#fff;
+  background:var(--kv-surface);
+}
+body.skin-kelivo.dark{
+  --kv-primary:#B6C4FF;--kv-on-primary:#1D2D61;--kv-primary-container:#354479;
+  --kv-surface:#121213;--kv-on-surface:#F9F9F9;--kv-outline:rgba(255,255,255,.10);
+  --kv-card:#1E1E20;
+}
+
+/* ---------- 顶栏：透明磨砂，去掉胶囊/圆钮底 ---------- */
+body.skin-kelivo #topbar{
+  padding:calc(env(safe-area-inset-top)) 4px 0!important;
+  min-height:52px;align-items:center;gap:2px;
+  background:color-mix(in srgb,var(--kv-surface) 70%,transparent)!important;
+  backdrop-filter:blur(20px) saturate(1.2);-webkit-backdrop-filter:blur(20px) saturate(1.2);
+}
+body.skin-kelivo #topbar .topbar-btn{
+  width:44px;height:44px;background:none!important;box-shadow:none!important;
+  border:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  color:var(--kv-on-surface);
+}
+body.skin-kelivo #menu-btn{width:40px;height:40px;}
+body.skin-kelivo #topbar-title{
+  background:none!important;box-shadow:none!important;border:none!important;
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  padding:0!important;margin-left:2px!important;
+  font-size:16px;font-weight:500;color:var(--kv-on-surface);
+}
+
+/* ---------- 聊天区 ---------- */
+body.skin-kelivo #chat-area{
+  padding:calc(env(safe-area-inset-top) + 60px) 0 var(--input-reserve,140px);
+  font-size:15.7px;
+}
+body.skin-kelivo .msg-row{gap:8px;margin-bottom:0;padding:12px 20px;}
+body.skin-kelivo .msg-row-user{padding:12px 16px;}
+body.skin-kelivo .msg-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:color-mix(in srgb,var(--kv-primary) 10%,transparent);
+}
+/* 头部：名字13 + 时间11，列排 */
+body.skin-kelivo .msg-meta{gap:2px;margin-bottom:8px;}
+body.skin-kelivo .msg-name{font-size:13px;font-weight:500;color:color-mix(in srgb,var(--kv-on-surface) 70%,transparent);letter-spacing:0;}
+body.skin-kelivo .msg-time{font-size:11px;color:color-mix(in srgb,var(--kv-on-surface) 50%,transparent);}
+body.skin-kelivo .msg-body{max-width:82%;}
+body.skin-kelivo .msg-body-user{max-width:75%;}
+
+/* 助手气泡：裸文本无底，字重400 行1.5 */
+body.skin-kelivo .msg-body-ai .msg-bubble{
+  background:none!important;padding:0!important;border-radius:0!important;box-shadow:none!important;
+  font-size:15.7px;font-weight:400;line-height:1.5;color:var(--kv-on-surface);
+}
+/* 用户气泡：primary 0.08，圆16，pad12，字15.5 */
+body.skin-kelivo .msg-body-user .msg-bubble{
+  background:color-mix(in srgb,var(--kv-primary) 8%,transparent)!important;
+  border-radius:16px!important;padding:12px!important;box-shadow:none!important;
+  font-size:15.5px;font-weight:400;line-height:1.4;color:var(--kv-on-surface);
+}
+body.skin-kelivo.dark .msg-body-user .msg-bubble{
+  background:color-mix(in srgb,var(--kv-primary) 15%,transparent)!important;
+}
+/* 去掉气泡尾巴（Kelivo 无尖角） */
+body.skin-kelivo .msg-bubble::after{display:none!important;}
+
+/* 思维链卡：radius16 padH8V4 底primaryContainer0.30 标题13 正文12.5 */
+body.skin-kelivo .think-box{
+  border-radius:16px;padding:4px 8px;margin-bottom:12px;
+  background:color-mix(in srgb,var(--kv-primary-container) 30%,transparent);
+}
+body.skin-kelivo.dark .think-box{background:color-mix(in srgb,var(--kv-primary-container) 25%,transparent);}
+body.skin-kelivo .think-head{font-size:13px;font-weight:600;padding:8px 4px;}
+body.skin-kelivo .think-body{font-size:12.5px;line-height:1.32;padding:2px 4px 10px;color:color-mix(in srgb,var(--kv-on-surface) 78%,transparent);}
+
+/* ---------- 输入框：圆角20 磨砂 blur14 border1px ---------- */
+body.skin-kelivo #input-box{
+  background:color-mix(in srgb,var(--kv-card) 90%,transparent)!important;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--kv-outline)!important;border-radius:20px!important;
+  padding:4px 8px 8px!important;box-shadow:none!important;
+}
+body.skin-kelivo #input-text{
+  min-height:40px;font-size:15px;line-height:1.4;padding:10px 8px 6px;color:var(--kv-on-surface);
+}
+body.skin-kelivo .input-toolbar{gap:8px;margin-top:0;}
+/* 工具栏图标按钮：透明、20px、灰 */
+body.skin-kelivo #attach-btn,body.skin-kelivo #mini-menu-btn{
+  width:32px;height:32px;background:none!important;
+  color:color-mix(in srgb,var(--kv-on-surface) 54%,transparent);
+}
+body.skin-kelivo #model-btn{
+  background:none!important;color:var(--kv-primary);padding:5px 6px;font-weight:500;
+}
+/* 发送键：圆32、primary、图标上箭头 */
+body.skin-kelivo #send-btn{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--kv-primary)!important;color:var(--kv-on-primary)!important;font-size:16px;
+}
+body.skin-kelivo #send-btn:disabled{
+  background:color-mix(in srgb,var(--kv-on-surface) 12%,transparent)!important;
+  color:color-mix(in srgb,var(--kv-on-surface) 38%,transparent)!important;opacity:1;
+}
