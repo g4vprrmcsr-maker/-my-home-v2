@@ -1527,8 +1527,8 @@ body:not(.gpt-ui) #topbar {
 }
 /* 输入区两侧留 16px 气口 */
 body:not(.gpt-ui) #input-area {
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-left: 14px;
+  padding-right: 14px;
 }
 
 /* 顶栏圆钮 + 标题胶囊：实色 */
